@@ -1,16 +1,16 @@
 {
   "private": true,
-  "displayName": "Plugin Name",
-  "name": "homebridge-plugin-name",
-  "version": "1.0.0",
-  "description": "A short description about what your plugin does.",
+  "displayName": "Homebridge Tasmota",
+  "name": "homebridge-tasmota",
+  "version": "0.0.0",
+  "description": "Homebridge plugin for Tasmota devices leveraging home assistant auto discovery.",
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
-    "url": "git://github.com/USERNAME/GITHUB_PROJECT_NAME.git"
+    "url": "git://github.com/NorthernMan54/homebridge-tasmota.git"
   },
   "bugs": {
-    "url": "https://github.com/USERNAME/GITHUB_PROJECT_NAME/issues"
+    "url": "https://github.com/NorthernMan54/homebridge-tasmota/issues"
   },
   "engines": {
     "node": ">=10.17.0",
@@ -24,9 +24,13 @@
     "prepublishOnly": "npm run lint && npm run build"
   },
   "keywords": [
-    "homebridge-plugin"
+    "homebridge-plugin",
+    "tasmota"
   ],
-  "dependencies": {},
+  "dependencies": {
+    "debug": "4.1.x",
+    "mqtt": "4.2.x"
+  },
   "devDependencies": {
     "@types/node": "^14.0.27",
     "@typescript-eslint/eslint-plugin": "^3.9.0",

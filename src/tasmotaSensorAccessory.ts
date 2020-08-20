@@ -7,7 +7,7 @@ import { tasmotaPlatform } from './platform';
  * An instance of this class is created for each accessory your platform registers
  * Each accessory may expose multiple services of different service types.
  */
-export class tasmotaAccessory {
+export class tasmotaSensorAccessory {
   private service: Service;
 
   /**

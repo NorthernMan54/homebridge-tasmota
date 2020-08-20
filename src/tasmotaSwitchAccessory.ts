@@ -7,7 +7,7 @@ import { tasmotaPlatform } from './platform';
  * An instance of this class is created for each accessory your platform registers
  * Each accessory may expose multiple services of different service types.
  */
-export class tasmotaAccessory {
+export class tasmotaSwitchAccessory {
   private service: Service;
 
   /**
@@ -21,7 +21,7 @@ export class tasmotaAccessory {
 
   constructor(
     private readonly platform: tasmotaPlatform,
-    private readonly accessory: PlatformAccessory,
+    private readonly accessory,
   ) {
 
     // set accessory information
