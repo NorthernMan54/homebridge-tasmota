@@ -10,11 +10,14 @@ export class Mqtt extends EventEmitter {
   constructor(config) {
     const connection = mqttClient.connect('mqtt://' + config.mqttHost);
     super();
-    debug("this", this);
+    // debug("this", this);
     // debug("Connecting", this);
     connection.on('connect', function(this: Mqtt) {
       // debug("Connected", this);
       connection.subscribe("homeassistant/#");
+      connection.subscribe("tele/+/STATE");
+      connection.subscribe("tele/+/LWT");
+      connection.subscribe("stat/+/RESULT");
     });
 
     connection.on('message', (topic, message) => {
@@ -22,19 +25,44 @@ export class Mqtt extends EventEmitter {
 
       const subject = topic.split('/');
 
-      const device = JSON.parse(message.toString());
+      switch (subject[0]) {
+        case "homeassistant":
 
-      debug("subject", subject[1]);
+          if(message) {
+          const device = JSON.parse(message.toString());
 
-      device.tasmotaType = subject[1];
+          debug("subject", subject[1]);
 
-      switch (subject[1]) {
-        case "switch":
-        case "sensor":
-          debug("emit", subject[1], this);
-          this.emit('Discovered', device);
+          device.tasmotaType = subject[1];
+
+          switch (subject[1]) {
+            case "switch":
+            case "sensor":
+              debug("emit", subject[1], this);
+              this.emit('Discovered', device);
+              break;
+
+          }}
           break;
+        case "tele":
+          switch (subject[2]) {
+            case "LWT":
+            case "sensor":
+              debug("emit", 'Reachability', subject[1], message.toString());
+              this.emit('Reachability', subject[1], message);
+              break;
 
+          }
+          break;
+        case "stat":
+          switch (subject[2]) {
+            default:
+              debug("emit", 'Status', subject[1], message.toString());
+              this.emit('Status', subject[1], message);
+              break;
+
+          }
+          break;
       }
 
     });

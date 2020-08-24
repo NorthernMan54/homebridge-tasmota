@@ -87,12 +87,15 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
 
         // create the accessory handler for the restored accessory
         // this is imported from `platformAccessory.ts`
+
+        existingAccessory.context.mqttHost = mqttHost;
+
         switch (message.tasmotaType) {
-          case "switch":
-            break;
-            new tasmotaSwitchAccessory(this, existingAccessory);
           case "sensor":
             new tasmotaSensorAccessory(this, existingAccessory);
+            break;
+          case "switch":
+            new tasmotaSwitchAccessory(this, existingAccessory);
             break;
           default:
             this.log.info("Warning: Unhandled Tasmota device type", message.tasmotaType);
@@ -108,13 +111,14 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
         // store a copy of the device object in the `accessory.context`
         // the `context` property can be used to store any data about the accessory you may need
         accessory.context.device = message;
+        accessory.context.mqttHost = mqttHost;
 
         // create the accessory handler for the newly create accessory
         // this is imported from `platformAccessory.ts`
         switch (message.tasmotaType) {
           case "switch":
-            break;
             new tasmotaSwitchAccessory(this, accessory);
+            break;
           case "sensor":
             new tasmotaSensorAccessory(this, accessory);
             break;
