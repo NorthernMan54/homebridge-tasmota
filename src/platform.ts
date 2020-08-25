@@ -58,7 +58,7 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
    */
   discoverDevices() {
 
-    debug("discoverDevices");
+    debug('discoverDevices');
     // EXAMPLE ONLY
     // A real plugin you would discover accessories from the local network, cloud services
     // or a user-defined array in the platform config.
@@ -75,7 +75,7 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
       // number or MAC address
       const message = normalizeMessage(config);
       // debug('normalizeMessage ->', message);
-      var identifier, uniq_id;
+      let identifier, uniq_id;
       if (message.device && message.device.identifiers) {
         identifier = message.device.identifiers[0];
         uniq_id = message.uniq_id;
@@ -104,17 +104,17 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
         existingAccessory.context.device[uniq_id] = message;
 
         switch (message.tasmotaType) {
-          case "sensor":
+          case 'sensor':
             new tasmotaSensorAccessory(this, existingAccessory, uniq_id);
             break;
-          case "light":
+          case 'light':
             new tasmotaLightAccessory(this, existingAccessory, uniq_id);
             break;
-          case "switch":
+          case 'switch':
             new tasmotaSwitchAccessory(this, existingAccessory, uniq_id);
             break;
           default:
-            this.log.info("Warning: Unhandled Tasmota device type", message.tasmotaType);
+            this.log.info('Warning: Unhandled Tasmota device type', message.tasmotaType);
         }
 
       } else {
@@ -133,17 +133,17 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
         // create the accessory handler for the newly create accessory
         // this is imported from `platformAccessory.ts`
         switch (message.tasmotaType) {
-          case "switch":
+          case 'switch':
             new tasmotaSwitchAccessory(this, accessory, uniq_id);
             break;
-          case "light":
+          case 'light':
             new tasmotaLightAccessory(this, accessory, uniq_id);
             break;
-          case "sensor":
+          case 'sensor':
             new tasmotaSensorAccessory(this, accessory, uniq_id);
             break;
           default:
-            this.log.info("Warning: Unhandled Tasmota device type", message.tasmotaType);
+            this.log.info('Warning: Unhandled Tasmota device type', message.tasmotaType);
         }
         this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
         this.accessories.push(accessory);
