@@ -3,14 +3,14 @@ import { Service, PlatformAccessory, CharacteristicValue, CharacteristicSetCallb
 import { tasmotaPlatform } from './platform';
 
 import createDebug from 'debug';
-const debug = createDebug('Tasmota:switch');
+const debug = createDebug('Tasmota:light');
 
 /**
  * Platform Accessory
  * An instance of this class is created for each accessory your platform registers
  * Each accessory may expose multiple services of different service types.
  */
-export class tasmotaSwitchAccessory {
+export class tasmotaLightAccessory {
   private service: Service;
 
   /**
@@ -57,7 +57,7 @@ export class tasmotaSwitchAccessory {
 
     // get the LightBulb service if it exists, otherwise create a new LightBulb service
     // you can create multiple services for each accessory
-    this.service = this.accessory.getService(this.platform.Service.Switch) || this.accessory.addService(this.platform.Service.Switch);
+    this.service = this.accessory.getService(this.platform.Service.Lightbulb) || this.accessory.addService(this.platform.Service.Lightbulb);
 
     // set the service name, this is what is displayed as the default name on the Home app
     // in this example we are using the name we stored in the `accessory.context` in the `discoverDevices` method.

@@ -3,6 +3,7 @@ import { API, DynamicPlatformPlugin, Logger, PlatformAccessory, PlatformConfig, 
 import { PLATFORM_NAME, PLUGIN_NAME } from './settings';
 // import { tasmotaAccessory } from './platformAccessory';
 import { tasmotaSwitchAccessory } from './tasmotaSwitchAccessory';
+import { tasmotaLightAccessory } from './tasmotaLightAccessory';
 import { tasmotaSensorAccessory } from './tasmotaSensorAccessory';
 import { Mqtt } from './lib/Mqtt';
 import createDebug from 'debug';
@@ -57,21 +58,32 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
    */
   discoverDevices() {
 
+    debug("discoverDevices");
     // EXAMPLE ONLY
     // A real plugin you would discover accessories from the local network, cloud services
     // or a user-defined array in the platform config.
 
     const mqttHost = new Mqtt(this.config);
 
-    debug('MqttHost', mqttHost);
+    // debug('MqttHost', mqttHost);
 
-    mqttHost.on('Discovered', (message) => {
-      debug('Discovered ->', message.name, message);
+    mqttHost.on('Discovered', (config) => {
+      debug('Discovered ->', config.name, config);
 
       // generate a unique id for the accessory this should be generated from
       // something globally unique, but constant, for example, the device serial
       // number or MAC address
-      const uuid = this.api.hap.uuid.generate(message.uniq_id);
+      const message = normalizeMessage(config);
+      // debug('normalizeMessage ->', message);
+      var identifier, uniq_id;
+      if (message.device && message.device.identifiers) {
+        identifier = message.device.identifiers[0];
+        uniq_id = message.uniq_id;
+      } else {
+        identifier = message.dev.ids[0];
+        uniq_id = message.uniq_id;
+      }
+      const uuid = this.api.hap.uuid.generate(identifier);
 
       // see if an accessory with the same uuid has already been registered and restored from
       // the cached devices we stored in the `configureAccessory` method above
@@ -89,13 +101,17 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
         // this is imported from `platformAccessory.ts`
 
         existingAccessory.context.mqttHost = mqttHost;
+        existingAccessory.context.device[uniq_id] = message;
 
         switch (message.tasmotaType) {
           case "sensor":
-            new tasmotaSensorAccessory(this, existingAccessory);
+            new tasmotaSensorAccessory(this, existingAccessory, uniq_id);
+            break;
+          case "light":
+            new tasmotaLightAccessory(this, existingAccessory, uniq_id);
             break;
           case "switch":
-            new tasmotaSwitchAccessory(this, existingAccessory);
+            new tasmotaSwitchAccessory(this, existingAccessory, uniq_id);
             break;
           default:
             this.log.info("Warning: Unhandled Tasmota device type", message.tasmotaType);
@@ -110,26 +126,111 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
 
         // store a copy of the device object in the `accessory.context`
         // the `context` property can be used to store any data about the accessory you may need
-        accessory.context.device = message;
+        accessory.context.device = {};
+        accessory.context.device[uniq_id] = message;
         accessory.context.mqttHost = mqttHost;
 
         // create the accessory handler for the newly create accessory
         // this is imported from `platformAccessory.ts`
         switch (message.tasmotaType) {
           case "switch":
-            new tasmotaSwitchAccessory(this, accessory);
+            new tasmotaSwitchAccessory(this, accessory, uniq_id);
+            break;
+          case "light":
+            new tasmotaLightAccessory(this, accessory, uniq_id);
             break;
           case "sensor":
-            new tasmotaSensorAccessory(this, accessory);
+            new tasmotaSensorAccessory(this, accessory, uniq_id);
             break;
           default:
             this.log.info("Warning: Unhandled Tasmota device type", message.tasmotaType);
         }
-
-        // link the accessory to your platform
         this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
+        this.accessories.push(accessory);
+
       }
     });
 
   }
+}
+
+function normalizeMessage(message) {
+  /*
+    {
+    name: 'Kitchen Sink',
+    cmd_t: '~cmnd/POWER',
+    stat_t: '~tele/STATE',
+    val_tpl: '{{value_json.POWER}}',
+    pl_off: 'OFF',
+    pl_on: 'ON',
+    avty_t: '~tele/LWT',
+    pl_avail: 'Online',
+    pl_not_avail: 'Offline',
+    uniq_id: '284CCF_LI_1',
+    device: { identifiers: [ '284CCF' ] },
+    '~': 'sonoff/',
+    bri_cmd_t: '~cmnd/Dimmer',
+    bri_stat_t: '~tele/STATE',
+    bri_scl: 100,
+    on_cmd_type: 'brightness',
+    bri_val_tpl: '{{value_json.Dimmer}}',
+    tasmotaType: 'light'
+    }
+
+    {
+    name: 'Scanner Tasmota',
+    stat_t: 'tele/tasmota_00705C/STATE',
+    avty_t: 'tele/tasmota_00705C/LWT',
+    pl_avail: 'Online',
+    pl_not_avail: 'Offline',
+    cmd_t: 'cmnd/tasmota_00705C/POWER',
+    val_tpl: '{{value_json.POWER}}',
+    pl_off: 'OFF',
+    pl_on: 'ON',
+    uniq_id: '00705C_RL_1',
+    dev: { ids: [ '00705C' ] },
+    tasmotaType: 'switch'
+    }
+  */
+
+  if (message['~']) {
+    message.stat_t = message.stat_t.replace('~', message['~']);
+    message.avty_t = message.avty_t.replace('~', message['~']);
+    if (message.cmd_t) {
+      message.cmd_t = message.cmd_t.replace('~', message['~']);
+    }
+    if (message.bri_cmd_t) {
+      message.bri_cmd_t = message.bri_cmd_t.replace('~', message['~']);
+      message.bri_stat_t = message.bri_stat_t.replace('~', message['~']);
+    }
+  }
+
+  /*
+  dev: {
+    ids: [ '00705C' ],
+    name: 'Scanner',
+    mdl: 'WiOn',
+    sw: '8.4.0(tasmota)',
+    mf: 'Tasmota'
+  },
+
+  device: {
+    identifiers: [ '284CCF' ],
+    name: 'Kitchen Sink',
+    model: 'Tuya Dimmer',
+    sw_version: '6.5.0(release-sonoff)',
+    manufacturer: 'Tasmota'
+  },
+  */
+
+  if (message.device) {
+    message.dev = message.device;
+    message.dev.mdl = message.dev.model;
+    message.dev.sw = message.dev.sw_version;
+    message.dev.mf = message.dev.manufacturer;
+    message.dev.ids = message.dev.identifiers;
+  }
+
+  // debug("normalizeMessage", message);
+  return (message);
 }
