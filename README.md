@@ -10,11 +10,12 @@ Homebridge Plugin for Tasmota Devices that leverage's the Home Assistant Auto Di
 ## Homebridge config.json Configuration
 
 ```
-{
-    "platform": "Tasmota",
-    "name": "Tasmota",
-    "mqttHost": "mqtt.local"
-}
+"platforms": [{
+  "platform": "Tasmota",
+  "name": "Tasmota",
+  "mqttHost": "mqtt.local"
+  }
+]
 ```
 
 ## Required parameters
@@ -47,7 +48,7 @@ tasmota/tele/STATE
 
 ## Technical Details ##
 
-Under the covers this plugin leverages the Home Assistant Auto Discovery Function (setOption19) built into the Tasmota firmware and the [MQTT Discovery](https://www.home-assistant.io/docs/mqtt/discovery/) feature built into Home Assistant.  
+Under the covers this plugin leverages the Home Assistant Auto Discovery Function (setOption19) built into the Tasmota firmware and the [MQTT Discovery](https://www.home-assistant.io/docs/mqtt/discovery/) feature built into Home Assistant.  And uses the information provided by the Tasmota device to configure the HomeKit Accessory automatically without requiring within Homebridge.  
 
 ## Known issues
 
