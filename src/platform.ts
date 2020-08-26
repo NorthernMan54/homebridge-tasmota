@@ -231,6 +231,11 @@ function normalizeMessage(message) {
     message.dev.ids = message.dev.identifiers;
   }
 
+  if ( message.stat_t === 'sonoff/tele/STATE')
+  {
+    console.log("ERROR: %s has an incorrectly configure MQTT Topic, please make it unique.", message.name);
+  }
+
   // debug("normalizeMessage", message);
   return (message);
 }

@@ -5,9 +5,7 @@ Homebridge Plugin for Tasmota Devices that leverage's the Home Assistant Auto Di
 * switch - WiOn (17) Outlet Module
 * light - Tuya Dimmer (54) Dimmer Switch
 
-# Homebridge Configuration
-
-## config.json
+## Homebridge config.json Configuration
 
 ```
 {
@@ -23,21 +21,17 @@ Homebridge Plugin for Tasmota Devices that leverage's the Home Assistant Auto Di
 
 ## Tasmota Device Config
 
-1 - MQTT Configuration
-
-I found that some of my devices were not using a unique Topic for devices and I needed to update the configuration to
-
-
-**Topic:** tasmota_%06X
-
-**Full Topic:** %prefix%/%topic%/
-
-
-2 - Enable Home Assistant Auto Discovery
+1. Enable Home Assistant Auto Discovery from the console
 
 ```
 SetOption19 1
 ```
+
+2. MQTT Configuration
+
+I found that some of my devices were not using a unique Topic for devices and I needed to update the configuration to
+
+**Topic:** tasmota_%06X
 
 ## Known issues
 

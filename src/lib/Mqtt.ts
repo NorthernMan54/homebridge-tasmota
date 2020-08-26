@@ -19,6 +19,9 @@ export class Mqtt extends EventEmitter {
       connection.subscribe("tele/+/STATE");
       connection.subscribe("tele/+/LWT");
       connection.subscribe("stat/+/RESULT");
+      connection.subscribe("+/tele/STATE");
+      connection.subscribe("+/tele/LWT");
+      connection.subscribe("+/stat/RESULT");
     });
 
     connection.on('message', (topic, message) => {
@@ -54,8 +57,7 @@ export class Mqtt extends EventEmitter {
             }
           }
           break;
-        case "tele":
-        case "stat":
+        default:
           this.emit(topic, topic, message);
           break;
       }
