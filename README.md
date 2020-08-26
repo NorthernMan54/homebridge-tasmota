@@ -38,3 +38,11 @@ I found that some of my devices were not using a unique Topic for devices and I 
 1 - Accessory names are doubled with Tasmota version 8.1.3 to 8.4 - This is an issue with Tasmota firmware and is being tracked [here](https://github.com/arendst/Tasmota/issues/8995).
 
 i.e. "Scanner Scanner"
+
+## Backlog prior to Production
+
+* [ ] Add config.schema.json for homebridge-config-ui-x
+* [ ] Add automated removal of non-responding devices
+* [ ] Enable debug logging via config.json
+* [ ] Clean up README
+* [ ] Clean up debug and production logging
