@@ -30,29 +30,24 @@ export class tasmotaLightAccessory {
 
     /*
     {
-      name: 'Stereo Tasmota',
-      stat_t: 'tele/tasmota_00F861/STATE',
-      avty_t: 'tele/tasmota_00F861/LWT',
+      name: 'Kitchen Sink Kitchen Sink',
+      stat_t: 'tele/tasmota_284CCF/STATE',
+      avty_t: 'tele/tasmota_284CCF/LWT',
       pl_avail: 'Online',
       pl_not_avail: 'Offline',
-      cmd_t: 'cmnd/tasmota_00F861/POWER',
+      cmd_t: 'cmnd/tasmota_284CCF/POWER',
       val_tpl: '{{value_json.POWER}}',
       pl_off: 'OFF',
       pl_on: 'ON',
-      uniq_id: '00F861_RL_1',
-      dev: { ids: [ '00F861' ] },
-      tasmotaType: 'switch'
+      uniq_id: '284CCF_LI_1',
+      dev: { ids: [ '284CCF' ] },
+      bri_cmd_t: 'cmnd/tasmota_284CCF/Dimmer',
+      bri_stat_t: 'tele/tasmota_284CCF/STATE',
+      bri_scl: 100,
+      on_cmd_type: 'brightness',
+      bri_val_tpl: '{{value_json.Dimmer}}',
+      tasmotaType: 'light'
     }
-    */
-
-    // debug("This", this);
-
-    // set accessory information
-    /*
-    this.accessory.getService(this.platform.Service.AccessoryInformation)!
-      .setCharacteristic(this.platform.Characteristic.Manufacturer, 'Tasmota')
-      .setCharacteristic(this.platform.Characteristic.Model, 'Default-Model')
-      .setCharacteristic(this.platform.Characteristic.SerialNumber, 'Default-Serial');
     */
 
     // get the LightBulb service if it exists, otherwise create a new LightBulb service
@@ -71,13 +66,19 @@ export class tasmotaLightAccessory {
     if (this.service.getCharacteristic(this.platform.Characteristic.On).listenerCount('set') < 1) {
       this.service.getCharacteristic(this.platform.Characteristic.On)
         .on('set', this.setOn.bind(this));                // SET - bind to the `setOn` method below
-        // .on('get', this.getOn.bind(this));               // GET - bind to the `getOn` method below
+      // .on('get', this.getOn.bind(this));               // GET - bind to the `getOn` method below
 
       debug("Creating statusUpdate listener for", accessory.context.device[this.uniq_id].stat_t);
       accessory.context.mqttHost.on(accessory.context.device[this.uniq_id].stat_t, this.statusUpdate.bind(this));
       accessory.context.mqttHost.on(accessory.context.device[this.uniq_id].avty_t, this.availabilityUpdate.bind(this));
     }
 
+    // Does the lightbulb include a brightness characteristic
+
+    if (accessory.context.device[this.uniq_id].bri_cmd_t) {
+      (this.service.getCharacteristic(this.platform.Characteristic.Brightness) || this.service.addCharacteristic(this.platform.Characteristic.Brightness))
+        .on('set', this.setBrightness.bind(this));
+    }
   }
 
   /**
@@ -91,22 +92,43 @@ export class tasmotaLightAccessory {
      * pl_off: 'OFF',
        pl_on: 'ON',
      *
-     {"Time":"1970-01-01T18:24:07",
-     "Uptime":"0T18:24:08",
-     "UptimeSec":66248,
-     "Heap":23,
-     "SleepMode":"Dynamic",
-     "Sleep":50,
-     "LoadAvg":19,
-     "MqttCount":1,
-     "POWER":"ON",
-     "Wifi":{"AP":2,"SSId":"The_Beach","BSSId":"34:12:98:08:9D:2A","Channel":11,"RSSI":82,"Signal":-59,"LinkCount":1,"Downtime":"0T00:00:03"}}
-
+     {
+        Time: '2020-08-26T03:14:15',
+        Uptime: '0T00:32:09',
+        UptimeSec: 1929,
+        Heap: 24,
+        SleepMode: 'Dynamic',
+        Sleep: 10,
+        LoadAvg: 19,
+        MqttCount: 1,
+        POWER: 'ON',
+        Dimmer: 77,
+        Fade: 'OFF',
+        Speed: 1,
+        LedTable: 'OFF',
+        Wifi: {
+          AP: 1,
+          SSId: '67 Bonacres',
+          BSSId: '6C:70:9F:EB:06:40',
+          Channel: 1,
+          RSSI: 84,
+          Signal: -58,
+          LinkCount: 1,
+          Downtime: '0T00:00:04'
+        }
+      }
      */
 
     const status = JSON.parse(message.toString());
 
+    // debug("statusUpdate", status);
+
     this.service.getCharacteristic(this.platform.Characteristic.On).updateValue((status.POWER === this.accessory.context.device[this.uniq_id].pl_on ? 1 : 0));
+
+    if (status.Dimmer) {
+      this.service.getCharacteristic(this.platform.Characteristic.Brightness).updateValue(status.Dimmer);
+      debug("statusUpdate %s Brightness to %s", this.accessory.displayName, status.Dimmer);
+    }
 
     debug("statusUpdate %s to %s", this.accessory.displayName, status.POWER);
   }
@@ -143,6 +165,16 @@ export class tasmotaLightAccessory {
     this.platform.log.debug('%s Set Characteristic On ->', this.accessory.displayName, value);
 
     this.accessory.context.mqttHost.sendMessage(this.accessory.context.device[this.uniq_id].cmd_t, (value ? this.accessory.context.device[this.uniq_id].pl_on : this.accessory.context.device[this.uniq_id].pl_off));
+
+    // you must call the callback function
+    callback(null);
+  }
+
+  setBrightness(value: CharacteristicValue, callback: CharacteristicSetCallback) {
+
+    this.platform.log.debug('%s Set Characteristic Brightness ->', this.accessory.displayName, value);
+
+    this.accessory.context.mqttHost.sendMessage(this.accessory.context.device[this.uniq_id].bri_cmd_t, value.toString());
 
     // you must call the callback function
     callback(null);

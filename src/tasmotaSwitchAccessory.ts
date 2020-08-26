@@ -77,7 +77,6 @@ export class tasmotaSwitchAccessory {
       accessory.context.mqttHost.on(accessory.context.device[this.uniq_id].stat_t, this.statusUpdate.bind(this));
       accessory.context.mqttHost.on(accessory.context.device[this.uniq_id].avty_t, this.availabilityUpdate.bind(this));
     }
-
   }
 
   /**
