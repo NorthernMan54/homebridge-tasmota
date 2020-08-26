@@ -2,7 +2,7 @@
 
 Homebridge Plugin for Tasmota Devices that leverage's the Home Assistant Auto Discovery Function to configure and add devices.  And remove the need to manually configure Tasmota devices with Homebridge.
 
-## Tasmota Device's Supported
+## Tasmota Device's Tested
 
 * switch - WiOn (17) Outlet Module
 * light - Tuya Dimmer (54) Dimmer Switch
