@@ -35,7 +35,7 @@ I found that some of my devices were not using a unique Topic for devices and I 
 
 ## Known issues
 
-1 - Accessory names are doubled with Tasmota version 8.1.3 to 8.4 - This is an issue with Tasmota firmware and is being tracked [here](https://github.com/arendst/Tasmota/issues/8995).
+1 - Accessory names are doubled with Tasmota version 8.1.3 to 8.4 - This is an issue with Tasmota firmware and is being tracked [here](https://github.com/arendst/Tasmota/issues/8995).  As a workaround downgrade to Tasmota version 8.1
 
 i.e. "Scanner Scanner"
 
