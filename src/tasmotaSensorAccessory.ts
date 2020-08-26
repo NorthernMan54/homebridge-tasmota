@@ -1,4 +1,4 @@
-import { Service, PlatformAccessory, CharacteristicValue, CharacteristicSetCallback, CharacteristicGetCallback } from 'homebridge';
+import { PlatformAccessory } from 'homebridge';
 
 import { tasmotaPlatform } from './platform';
 
@@ -25,7 +25,7 @@ export class tasmotaSensorAccessory {
   constructor(
     private readonly platform: tasmotaPlatform,
     private readonly accessory: PlatformAccessory,
-    private readonly uniq_id: string
+    private readonly uniq_id: string,
   ) {
 
     /*
@@ -60,7 +60,7 @@ export class tasmotaSensorAccessory {
       .setCharacteristic(this.platform.Characteristic.FirmwareRevision, accessory.context.device[this.uniq_id].dev.sw)
       .setCharacteristic(this.platform.Characteristic.SerialNumber, accessory.context.device[this.uniq_id].dev.ids[0]);
 
-    debug("details", accessory.context.device[this.uniq_id].dev);
+    // debug("details", accessory.context.device[this.uniq_id].dev);
 
   }
 }

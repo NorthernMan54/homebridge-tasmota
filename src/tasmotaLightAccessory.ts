@@ -1,4 +1,4 @@
-import { Service, PlatformAccessory, CharacteristicValue, CharacteristicSetCallback, CharacteristicGetCallback } from 'homebridge';
+import { Service, PlatformAccessory, CharacteristicValue, CharacteristicSetCallback } from 'homebridge';
 
 import { tasmotaPlatform } from './platform';
 
@@ -25,7 +25,7 @@ export class tasmotaLightAccessory {
   constructor(
     private readonly platform: tasmotaPlatform,
     private readonly accessory: PlatformAccessory,
-    private readonly uniq_id: string
+    private readonly uniq_id: string,
   ) {
 
     /*
@@ -68,7 +68,7 @@ export class tasmotaLightAccessory {
         .on('set', this.setOn.bind(this));                // SET - bind to the `setOn` method below
       // .on('get', this.getOn.bind(this));               // GET - bind to the `getOn` method below
 
-      debug("Creating statusUpdate listener for", accessory.context.device[this.uniq_id].stat_t);
+      debug('Creating statusUpdate listener for', accessory.context.device[this.uniq_id].stat_t);
       accessory.context.mqttHost.on(accessory.context.device[this.uniq_id].stat_t, this.statusUpdate.bind(this));
       accessory.context.mqttHost.on(accessory.context.device[this.uniq_id].avty_t, this.availabilityUpdate.bind(this));
     }
@@ -127,10 +127,10 @@ export class tasmotaLightAccessory {
 
     if (status.Dimmer) {
       this.service.getCharacteristic(this.platform.Characteristic.Brightness).updateValue(status.Dimmer);
-      debug("statusUpdate %s Brightness to %s", this.accessory.displayName, status.Dimmer);
+      debug('statusUpdate %s Brightness to %s', this.accessory.displayName, status.Dimmer);
     }
 
-    debug("statusUpdate %s to %s", this.accessory.displayName, status.POWER);
+    debug('statusUpdate %s to %s', this.accessory.displayName, status.POWER);
   }
 
   /**
@@ -148,7 +148,7 @@ export class tasmotaLightAccessory {
 
     */
 
-    const availability = (message.toString() === this.accessory.context.device[this.uniq_id].pl_not_avail ? new Error(this.accessory.displayName + " " + message.toString()) : 0);
+    const availability = (message.toString() === this.accessory.context.device[this.uniq_id].pl_not_avail ? new Error(this.accessory.displayName + ' ' + message.toString()) : 0);
 
     this.service.getCharacteristic(this.platform.Characteristic.On).updateValue(availability);
   }
