@@ -1,3 +1,5 @@
+[![NPM Downloads](https://img.shields.io/npm/dm/homebridge-tasmota.svg?style=flat)](https://npmjs.org/package/homebridge-tasmota)
+
 Homebridge Plugin for Tasmota Devices that leverage's the Home Assistant Auto Discovery Function to configure and add devices.  And remove the need to manually configure Tasmota devices with Homebridge.
 
 ## Tasmota Device's Supported
@@ -32,6 +34,16 @@ SetOption19 1
 I found that some of my devices were not using a unique Topic for devices and I needed to update the configuration to
 
 **Topic:** tasmota_%06X
+
+This showed up when looking at MQTT messages and I was seeing them with this Topic.
+
+```
+sonoff/tele/STATE
+
+or
+
+tasmota/tele/STATE
+```
 
 ## Known issues
 

@@ -231,7 +231,7 @@ function normalizeMessage(message) {
     message.dev.ids = message.dev.identifiers;
   }
 
-  if (message.stat_t === 'sonoff/tele/STATE') {
+  if (message.stat_t === 'sonoff/tele/STATE' || message.stat_t === 'tasmota/tele/STATE') {
     console.log('ERROR: %s has an incorrectly configure MQTT Topic, please make it unique.', message.name);
   }
 
