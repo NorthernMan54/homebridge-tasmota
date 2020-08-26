@@ -8,7 +8,8 @@ npm audit
   npm version patch -m "$1" --force
   npm publish --tag beta
   git commit -m "$1"
-  git push origin inputController --tags
+#  git push origin beta --tags
+  git push origin master --tags
 #else
 #  echo "Not publishing due to security vulnerabilites"
 #fi
