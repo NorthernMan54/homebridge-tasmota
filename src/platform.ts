@@ -22,12 +22,20 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
   // this is used to track restored cached accessories
   public readonly accessories: PlatformAccessory[] = [];
 
+  // Auto removal of non responding devices
+
+  private cleanup;
+  private timeouts = {};
+  private timeoutCounter = 0;
+
   constructor(
     public readonly log: Logger,
     public readonly config: PlatformConfig,
     public readonly api: API,
   ) {
     this.log.debug('Finished initializing platform:', this.config.name);
+
+    this.cleanup = this.config['cleanup'] || 24; // Default removal of defunct devices after 24 hours
 
     // When this event is fired it means Homebridge has restored all cached accessories from disk.
     // Dynamic Platform plugins should only register new accessories after this event was fired,
@@ -46,6 +54,8 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
    */
   configureAccessory(accessory: PlatformAccessory) {
     this.log.info('Loading accessory from cache:', accessory.displayName);
+
+    accessory.context.timeout = this.autoCleanup(accessory);
 
     // add the restored accessory to the accessories cache so we can track if it has already been registered
     this.accessories.push(accessory);
@@ -150,9 +160,35 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
 
       }
     });
-
   }
+
+  autoCleanup(accessory) {
+    var timeoutID;
+
+    if (accessory.context.timeout) {
+      timeoutID = accessory.context.timeout;
+      clearTimeout(this.timeouts[timeoutID]);
+    }
+
+    timeoutID = this.timeoutCounter++;
+
+    // debug("Cleanup", this.cleanup);
+
+    this.timeouts[timeoutID] = setTimeout(this.unregister.bind(this), this.cleanup * 60 * 60 * 1000, accessory, timeoutID);
+
+    return (timeoutID);
+  }
+
+  unregister(accessory, timeoutID) {
+      debug('Removing %s', accessory.displayName);
+      this.timeouts[timeoutID] = null;
+      this.api.unregisterPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
+      // callback();
+    }
 }
+
+/* The various Tasmota firmware's have a slightly different flavors of the message. */
+
 
 function normalizeMessage(message) {
   /*

@@ -123,6 +123,9 @@ export class tasmotaLightAccessory {
 
     // debug("statusUpdate", status);
 
+    // debug("THIS", this);
+    this.accessory.context.timeout = this.platform.autoCleanup(this.accessory);
+
     this.service.getCharacteristic(this.platform.Characteristic.On).updateValue((status.POWER === this.accessory.context.device[this.uniq_id].pl_on ? 1 : 0));
 
     if (status.Dimmer) {
