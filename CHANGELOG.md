@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. This project uses [Semantic Versioning](https://semver.org/).
 
+## 0.0.9 (2020-08-27)
+
+## [Version 0.0.9](https://github.com/northernman54/homebridge-tasmota/compare/v0.0.8...v0.0.9)
+
+#### Changes
+
+- Added CHANGELOG.md
+
 ## 0.0.8 (2020-08-27)
 
 ## [Version 0.0.8](https://github.com/northernman54/homebridge-tasmota/compare/v0.0.7...v0.0.8)
@@ -9,7 +17,6 @@ All notable changes to this project will be documented in this file. This projec
 #### Changes
 
 - Added support for homebridge-config-ui-x
-- Added change log
 
 ## 0.0.7 (2020-08-26)
 

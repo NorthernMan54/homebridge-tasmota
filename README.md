@@ -7,6 +7,10 @@ Homebridge Plugin for Tasmota Devices that leverage's the Home Assistant Auto Di
 * switch - WiOn (17) Outlet Module
 * light - Tuya Dimmer (54) Dimmer Switch
 
+## Installation
+
+For installation, please use the homebridge console
+
 ## Homebridge config.json Configuration
 
 ```
@@ -20,7 +24,7 @@ Homebridge Plugin for Tasmota Devices that leverage's the Home Assistant Auto Di
 
 ## Required parameters
 
-* mqttHost - This is the name of you MQTT server
+* mqttHost - This is the name / IP address of your MQTT server
 
 ## Tasmota Device Config
 
@@ -58,7 +62,7 @@ i.e. "Scanner Scanner"
 
 ## Backlog prior to Production
 
-* [ ] Add config.schema.json for homebridge-config-ui-x
+* [x] Add config.schema.json for homebridge-config-ui-x
 * [ ] Add automated removal of non-responding devices
 * [ ] Enable debug logging via config.json
 * [ ] Clean up README
