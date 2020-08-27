@@ -163,7 +163,7 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
   }
 
   autoCleanup(accessory) {
-    var timeoutID;
+    let timeoutID;
 
     if (accessory.context.timeout) {
       timeoutID = accessory.context.timeout;
