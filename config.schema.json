@@ -1,15 +1,24 @@
 {
-  "pluginAlias": "ExampleHomebridgePlugin",
+  "pluginAlias": "Tasmota",
   "pluginType": "platform",
   "singular": true,
   "schema": {
     "type": "object",
     "properties": {
+
       "name": {
         "title": "Name",
         "type": "string",
         "required": true,
-        "default": "Example Dynamic Platform"
+        "default": "Tasmota",
+        "description": "Plugin name as displayed in the Homebridge log"
+      },
+      "mqttHost": {
+        "title": "mqttHost",
+        "type": "string",
+        "required": true,
+        "default": "mqtt.local",
+        "description": "This is the name / ip address for your MQTT Server."
       }
     }
   }
