@@ -1,7 +1,9 @@
 import { Service, PlatformAccessory, CharacteristicValue, CharacteristicSetCallback, Characteristic } from 'homebridge';
 
 import { tasmotaPlatform } from './platform';
-import { nunjucks } from 'nunjucks';
+// import { nunjucks } from 'nunjucks';
+
+let nunjucks = require('nunjucks');
 
 import createDebug from 'debug';
 const debug = createDebug('Tasmota:sensor');
