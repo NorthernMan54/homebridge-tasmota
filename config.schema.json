@@ -3,7 +3,7 @@
   "pluginType": "platform",
   "singular": true,
   "headerDisplay": "Please ensure that your Tasmota device has HASS Auto Discovey enabled ( setOption19 1 )",
-  "footerDisplay": "For further details please see the [README](https://github.com/NorthernMan54/homebridge-tasmota/blob/master/README.md).",
+  "footerDisplay": "For further details please see the [README](https://github.com/NorthernMan54/homebridge-tasmota/blob/master/README.md). To manage your Tasmota devices [click here](http://tasui.shantur.com/#/findDevices)",
   "schema": {
     "type": "object",
     "properties": {

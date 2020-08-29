@@ -13,15 +13,6 @@ const debug = createDebug('Tasmota:switch');
 export class tasmotaSwitchAccessory {
   private service: Service;
 
-  /**
-   * These are just used to create a working example
-   * You should implement your own code to track the state of your accessory
-   */
-  private exampleStates = {
-    On: false,
-    Brightness: 100,
-  }
-
   constructor(
     private readonly platform: tasmotaPlatform,
     private readonly accessory: PlatformAccessory,
@@ -135,9 +126,6 @@ export class tasmotaSwitchAccessory {
    * These are sent when the user changes the state of an accessory, for example, turning on a Light bulb.
    */
   setOn(value: CharacteristicValue, callback: CharacteristicSetCallback) {
-
-    // implement your own code to turn your device on/off
-    this.exampleStates.On = value as boolean;
 
     this.platform.log.debug('%s Set Characteristic On ->', this.accessory.displayName, value);
 
