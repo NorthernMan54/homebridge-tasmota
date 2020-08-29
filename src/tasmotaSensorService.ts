@@ -3,7 +3,7 @@ import { Service, PlatformAccessory, CharacteristicValue, CharacteristicSetCallb
 import { tasmotaPlatform } from './platform';
 // import { nunjucks } from 'nunjucks';
 
-let nunjucks = require('nunjucks');
+import nunjucks from 'nunjucks';
 
 import createDebug from 'debug';
 const debug = createDebug('Tasmota:sensor');
