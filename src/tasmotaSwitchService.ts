@@ -1,6 +1,7 @@
-import { Service, PlatformAccessory, CharacteristicValue, CharacteristicSetCallback } from 'homebridge';
+import { Service, PlatformAccessory, CharacteristicValue, CharacteristicSetCallback, Characteristic } from 'homebridge';
 
 import { tasmotaPlatform } from './platform';
+import nunjucks from 'nunjucks';
 
 import createDebug from 'debug';
 const debug = createDebug('Tasmota:switch');
@@ -10,8 +11,9 @@ const debug = createDebug('Tasmota:switch');
  * An instance of this class is created for each accessory your platform registers
  * Each accessory may expose multiple services of different service types.
  */
-export class tasmotaSwitchAccessory {
+export class tasmotaSwitchService {
   private service: Service;
+  private characteristic: Characteristic;
 
   constructor(
     private readonly platform: tasmotaPlatform,
@@ -57,8 +59,10 @@ export class tasmotaSwitchAccessory {
     // each service must implement at-minimum the "required characteristics" for the given service type
     // see https://developers.homebridge.io/#/service/Lightbulb
 
+    this.characteristic = this.service.getCharacteristic(this.platform.Characteristic.On);
+
     // register handlers for the On/Off Characteristic
-    //
+
     if (this.service.getCharacteristic(this.platform.Characteristic.On).listenerCount('set') < 1) {
       this.service.getCharacteristic(this.platform.Characteristic.On)
         .on('set', this.setOn.bind(this));                // SET - bind to the `setOn` method below
@@ -68,6 +72,10 @@ export class tasmotaSwitchAccessory {
       accessory.context.mqttHost.on(accessory.context.device[this.uniq_id].stat_t, this.statusUpdate.bind(this));
       accessory.context.mqttHost.on(accessory.context.device[this.uniq_id].avty_t, this.availabilityUpdate.bind(this));
     }
+    nunjucks.configure({
+      autoescape: true
+    });
+
   }
 
   /**
@@ -94,11 +102,16 @@ export class tasmotaSwitchAccessory {
 
      */
 
+    // debug("statusUpdate", message.toString());
+
     const status = JSON.parse(message.toString());
+    const interim = {
+      value_json: status
+    };
 
-    this.service.getCharacteristic(this.platform.Characteristic.On).updateValue((status.POWER === this.accessory.context.device[this.uniq_id].pl_on ? 1 : 0));
+    this.characteristic.updateValue((nunjucks.renderString(this.accessory.context.device[this.uniq_id].val_tpl, interim) === this.accessory.context.device[this.uniq_id].pl_on ? 1 : 0));
 
-    debug('statusUpdate %s to %s', this.accessory.displayName, status.POWER);
+    debug('statusUpdate %s to %s', this.accessory.displayName, nunjucks.renderString(this.accessory.context.device[this.uniq_id].val_tpl, interim));
   }
 
   /**

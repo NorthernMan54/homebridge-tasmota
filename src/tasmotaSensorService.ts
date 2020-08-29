@@ -64,7 +64,9 @@ export class tasmotaSensorService {
         .setCharacteristic(this.platform.Characteristic.SerialNumber, accessory.context.device[this.uniq_id].dev.ids[0]);
     }
 
-    // debug("details", accessory.context.device[this.uniq_id].dev);
+    nunjucks.configure({
+      autoescape: true
+    });
 
   }
 
@@ -78,20 +80,14 @@ export class tasmotaSensorService {
 
   statusUpdate(topic, message) {
 
+    debug("statusUpdate", message.toString());
+
     const status = JSON.parse(message.toString());
-
-    // debug("statusUpdate", topic, status, this.accessory.context.device[this.uniq_id].val_tpl);
-
-    // debug("statusUpdate service", this.characteristic);
-
     const interim = {
       value_json: status
     };
 
-    nunjucks.configure({
-      autoescape: true
-    });
-    // debug(nunjucks.renderString('{ \'value\': ' + this.accessory.context.device[this.uniq_id].val_tpl + '}', interim));
+
 
     this.characteristic.updateValue(nunjucks.renderString(this.accessory.context.device[this.uniq_id].val_tpl, interim));
 

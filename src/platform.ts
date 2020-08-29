@@ -2,8 +2,8 @@ import { API, DynamicPlatformPlugin, Logger, PlatformAccessory, PlatformConfig, 
 
 import { PLATFORM_NAME, PLUGIN_NAME } from './settings';
 // import { tasmotaAccessory } from './platformAccessory';
-import { tasmotaSwitchAccessory } from './tasmotaSwitchAccessory';
-import { tasmotaLightAccessory } from './tasmotaLightAccessory';
+import { tasmotaSwitchService } from './tasmotaSwitchService';
+import { tasmotaLightService } from './tasmotaLightService';
 import { tasmotaSensorService } from './tasmotaSensorService';
 import { Mqtt } from './lib/Mqtt';
 import createDebug from 'debug';
@@ -118,10 +118,10 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
             new tasmotaSensorService(this, existingAccessory, uniq_id);
             break;
           case 'light':
-            new tasmotaLightAccessory(this, existingAccessory, uniq_id);
+            new tasmotaLightService(this, existingAccessory, uniq_id);
             break;
           case 'switch':
-            new tasmotaSwitchAccessory(this, existingAccessory, uniq_id);
+            new tasmotaSwitchService(this, existingAccessory, uniq_id);
             break;
           default:
             this.log.info('Warning: Unhandled Tasmota device type', message.tasmotaType);
@@ -144,10 +144,10 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
         // this is imported from `platformAccessory.ts`
         switch (message.tasmotaType) {
           case 'switch':
-            new tasmotaSwitchAccessory(this, accessory, uniq_id);
+            new tasmotaSwitchService(this, accessory, uniq_id);
             break;
           case 'light':
-            new tasmotaLightAccessory(this, accessory, uniq_id);
+            new tasmotaLightService(this, accessory, uniq_id);
             break;
           case 'sensor':
             new tasmotaSensorService(this, accessory, uniq_id);

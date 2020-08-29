@@ -1,6 +1,7 @@
-import { Service, PlatformAccessory, CharacteristicValue, CharacteristicSetCallback } from 'homebridge';
+import { Service, PlatformAccessory, CharacteristicValue, CharacteristicSetCallback, Characteristic } from 'homebridge';
 
 import { tasmotaPlatform } from './platform';
+import nunjucks from 'nunjucks';
 
 import createDebug from 'debug';
 const debug = createDebug('Tasmota:light');
@@ -10,8 +11,9 @@ const debug = createDebug('Tasmota:light');
  * An instance of this class is created for each accessory your platform registers
  * Each accessory may expose multiple services of different service types.
  */
-export class tasmotaLightAccessory {
+export class tasmotaLightService {
   private service: Service;
+  private characteristic: Characteristic;
 
   /**
    * These are just used to create a working example
