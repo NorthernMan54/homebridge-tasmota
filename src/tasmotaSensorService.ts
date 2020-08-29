@@ -3,8 +3,6 @@ import { Service, PlatformAccessory, CharacteristicValue, CharacteristicSetCallb
 import { tasmotaPlatform } from './platform';
 import { nunjucks } from 'nunjucks';
 
-var nunjucks = require('nunjucks');
-
 import createDebug from 'debug';
 const debug = createDebug('Tasmota:sensor');
 
@@ -84,7 +82,7 @@ export class tasmotaSensorService {
 
     // debug("statusUpdate service", this.characteristic);
 
-    var interim = {
+    const interim = {
       value_json: status
     };
 
