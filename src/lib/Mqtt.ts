@@ -17,9 +17,11 @@ export class Mqtt extends EventEmitter {
       // debug("Connected", this);
       connection.subscribe("homeassistant/#");
       connection.subscribe("tele/+/STATE");
+      connection.subscribe("tele/+/SENSOR");
       connection.subscribe("tele/+/LWT");
       connection.subscribe("stat/+/RESULT");
       connection.subscribe("+/tele/STATE");
+      connection.subscribe("+/tele/SENSOR");
       connection.subscribe("+/tele/LWT");
       connection.subscribe("+/stat/RESULT");
     });

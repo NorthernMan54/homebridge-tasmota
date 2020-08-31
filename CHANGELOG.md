@@ -2,6 +2,25 @@
 
 All notable changes to this project will be documented in this file. This project uses [Semantic Versioning](https://semver.org/).
 
+## 0.0.16 (2020-08-31)
+
+## [Version 0.0.16](https://github.com/northernman54/homebridge-tasmota/compare/v0.0.9...v0.0.16)
+
+#### Changes
+
+- Added support sensor devices
+- Added support for multiple relay devices
+- Usage of Jinja templates for value extraction ( in alignment with HASS design )
+- Use of teleperiod to get current status on startup of plugin
+
+## 0.0.11 (2020-08-27)
+
+## [Version 0.0.11](https://github.com/northernman54/homebridge-tasmota/compare/v0.0.9...v0.0.11)
+
+#### Changes
+
+- Added support for the automated cleanup of disconnected devices
+
 ## 0.0.9 (2020-08-27)
 
 ## [Version 0.0.9](https://github.com/northernman54/homebridge-tasmota/compare/v0.0.8...v0.0.9)

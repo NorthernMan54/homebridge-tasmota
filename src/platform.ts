@@ -2,11 +2,12 @@ import { API, DynamicPlatformPlugin, Logger, PlatformAccessory, PlatformConfig, 
 
 import { PLATFORM_NAME, PLUGIN_NAME } from './settings';
 // import { tasmotaAccessory } from './platformAccessory';
-import { tasmotaSwitchAccessory } from './tasmotaSwitchAccessory';
-import { tasmotaLightAccessory } from './tasmotaLightAccessory';
-import { tasmotaSensorAccessory } from './tasmotaSensorAccessory';
+import { tasmotaSwitchService } from './tasmotaSwitchService';
+import { tasmotaLightService } from './tasmotaLightService';
+import { tasmotaSensorService } from './tasmotaSensorService';
 import { Mqtt } from './lib/Mqtt';
 import createDebug from 'debug';
+import debugEnable from 'debug';
 
 const debug = createDebug('Tasmota:platform');
 
@@ -22,12 +23,36 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
   // this is used to track restored cached accessories
   public readonly accessories: PlatformAccessory[] = [];
 
+  // Auto removal of non responding devices
+
+  private cleanup;
+  private timeouts = {};
+  private timeoutCounter = 0;
+  private debug = false;
+
   constructor(
     public readonly log: Logger,
     public readonly config: PlatformConfig,
     public readonly api: API,
   ) {
     this.log.debug('Finished initializing platform:', this.config.name);
+
+    this.cleanup = this.config['cleanup'] || 24; // Default removal of defunct devices after 24 hours
+
+    this.debug = this.config['debug'] || false;
+    if (this.debug) {
+
+      let namespaces = debugEnable.disable();
+
+      // this.log("DEBUG-1", namespaces);
+      if (namespaces) {
+        namespaces = namespaces + ',Tasmota*';
+      } else {
+        namespaces = 'Tasmota*';
+      }
+      // this.log("DEBUG-2", namespaces);
+      debugEnable.enable(namespaces);
+    }
 
     // When this event is fired it means Homebridge has restored all cached accessories from disk.
     // Dynamic Platform plugins should only register new accessories after this event was fired,
@@ -46,6 +71,8 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
    */
   configureAccessory(accessory: PlatformAccessory) {
     this.log.info('Loading accessory from cache:', accessory.displayName);
+
+    accessory.context.timeout = this.autoCleanup(accessory);
 
     // add the restored accessory to the accessories cache so we can track if it has already been registered
     this.accessories.push(accessory);
@@ -91,7 +118,7 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
 
       if (existingAccessory) {
         // the accessory already exists
-        this.log.info('Restoring existing accessory from cache:', existingAccessory.displayName);
+        this.log.info('Restoring existing service from cache:', message.name);
 
         // if you need to update the accessory.context then you should run `api.updatePlatformAccessories`. eg.:
         // existingAccessory.context.device = device;
@@ -105,13 +132,13 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
 
         switch (message.tasmotaType) {
           case 'sensor':
-            new tasmotaSensorAccessory(this, existingAccessory, uniq_id);
+            new tasmotaSensorService(this, existingAccessory, uniq_id);
             break;
           case 'light':
-            new tasmotaLightAccessory(this, existingAccessory, uniq_id);
+            new tasmotaLightService(this, existingAccessory, uniq_id);
             break;
           case 'switch':
-            new tasmotaSwitchAccessory(this, existingAccessory, uniq_id);
+            new tasmotaSwitchService(this, existingAccessory, uniq_id);
             break;
           default:
             this.log.info('Warning: Unhandled Tasmota device type', message.tasmotaType);
@@ -134,13 +161,13 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
         // this is imported from `platformAccessory.ts`
         switch (message.tasmotaType) {
           case 'switch':
-            new tasmotaSwitchAccessory(this, accessory, uniq_id);
+            new tasmotaSwitchService(this, accessory, uniq_id);
             break;
           case 'light':
-            new tasmotaLightAccessory(this, accessory, uniq_id);
+            new tasmotaLightService(this, accessory, uniq_id);
             break;
           case 'sensor':
-            new tasmotaSensorAccessory(this, accessory, uniq_id);
+            new tasmotaSensorService(this, accessory, uniq_id);
             break;
           default:
             this.log.info('Warning: Unhandled Tasmota device type', message.tasmotaType);
@@ -150,9 +177,35 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
 
       }
     });
-
   }
+
+  autoCleanup(accessory) {
+    let timeoutID;
+
+    if (accessory.context.timeout) {
+      timeoutID = accessory.context.timeout;
+      clearTimeout(this.timeouts[timeoutID]);
+    }
+
+    timeoutID = this.timeoutCounter++;
+
+    // debug("Cleanup", this.cleanup);
+
+    this.timeouts[timeoutID] = setTimeout(this.unregister.bind(this), this.cleanup * 60 * 60 * 1000, accessory, timeoutID);
+
+    return (timeoutID);
+  }
+
+  unregister(accessory, timeoutID) {
+      debug('Removing %s', accessory.displayName);
+      this.timeouts[timeoutID] = null;
+      this.api.unregisterPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
+      // callback();
+    }
 }
+
+/* The various Tasmota firmware's have a slightly different flavors of the message. */
+
 
 function normalizeMessage(message) {
   /*

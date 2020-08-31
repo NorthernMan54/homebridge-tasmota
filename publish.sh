@@ -7,7 +7,6 @@ npm audit
   git add .
   npm version patch -m "$1" --force
   npm publish --tag latest
-  npm publish --tag beta
   git commit -m "$1"
 #  git push origin beta --tags
   git push origin master --tags

@@ -1,17 +1,19 @@
-import { Service, PlatformAccessory, CharacteristicValue, CharacteristicSetCallback } from 'homebridge';
+import { Service, PlatformAccessory, CharacteristicValue, CharacteristicSetCallback, Characteristic } from 'homebridge';
 
 import { tasmotaPlatform } from './platform';
+import nunjucks from 'nunjucks';
 
 import createDebug from 'debug';
-const debug = createDebug('Tasmota:switch');
+const debug = createDebug('Tasmota:light');
 
 /**
  * Platform Accessory
  * An instance of this class is created for each accessory your platform registers
  * Each accessory may expose multiple services of different service types.
  */
-export class tasmotaSwitchAccessory {
+export class tasmotaLightService {
   private service: Service;
+  private characteristic: Characteristic;
 
   /**
    * These are just used to create a working example
@@ -30,34 +32,31 @@ export class tasmotaSwitchAccessory {
 
     /*
     {
-      name: 'Stereo Tasmota',
-      stat_t: 'tele/tasmota_00F861/STATE',
-      avty_t: 'tele/tasmota_00F861/LWT',
+      name: 'Kitchen Sink Kitchen Sink',
+      stat_t: 'tele/tasmota_284CCF/STATE',
+      avty_t: 'tele/tasmota_284CCF/LWT',
       pl_avail: 'Online',
       pl_not_avail: 'Offline',
-      cmd_t: 'cmnd/tasmota_00F861/POWER',
+      cmd_t: 'cmnd/tasmota_284CCF/POWER',
       val_tpl: '{{value_json.POWER}}',
       pl_off: 'OFF',
       pl_on: 'ON',
-      uniq_id: '00F861_RL_1',
-      dev: { ids: [ '00F861' ] },
-      tasmotaType: 'switch'
+      uniq_id: '284CCF_LI_1',
+      dev: { ids: [ '284CCF' ] },
+      bri_cmd_t: 'cmnd/tasmota_284CCF/Dimmer',
+      bri_stat_t: 'tele/tasmota_284CCF/STATE',
+      bri_scl: 100,
+      on_cmd_type: 'brightness',
+      bri_val_tpl: '{{value_json.Dimmer}}',
+      tasmotaType: 'light'
     }
-    */
-
-    // debug("This", this);
-
-    // set accessory information
-    /*
-    this.accessory.getService(this.platform.Service.AccessoryInformation)!
-      .setCharacteristic(this.platform.Characteristic.Manufacturer, 'Tasmota')
-      .setCharacteristic(this.platform.Characteristic.Model, 'Default-Model')
-      .setCharacteristic(this.platform.Characteristic.SerialNumber, 'Default-Serial');
     */
 
     // get the LightBulb service if it exists, otherwise create a new LightBulb service
     // you can create multiple services for each accessory
-    this.service = this.accessory.getService(this.platform.Service.Switch) || this.accessory.addService(this.platform.Service.Switch);
+
+    const uuid = this.platform.api.hap.uuid.generate(accessory.context.device[this.uniq_id].uniq_id);
+    this.service = this.accessory.getService(uuid) || this.accessory.addService(this.platform.Service.Lightbulb, accessory.context.device[this.uniq_id].name, uuid);
 
     // set the service name, this is what is displayed as the default name on the Home app
     // in this example we are using the name we stored in the `accessory.context` in the `discoverDevices` method.
@@ -77,6 +76,20 @@ export class tasmotaSwitchAccessory {
       accessory.context.mqttHost.on(accessory.context.device[this.uniq_id].stat_t, this.statusUpdate.bind(this));
       accessory.context.mqttHost.on(accessory.context.device[this.uniq_id].avty_t, this.availabilityUpdate.bind(this));
     }
+
+    // Does the lightbulb include a brightness characteristic
+
+    if (accessory.context.device[this.uniq_id].bri_cmd_t) {
+      (this.service.getCharacteristic(this.platform.Characteristic.Brightness) || this.service.addCharacteristic(this.platform.Characteristic.Brightness))
+        .on('set', this.setBrightness.bind(this));
+    }
+
+    nunjucks.configure({
+      autoescape: true,
+    });
+    // Get current status for accessory/service on startup
+    const teleperiod = this.accessory.context.device[this.uniq_id].cmd_t.substr(0, this.accessory.context.device[this.uniq_id].cmd_t.lastIndexOf('/') + 1) + "teleperiod";
+    this.accessory.context.mqttHost.sendMessage(teleperiod, '300');
   }
 
   /**
@@ -90,24 +103,48 @@ export class tasmotaSwitchAccessory {
      * pl_off: 'OFF',
        pl_on: 'ON',
      *
-     {"Time":"1970-01-01T18:24:07",
-     "Uptime":"0T18:24:08",
-     "UptimeSec":66248,
-     "Heap":23,
-     "SleepMode":"Dynamic",
-     "Sleep":50,
-     "LoadAvg":19,
-     "MqttCount":1,
-     "POWER":"ON",
-     "Wifi":{"AP":2,"SSId":"The_Beach","BSSId":"34:12:98:08:9D:2A","Channel":11,"RSSI":82,"Signal":-59,"LinkCount":1,"Downtime":"0T00:00:03"}}
-
+     {
+        Time: '2020-08-26T03:14:15',
+        Uptime: '0T00:32:09',
+        UptimeSec: 1929,
+        Heap: 24,
+        SleepMode: 'Dynamic',
+        Sleep: 10,
+        LoadAvg: 19,
+        MqttCount: 1,
+        POWER: 'ON',
+        Dimmer: 77,
+        Fade: 'OFF',
+        Speed: 1,
+        LedTable: 'OFF',
+        Wifi: {
+          AP: 1,
+          SSId: '67 Bonacres',
+          BSSId: '6C:70:9F:EB:06:40',
+          Channel: 1,
+          RSSI: 84,
+          Signal: -58,
+          LinkCount: 1,
+          Downtime: '0T00:00:04'
+        }
+      }
      */
 
-    const status = JSON.parse(message.toString());
+    this.accessory.context.timeout = this.platform.autoCleanup(this.accessory);
 
-    this.service.getCharacteristic(this.platform.Characteristic.On).updateValue((status.POWER === this.accessory.context.device[this.uniq_id].pl_on ? 1 : 0));
+    const interim = {
+      value_json: JSON.parse(message.toString()),
+    };
 
-    debug('statusUpdate %s to %s', this.accessory.displayName, status.POWER);
+    this.service.getCharacteristic(this.platform.Characteristic.On).updateValue((nunjucks.renderString(this.accessory.context.device[this.uniq_id].val_tpl, interim) === this.accessory.context.device[this.uniq_id].pl_on ? 1 : 0));
+
+    if (this.accessory.context.device[this.uniq_id].bri_val_tpl) {
+      this.service.getCharacteristic(this.platform.Characteristic.Brightness).updateValue(nunjucks.renderString(this.accessory.context.device[this.uniq_id].bri_val_tpl, interim));
+      this.platform.log.info('statusUpdate %s Brightness to %s', this.accessory.displayName, nunjucks.renderString(this.accessory.context.device[this.uniq_id].bri_val_tpl, interim));
+
+    }
+
+    this.platform.log.info('statusUpdate %s to %s', this.accessory.displayName, nunjucks.renderString(this.accessory.context.device[this.uniq_id].val_tpl, interim));
   }
 
   /**
@@ -116,6 +153,7 @@ export class tasmotaSwitchAccessory {
    */
 
   availabilityUpdate(topic, message) {
+    this.platform.log.error('availabilityUpdate %s to %s', this.service.displayName, message);
     // debug("MQTT", this.accessory.displayName, topic, message.toString());
     /*
 
@@ -139,9 +177,19 @@ export class tasmotaSwitchAccessory {
     // implement your own code to turn your device on/off
     this.exampleStates.On = value as boolean;
 
-    this.platform.log.debug('%s Set Characteristic On ->', this.accessory.displayName, value);
+    this.platform.log.info('%s Set Characteristic On ->', this.accessory.displayName, value);
 
     this.accessory.context.mqttHost.sendMessage(this.accessory.context.device[this.uniq_id].cmd_t, (value ? this.accessory.context.device[this.uniq_id].pl_on : this.accessory.context.device[this.uniq_id].pl_off));
+
+    // you must call the callback function
+    callback(null);
+  }
+
+  setBrightness(value: CharacteristicValue, callback: CharacteristicSetCallback) {
+
+    this.platform.log.info('%s Set Characteristic Brightness ->', this.accessory.displayName, value);
+
+    this.accessory.context.mqttHost.sendMessage(this.accessory.context.device[this.uniq_id].bri_cmd_t, value.toString());
 
     // you must call the callback function
     callback(null);
