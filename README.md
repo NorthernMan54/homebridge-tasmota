@@ -1,11 +1,13 @@
 [![NPM Downloads](https://img.shields.io/npm/dm/homebridge-tasmota.svg?style=flat)](https://npmjs.org/package/homebridge-tasmota)
 
-Homebridge Plugin for Tasmota Devices that leverage's the Home Assistant Auto Discovery Function to configure and add devices.  And remove the need to manually configure Tasmota devices with Homebridge.
+Homebridge Plugin for Tasmota Devices that leverage's the Home Assistant Auto Discovery Function to configure and add devices.  And remove the need to manually configure Tasmota devices with Homebridge.  So far this has been tested with Switches/Outlets, Dimmers/Light's and temperature sensors ymmv for other devices.
 
 ## Tasmota Device's Tested
 
 * switch - WiOn (17) Outlet Module
 * light - Tuya Dimmer (54) Dimmer Switch
+* sensor - Generic (18) with a bme280 connected
+* relay - ESP with multiple relays connected.
 
 ## Installation
 
@@ -63,7 +65,10 @@ i.e. "Scanner Scanner"
 ## Backlog prior to Production
 
 * [x] Add config.schema.json for homebridge-config-ui-x
-* [ ] Add automated removal of non-responding devices
-* [ ] Enable debug logging via config.json
+* [x] Add automated removal of non-responding devices
+* [x] Add support for sensors
+* [x] Add support for multiple relays
+* [ ] Add support for RGB Lights
+* [x] Enable debug logging via config.json
 * [ ] Clean up README
-* [ ] Clean up debug and production logging
+* [x] Clean up debug and production logging

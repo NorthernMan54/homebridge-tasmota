@@ -50,7 +50,9 @@ export class tasmotaSwitchService {
 
     // get the LightBulb service if it exists, otherwise create a new LightBulb service
     // you can create multiple services for each accessory
-    this.service = this.accessory.getService(this.platform.Service.Switch) || this.accessory.addService(this.platform.Service.Switch);
+    const uuid = this.platform.api.hap.uuid.generate(accessory.context.device[this.uniq_id].uniq_id);
+
+    this.service = this.accessory.getService(uuid) || this.accessory.addService(this.platform.Service.Switch, accessory.context.device[this.uniq_id].name, uuid);
 
     // set the service name, this is what is displayed as the default name on the Home app
     // in this example we are using the name we stored in the `accessory.context` in the `discoverDevices` method.
@@ -76,6 +78,9 @@ export class tasmotaSwitchService {
       autoescape: true
     });
 
+    // Get current status for accessory/service on startup
+    const telePeriod = this.accessory.context.device[this.uniq_id].cmd_t.substr(0, this.accessory.context.device[this.uniq_id].cmd_t.lastIndexOf("/") + 1) + "teleperiod";
+    this.accessory.context.mqttHost.sendMessage(telePeriod, "300");
   }
 
   /**
@@ -102,16 +107,13 @@ export class tasmotaSwitchService {
 
      */
 
-    // debug("statusUpdate", message.toString());
-
-    const status = JSON.parse(message.toString());
     const interim = {
-      value_json: status
+      value_json: JSON.parse(message.toString())
     };
 
     this.characteristic.updateValue((nunjucks.renderString(this.accessory.context.device[this.uniq_id].val_tpl, interim) === this.accessory.context.device[this.uniq_id].pl_on ? 1 : 0));
 
-    debug('statusUpdate %s to %s', this.accessory.displayName, nunjucks.renderString(this.accessory.context.device[this.uniq_id].val_tpl, interim));
+    this.platform.log.info('statusUpdate %s to %s', this.service.displayName, nunjucks.renderString(this.accessory.context.device[this.uniq_id].val_tpl, interim));
   }
 
   /**
@@ -120,6 +122,7 @@ export class tasmotaSwitchService {
    */
 
   availabilityUpdate(topic, message) {
+    this.platform.log.error('availabilityUpdate %s to %s', this.service.displayName, message);
     // debug("MQTT", this.accessory.displayName, topic, message.toString());
     /*
 
@@ -132,6 +135,8 @@ export class tasmotaSwitchService {
     const availability = (message.toString() === this.accessory.context.device[this.uniq_id].pl_not_avail ? new Error(this.accessory.displayName + ' ' + message.toString()) : 0);
 
     this.service.getCharacteristic(this.platform.Characteristic.On).updateValue(availability);
+
+    // debug('statusUpdate %s to %s', this.service.displayName, message, availability);
   }
 
   /**
@@ -140,7 +145,7 @@ export class tasmotaSwitchService {
    */
   setOn(value: CharacteristicValue, callback: CharacteristicSetCallback) {
 
-    this.platform.log.debug('%s Set Characteristic On ->', this.accessory.displayName, value);
+    this.platform.log.info('%s Set Characteristic On ->', this.service.displayName, value);
 
     this.accessory.context.mqttHost.sendMessage(this.accessory.context.device[this.uniq_id].cmd_t, (value ? this.accessory.context.device[this.uniq_id].pl_on : this.accessory.context.device[this.uniq_id].pl_off));
 

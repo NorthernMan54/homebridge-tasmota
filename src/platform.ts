@@ -27,6 +27,7 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
   private cleanup;
   private timeouts = {};
   private timeoutCounter = 0;
+  private debug = false;
 
   constructor(
     public readonly log: Logger,
@@ -36,6 +37,21 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
     this.log.debug('Finished initializing platform:', this.config.name);
 
     this.cleanup = this.config['cleanup'] || 24; // Default removal of defunct devices after 24 hours
+
+    this.debug = this.config['debug'] || false;
+    if (this.debug) {
+      let debugEnable = require('debug');
+      let namespaces = debugEnable.disable();
+
+      // this.log("DEBUG-1", namespaces);
+      if (namespaces) {
+        namespaces = namespaces + ',Tasmota*';
+      } else {
+        namespaces = 'Tasmota*';
+      }
+      // this.log("DEBUG-2", namespaces);
+      debugEnable.enable(namespaces);
+    }
 
     // When this event is fired it means Homebridge has restored all cached accessories from disk.
     // Dynamic Platform plugins should only register new accessories after this event was fired,
@@ -101,7 +117,7 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
 
       if (existingAccessory) {
         // the accessory already exists
-        this.log.info('Restoring existing accessory from cache:', existingAccessory.displayName);
+        this.log.info('Restoring existing service from cache:', message.name);
 
         // if you need to update the accessory.context then you should run `api.updatePlatformAccessories`. eg.:
         // existingAccessory.context.device = device;

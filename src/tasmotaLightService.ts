@@ -54,7 +54,9 @@ export class tasmotaLightService {
 
     // get the LightBulb service if it exists, otherwise create a new LightBulb service
     // you can create multiple services for each accessory
-    this.service = this.accessory.getService(this.platform.Service.Lightbulb) || this.accessory.addService(this.platform.Service.Lightbulb);
+
+    const uuid = this.platform.api.hap.uuid.generate(accessory.context.device[this.uniq_id].uniq_id);
+    this.service = this.accessory.getService(uuid) || this.accessory.addService(this.platform.Service.Lightbulb, accessory.context.device[this.uniq_id].name, uuid);
 
     // set the service name, this is what is displayed as the default name on the Home app
     // in this example we are using the name we stored in the `accessory.context` in the `discoverDevices` method.
@@ -81,6 +83,13 @@ export class tasmotaLightService {
       (this.service.getCharacteristic(this.platform.Characteristic.Brightness) || this.service.addCharacteristic(this.platform.Characteristic.Brightness))
         .on('set', this.setBrightness.bind(this));
     }
+
+    nunjucks.configure({
+      autoescape: true
+    });
+    // Get current status for accessory/service on startup
+    const teleperiod = this.accessory.context.device[this.uniq_id].cmd_t.substr(0, this.accessory.context.device[this.uniq_id].cmd_t.lastIndexOf("/") + 1) + "teleperiod";
+    this.accessory.context.mqttHost.sendMessage(teleperiod, "300");
   }
 
   /**
@@ -121,21 +130,21 @@ export class tasmotaLightService {
       }
      */
 
-    const status = JSON.parse(message.toString());
-
-    // debug("statusUpdate", status);
-
-    // debug("THIS", this);
     this.accessory.context.timeout = this.platform.autoCleanup(this.accessory);
 
-    this.service.getCharacteristic(this.platform.Characteristic.On).updateValue((status.POWER === this.accessory.context.device[this.uniq_id].pl_on ? 1 : 0));
+    const interim = {
+      value_json: JSON.parse(message.toString())
+    };
 
-    if (status.Dimmer) {
-      this.service.getCharacteristic(this.platform.Characteristic.Brightness).updateValue(status.Dimmer);
-      debug('statusUpdate %s Brightness to %s', this.accessory.displayName, status.Dimmer);
+    this.service.getCharacteristic(this.platform.Characteristic.On).updateValue((nunjucks.renderString(this.accessory.context.device[this.uniq_id].val_tpl, interim) === this.accessory.context.device[this.uniq_id].pl_on ? 1 : 0));
+
+    if (this.accessory.context.device[this.uniq_id].bri_val_tpl) {
+      this.service.getCharacteristic(this.platform.Characteristic.Brightness).updateValue(nunjucks.renderString(this.accessory.context.device[this.uniq_id].bri_val_tpl, interim));
+      this.platform.log.info('statusUpdate %s Brightness to %s', this.accessory.displayName, nunjucks.renderString(this.accessory.context.device[this.uniq_id].bri_val_tpl, interim));
+
     }
 
-    debug('statusUpdate %s to %s', this.accessory.displayName, status.POWER);
+    this.platform.log.info('statusUpdate %s to %s', this.accessory.displayName, nunjucks.renderString(this.accessory.context.device[this.uniq_id].val_tpl, interim));
   }
 
   /**
@@ -144,6 +153,7 @@ export class tasmotaLightService {
    */
 
   availabilityUpdate(topic, message) {
+    this.platform.log.error('availabilityUpdate %s to %s', this.service.displayName, message);
     // debug("MQTT", this.accessory.displayName, topic, message.toString());
     /*
 
@@ -167,7 +177,7 @@ export class tasmotaLightService {
     // implement your own code to turn your device on/off
     this.exampleStates.On = value as boolean;
 
-    this.platform.log.debug('%s Set Characteristic On ->', this.accessory.displayName, value);
+    this.platform.log.info('%s Set Characteristic On ->', this.accessory.displayName, value);
 
     this.accessory.context.mqttHost.sendMessage(this.accessory.context.device[this.uniq_id].cmd_t, (value ? this.accessory.context.device[this.uniq_id].pl_on : this.accessory.context.device[this.uniq_id].pl_off));
 
@@ -177,7 +187,7 @@ export class tasmotaLightService {
 
   setBrightness(value: CharacteristicValue, callback: CharacteristicSetCallback) {
 
-    this.platform.log.debug('%s Set Characteristic Brightness ->', this.accessory.displayName, value);
+    this.platform.log.info('%s Set Characteristic Brightness ->', this.accessory.displayName, value);
 
     this.accessory.context.mqttHost.sendMessage(this.accessory.context.device[this.uniq_id].bri_cmd_t, value.toString());
 

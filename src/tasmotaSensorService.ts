@@ -25,10 +25,12 @@ export class tasmotaSensorService {
 
     if (accessory.context.device[this.uniq_id].dev_cla) {
 
+      const uuid = this.platform.api.hap.uuid.generate(accessory.context.device[this.uniq_id].uniq_id);
       switch (accessory.context.device[this.uniq_id].dev_cla) {
         case 'temperature':
           debug('Creating %s sensor %s', accessory.context.device[this.uniq_id].dev_cla, accessory.context.device[this.uniq_id].name)
-          this.service = this.accessory.getService(this.platform.Service.TemperatureSensor) || this.accessory.addService(this.platform.Service.TemperatureSensor);
+
+          this.service = this.accessory.getService(uuid) || this.accessory.addService(this.platform.Service.TemperatureSensor, accessory.context.device[this.uniq_id].name, uuid);
 
           this.service.setCharacteristic(this.platform.Characteristic.Name, accessory.context.device[this.uniq_id].name);
 
@@ -41,7 +43,8 @@ export class tasmotaSensorService {
           break;
         case 'humidity':
           debug('Creating %s sensor %s', accessory.context.device[this.uniq_id].dev_cla, accessory.context.device[this.uniq_id].name)
-          this.service = this.accessory.getService(this.platform.Service.HumiditySensor) || this.accessory.addService(this.platform.Service.HumiditySensor);
+
+          this.service = this.accessory.getService(uuid) || this.accessory.addService(this.platform.Service.HumiditySensor, accessory.context.device[this.uniq_id].name, uuid);
 
           this.service.setCharacteristic(this.platform.Characteristic.Name, accessory.context.device[this.uniq_id].name);
 
@@ -80,18 +83,11 @@ export class tasmotaSensorService {
 
   statusUpdate(topic, message) {
 
-    debug("statusUpdate", message.toString());
-
-    const status = JSON.parse(message.toString());
     const interim = {
-      value_json: status
+      value_json: JSON.parse(message.toString())
     };
-
-
-
     this.characteristic.updateValue(nunjucks.renderString(this.accessory.context.device[this.uniq_id].val_tpl, interim));
-
-    debug('statusUpdate %s to %s', this.accessory.displayName, status, this.accessory.context.device[this.uniq_id].val_tpl, nunjucks.renderString(this.accessory.context.device[this.uniq_id].val_tpl, interim));
+    this.platform.log.info('statusUpdate %s to %s', this.service.displayName, nunjucks.renderString(this.accessory.context.device[this.uniq_id].val_tpl, interim));
   }
 
   /**
@@ -100,6 +96,7 @@ export class tasmotaSensorService {
    */
 
   availabilityUpdate(topic, message) {
+    this.platform.log.error('availabilityUpdate %s to %s', this.service.displayName, message);
 
     const availability = (message.toString() === this.accessory.context.device[this.uniq_id].pl_not_avail ? new Error(this.accessory.displayName + ' ' + message.toString()) : 0);
 
