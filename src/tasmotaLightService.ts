@@ -85,11 +85,11 @@ export class tasmotaLightService {
     }
 
     nunjucks.configure({
-      autoescape: true
+      autoescape: true,
     });
     // Get current status for accessory/service on startup
-    const teleperiod = this.accessory.context.device[this.uniq_id].cmd_t.substr(0, this.accessory.context.device[this.uniq_id].cmd_t.lastIndexOf("/") + 1) + "teleperiod";
-    this.accessory.context.mqttHost.sendMessage(teleperiod, "300");
+    const teleperiod = this.accessory.context.device[this.uniq_id].cmd_t.substr(0, this.accessory.context.device[this.uniq_id].cmd_t.lastIndexOf('/') + 1) + "teleperiod";
+    this.accessory.context.mqttHost.sendMessage(teleperiod, '300');
   }
 
   /**
@@ -133,7 +133,7 @@ export class tasmotaLightService {
     this.accessory.context.timeout = this.platform.autoCleanup(this.accessory);
 
     const interim = {
-      value_json: JSON.parse(message.toString())
+      value_json: JSON.parse(message.toString()),
     };
 
     this.service.getCharacteristic(this.platform.Characteristic.On).updateValue((nunjucks.renderString(this.accessory.context.device[this.uniq_id].val_tpl, interim) === this.accessory.context.device[this.uniq_id].pl_on ? 1 : 0));

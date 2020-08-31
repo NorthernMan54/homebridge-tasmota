@@ -1,4 +1,4 @@
-import { Service, PlatformAccessory, CharacteristicValue, CharacteristicSetCallback, Characteristic } from 'homebridge';
+import { Service, PlatformAccessory, Characteristic } from 'homebridge';
 
 import { tasmotaPlatform } from './platform';
 // import { nunjucks } from 'nunjucks';
@@ -28,7 +28,7 @@ export class tasmotaSensorService {
       const uuid = this.platform.api.hap.uuid.generate(accessory.context.device[this.uniq_id].uniq_id);
       switch (accessory.context.device[this.uniq_id].dev_cla) {
         case 'temperature':
-          debug('Creating %s sensor %s', accessory.context.device[this.uniq_id].dev_cla, accessory.context.device[this.uniq_id].name)
+          debug('Creating %s sensor %s', accessory.context.device[this.uniq_id].dev_cla, accessory.context.device[this.uniq_id].name);
 
           this.service = this.accessory.getService(uuid) || this.accessory.addService(this.platform.Service.TemperatureSensor, accessory.context.device[this.uniq_id].name, uuid);
 
@@ -42,7 +42,7 @@ export class tasmotaSensorService {
           accessory.context.mqttHost.on(accessory.context.device[this.uniq_id].avty_t, this.availabilityUpdate.bind(this));
           break;
         case 'humidity':
-          debug('Creating %s sensor %s', accessory.context.device[this.uniq_id].dev_cla, accessory.context.device[this.uniq_id].name)
+          debug('Creating %s sensor %s', accessory.context.device[this.uniq_id].dev_cla, accessory.context.device[this.uniq_id].name);
 
           this.service = this.accessory.getService(uuid) || this.accessory.addService(this.platform.Service.HumiditySensor, accessory.context.device[this.uniq_id].name, uuid);
 
@@ -68,7 +68,7 @@ export class tasmotaSensorService {
     }
 
     nunjucks.configure({
-      autoescape: true
+      autoescape: true,
     });
 
   }
@@ -84,7 +84,7 @@ export class tasmotaSensorService {
   statusUpdate(topic, message) {
 
     const interim = {
-      value_json: JSON.parse(message.toString())
+      value_json: JSON.parse(message.toString()),
     };
     this.characteristic.updateValue(nunjucks.renderString(this.accessory.context.device[this.uniq_id].val_tpl, interim));
     this.platform.log.info('statusUpdate %s to %s', this.service.displayName, nunjucks.renderString(this.accessory.context.device[this.uniq_id].val_tpl, interim));

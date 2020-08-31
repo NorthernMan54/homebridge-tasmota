@@ -40,7 +40,7 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
 
     this.debug = this.config['debug'] || false;
     if (this.debug) {
-      let debugEnable = require('debug');
+      import debugEnable from 'debug';
       let namespaces = debugEnable.disable();
 
       // this.log("DEBUG-1", namespaces);
