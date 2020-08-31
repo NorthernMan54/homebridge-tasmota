@@ -7,6 +7,7 @@ import { tasmotaLightService } from './tasmotaLightService';
 import { tasmotaSensorService } from './tasmotaSensorService';
 import { Mqtt } from './lib/Mqtt';
 import createDebug from 'debug';
+import debugEnable from 'debug';
 
 const debug = createDebug('Tasmota:platform');
 
@@ -40,7 +41,7 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
 
     this.debug = this.config['debug'] || false;
     if (this.debug) {
-      import debugEnable from 'debug';
+
       let namespaces = debugEnable.disable();
 
       // this.log("DEBUG-1", namespaces);
