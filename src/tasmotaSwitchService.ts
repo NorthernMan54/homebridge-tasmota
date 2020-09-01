@@ -107,6 +107,7 @@ export class tasmotaSwitchService {
 
      */
 
+    this.accessory.context.timeout = this.platform.autoCleanup(this.accessory);
     const interim = {
       value_json: JSON.parse(message.toString()),
     };

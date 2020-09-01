@@ -83,6 +83,7 @@ export class tasmotaSensorService {
 
   statusUpdate(topic, message) {
 
+    this.accessory.context.timeout = this.platform.autoCleanup(this.accessory);
     const interim = {
       value_json: JSON.parse(message.toString()),
     };
