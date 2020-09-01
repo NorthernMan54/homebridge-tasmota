@@ -106,7 +106,6 @@ export class tasmotaSwitchService {
      "Wifi":{"AP":2,"SSId":"The_Beach","BSSId":"34:12:98:08:9D:2A","Channel":11,"RSSI":82,"Signal":-59,"LinkCount":1,"Downtime":"0T00:00:03"}}
 
      */
-
     this.accessory.context.timeout = this.platform.autoCleanup(this.accessory);
     const interim = {
       value_json: JSON.parse(message.toString()),

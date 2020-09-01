@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. This project uses [Semantic Versioning](https://semver.org/).
 
+## 0.0.19 (2020-09-01)
+
+## [Version 0.0.19](https://github.com/northernman54/homebridge-tasmota/compare/v0.0.16...v0.0.19)
+
+#### Changes
+
+- Fix for the automated cleanup routine being too aggressive and cleaning up devices prematurely
+
 ## 0.0.16 (2020-08-31)
 
 ## [Version 0.0.16](https://github.com/northernman54/homebridge-tasmota/compare/v0.0.9...v0.0.16)

@@ -27,7 +27,7 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
 
   private cleanup;
   private timeouts = {};
-  private timeoutCounter = 0;
+  private timeoutCounter = 1;
   private debug = false;
 
   constructor(
@@ -182,15 +182,16 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
   autoCleanup(accessory) {
     let timeoutID;
 
+    // debug("autoCleanup", accessory.displayName, accessory.context.timeout, this.timeouts);
+
     if (accessory.context.timeout) {
       timeoutID = accessory.context.timeout;
       clearTimeout(this.timeouts[timeoutID]);
+      delete this.timeouts[timeoutID];
+
     }
 
     timeoutID = this.timeoutCounter++;
-
-    // debug("Cleanup", this.cleanup);
-
     this.timeouts[timeoutID] = setTimeout(this.unregister.bind(this), this.cleanup * 60 * 60 * 1000, accessory, timeoutID);
 
     return (timeoutID);
