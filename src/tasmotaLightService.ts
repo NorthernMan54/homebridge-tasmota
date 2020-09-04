@@ -95,7 +95,7 @@ export class tasmotaLightService {
       autoescape: true,
     });
     // Get current status for accessory/service on startup
-    const teleperiod = this.accessory.context.device[this.uniq_id].cmd_t.substr(0, this.accessory.context.device[this.uniq_id].cmd_t.lastIndexOf('/') + 1) + "teleperiod";
+    const teleperiod = this.accessory.context.device[this.uniq_id].cmd_t.substr(0, this.accessory.context.device[this.uniq_id].cmd_t.lastIndexOf('/') + 1) + 'teleperiod';
     this.accessory.context.mqttHost.sendMessage(teleperiod, '300');
   }
 
@@ -105,12 +105,12 @@ export class tasmotaLightService {
    */
 
   statusUpdate(topic, message) {
-    debug("statusUpdate", topic, message.toString());
+    debug('statusUpdate', topic, message.toString());
     /* stat_t: 'tele/tasmota_00F861/STATE',
      * pl_off: 'OFF',
        pl_on: 'ON',
      */
-     /*
+    /*
     {  Arilux LC06 in
       "Time": "2020-09-04T01:09:41",
       "Uptime": "0T05:40:51",
