@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. This project uses [Semantic Versioning](https://semver.org/).
 
+## 0.0.20 (2020-09-03)
+
+## [Version 0.0.20](https://github.com/northernman54/homebridge-tasmota/compare/v0.0.19...v0.0.20)
+
+#### Changes
+
+- Added support for Colour Temperature on lights
+- Updated Issue templates to include details on the Tasmota device
+
 ## 0.0.19 (2020-09-01)
 
 ## [Version 0.0.19](https://github.com/northernman54/homebridge-tasmota/compare/v0.0.16...v0.0.19)

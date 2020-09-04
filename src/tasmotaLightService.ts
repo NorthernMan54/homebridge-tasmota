@@ -84,6 +84,13 @@ export class tasmotaLightService {
         .on('set', this.setBrightness.bind(this));
     }
 
+    // Does the lightbulb include a colour temperature characteristic
+
+    if (accessory.context.device[this.uniq_id].clr_temp_cmd_t) {
+      (this.service.getCharacteristic(this.platform.Characteristic.ColorTemperature) || this.service.addCharacteristic(this.platform.Characteristic.ColorTemperature))
+        .on('set', this.setColorTemperature.bind(this));
+    }
+
     nunjucks.configure({
       autoescape: true,
     });
@@ -98,36 +105,31 @@ export class tasmotaLightService {
    */
 
   statusUpdate(topic, message) {
-    // debug("MQTT", topic, message.toString());
+    debug("statusUpdate", topic, message.toString());
     /* stat_t: 'tele/tasmota_00F861/STATE',
      * pl_off: 'OFF',
        pl_on: 'ON',
-     *
-     {
-        Time: '2020-08-26T03:14:15',
-        Uptime: '0T00:32:09',
-        UptimeSec: 1929,
-        Heap: 24,
-        SleepMode: 'Dynamic',
-        Sleep: 10,
-        LoadAvg: 19,
-        MqttCount: 1,
-        POWER: 'ON',
-        Dimmer: 77,
-        Fade: 'OFF',
-        Speed: 1,
-        LedTable: 'OFF',
-        Wifi: {
-          AP: 1,
-          SSId: '67 Bonacres',
-          BSSId: '6C:70:9F:EB:06:40',
-          Channel: 1,
-          RSSI: 84,
-          Signal: -58,
-          LinkCount: 1,
-          Downtime: '0T00:00:04'
-        }
-      }
+     */
+     /*
+    {  Arilux LC06 in
+      "Time": "2020-09-04T01:09:41",
+      "Uptime": "0T05:40:51",
+      "UptimeSec": 20451,
+      "Heap": 24,
+      "SleepMode": "Dynamic",
+      "Sleep": 10,
+      "LoadAvg": 99, "MqttCount": 1,
+      "POWER": "ON",
+      "Dimmer": 74,
+      "Color": "189,189",
+      "HSBColor": "0,0,0",
+      "Channel": [74, 74],
+      "CT": 327,
+      "Fade": "OFF",
+      "Speed": 1,
+      "LedTable": "ON",
+      "Wifi": { "AP": 1, "SSId": "The_Beach", "BSSId": "34:12:98:08:9D:2A", "Channel": 11, "RSSI": 88, "Signal": -56, "LinkCount": 1, "Downtime": "0T00:00:06" }
+    };
      */
 
     this.accessory.context.timeout = this.platform.autoCleanup(this.accessory);
@@ -141,6 +143,12 @@ export class tasmotaLightService {
     if (this.accessory.context.device[this.uniq_id].bri_val_tpl) {
       this.service.getCharacteristic(this.platform.Characteristic.Brightness).updateValue(nunjucks.renderString(this.accessory.context.device[this.uniq_id].bri_val_tpl, interim));
       this.platform.log.info('statusUpdate %s Brightness to %s', this.accessory.displayName, nunjucks.renderString(this.accessory.context.device[this.uniq_id].bri_val_tpl, interim));
+
+    }
+
+    if (this.accessory.context.device[this.uniq_id].clr_temp_cmd_t) {
+      this.service.getCharacteristic(this.platform.Characteristic.ColorTemperature).updateValue(nunjucks.renderString(this.accessory.context.device[this.uniq_id].clr_temp_val_tpl, interim));
+      this.platform.log.info('statusUpdate %s ColorTemperature to %s', this.accessory.displayName, nunjucks.renderString(this.accessory.context.device[this.uniq_id].clr_temp_val_tpl, interim));
 
     }
 
@@ -192,6 +200,12 @@ export class tasmotaLightService {
     this.accessory.context.mqttHost.sendMessage(this.accessory.context.device[this.uniq_id].bri_cmd_t, value.toString());
 
     // you must call the callback function
+    callback(null);
+  }
+
+  setColorTemperature(value: CharacteristicValue, callback: CharacteristicSetCallback) {
+    this.platform.log.info('%s Set Characteristic ColorTemperature ->', this.accessory.displayName, value);
+    this.accessory.context.mqttHost.sendMessage(this.accessory.context.device[this.uniq_id].clr_temp_cmd_t, value.toString());
     callback(null);
   }
 

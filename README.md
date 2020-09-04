@@ -6,6 +6,7 @@ Homebridge Plugin for Tasmota Devices that leverage's the Home Assistant Auto Di
 
 * Automatic discovery and configuration of supported Tasmota devices in Homebridge/Homekit.
 * Cleanup and removal of disconnected devices after 24 hours.
+* Support for these types of devices Outlets, Dimmers, Sensors and Lightbulbs with Colour Temperature.
 
 ## Tasmota Device's Tested YMMV for other devices
 
@@ -13,6 +14,7 @@ Homebridge Plugin for Tasmota Devices that leverage's the Home Assistant Auto Di
 * light - Tuya Dimmer (54) Dimmer Switch
 * sensor - Generic (18) with a bme280 connected
 * relay - ESP with multiple relays connected.
+* Arilux LC06 - Light with Dimmer and Colour Temperature capabilities
 
 ## Installation / Configuration
 
@@ -25,6 +27,8 @@ For installation and configuration of the plugin please use the homebridge UI/co
 ```
 SetOption19 1
 ```
+
+* Please note that this setting will change the topics of your Tasmota device and a couple of other settings and will break existing integrations.  Please see here (under setoption19)[https://tasmota.github.io/docs/Commands/#setoption19]
 
 2. MQTT Topic Configuration
 

@@ -198,11 +198,11 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
   }
 
   unregister(accessory, timeoutID) {
-      debug('Removing %s', accessory.displayName);
-      this.timeouts[timeoutID] = null;
-      this.api.unregisterPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
-      // callback();
-    }
+    debug('Removing %s', accessory.displayName);
+    this.timeouts[timeoutID] = null;
+    this.api.unregisterPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
+    // callback();
+  }
 }
 
 /* The various Tasmota firmware's have a slightly different flavors of the message. */
@@ -256,6 +256,10 @@ function normalizeMessage(message) {
     if (message.bri_cmd_t) {
       message.bri_cmd_t = message.bri_cmd_t.replace('~', message['~']);
       message.bri_stat_t = message.bri_stat_t.replace('~', message['~']);
+    }
+    if (message.clr_temp_cmd_t) {
+      message.clr_temp_cmd_t = message.clr_temp_cmd_t.replace('~', message['~']);
+      message.clr_temp_stat_t = message.clr_temp_stat_t.replace('~', message['~']);
     }
   }
 
