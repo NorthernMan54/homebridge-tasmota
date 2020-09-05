@@ -87,8 +87,16 @@ export class tasmotaSensorService {
     const interim = {
       value_json: JSON.parse(message.toString()),
     };
+
+    if (this.characteristic.value != nunjucks.renderString(this.accessory.context.device[this.uniq_id].val_tpl, interim)) {
+      this.platform.log.info('statusUpdate %s to %s', this.service.displayName, nunjucks.renderString(this.accessory.context.device[this.uniq_id].val_tpl, interim));
+    }
+    else {
+      this.platform.log.debug('statusUpdate %s to %s', this.service.displayName, nunjucks.renderString(this.accessory.context.device[this.uniq_id].val_tpl, interim));
+    }
+
     this.characteristic.updateValue(nunjucks.renderString(this.accessory.context.device[this.uniq_id].val_tpl, interim));
-    this.platform.log.info('statusUpdate %s to %s', this.service.displayName, nunjucks.renderString(this.accessory.context.device[this.uniq_id].val_tpl, interim));
+    // this.platform.log.info('statusUpdate %s to %s', this.service.displayName, nunjucks.renderString(this.accessory.context.device[this.uniq_id].val_tpl, interim));
   }
 
   /**

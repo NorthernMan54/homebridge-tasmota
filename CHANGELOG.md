@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. This project uses [Semantic Versioning](https://semver.org/).
 
+## 0.0.21 (2020-09-05)
+
+## [Version 0.0.20](https://github.com/northernman54/homebridge-tasmota/compare/v0.0.20...v0.0.21)
+
+#### Changes
+
+- Updated statueUpdate logging to only log Delta values, and use debug for non changing updates
+
 ## 0.0.20 (2020-09-03)
 
 ## [Version 0.0.20](https://github.com/northernman54/homebridge-tasmota/compare/v0.0.19...v0.0.20)

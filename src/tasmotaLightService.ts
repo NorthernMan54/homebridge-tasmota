@@ -138,21 +138,57 @@ export class tasmotaLightService {
       value_json: JSON.parse(message.toString()),
     };
 
-    this.service.getCharacteristic(this.platform.Characteristic.On).updateValue((nunjucks.renderString(this.accessory.context.device[this.uniq_id].val_tpl, interim) === this.accessory.context.device[this.uniq_id].pl_on ? 1 : 0));
+    // debug(this.service.getCharacteristic(this.platform.Characteristic.On).value, (nunjucks.renderString(this.accessory.context.device[this.uniq_id].val_tpl, interim) === this.accessory.context.device[this.uniq_id].pl_on ? true : false));
+
+    if (this.service.getCharacteristic(this.platform.Characteristic.On).value !== (nunjucks.renderString(this.accessory.context.device[this.uniq_id].val_tpl, interim) === this.accessory.context.device[this.uniq_id].pl_on ? true : false)) {
+
+      this.platform.log.info('statusUpdate %s to %s', this.accessory.displayName, nunjucks.renderString(this.accessory.context.device[this.uniq_id].val_tpl, interim));
+
+    }
+    else {
+
+      this.platform.log.debug('statusUpdate %s to %s', this.accessory.displayName, nunjucks.renderString(this.accessory.context.device[this.uniq_id].val_tpl, interim));
+
+    }
+
+
+    this.service.getCharacteristic(this.platform.Characteristic.On).updateValue((nunjucks.renderString(this.accessory.context.device[this.uniq_id].val_tpl, interim) === this.accessory.context.device[this.uniq_id].pl_on ? true : false));
 
     if (this.accessory.context.device[this.uniq_id].bri_val_tpl) {
+
+      // debug(this.service.getCharacteristic(this.platform.Characteristic.Brightness).value , nunjucks.renderString(this.accessory.context.device[this.uniq_id].bri_val_tpl, interim));
+
+      if (this.service.getCharacteristic(this.platform.Characteristic.Brightness).value != nunjucks.renderString(this.accessory.context.device[this.uniq_id].bri_val_tpl, interim)) {
+
+        this.platform.log.info('statusUpdate %s Brightness to %s', this.accessory.displayName, nunjucks.renderString(this.accessory.context.device[this.uniq_id].bri_val_tpl, interim));
+      }
+      else {
+
+        this.platform.log.debug('statusUpdate %s Brightness to %s', this.accessory.displayName, nunjucks.renderString(this.accessory.context.device[this.uniq_id].bri_val_tpl, interim));
+      }
+
       this.service.getCharacteristic(this.platform.Characteristic.Brightness).updateValue(nunjucks.renderString(this.accessory.context.device[this.uniq_id].bri_val_tpl, interim));
-      this.platform.log.info('statusUpdate %s Brightness to %s', this.accessory.displayName, nunjucks.renderString(this.accessory.context.device[this.uniq_id].bri_val_tpl, interim));
+      // this.platform.log.info('statusUpdate %s Brightness to %s', this.accessory.displayName, nunjucks.renderString(this.accessory.context.device[this.uniq_id].bri_val_tpl, interim));
 
     }
 
     if (this.accessory.context.device[this.uniq_id].clr_temp_cmd_t) {
+
+      if (this.service.getCharacteristic(this.platform.Characteristic.ColorTemperature).value != nunjucks.renderString(this.accessory.context.device[this.uniq_id].clr_temp_val_tpl, interim)) {
+
+        this.platform.log.info('statusUpdate %s ColorTemperature to %s', this.accessory.displayName, nunjucks.renderString(this.accessory.context.device[this.uniq_id].clr_temp_val_tpl, interim));
+      }
+      else {
+        this.platform.log.debug('statusUpdate %s ColorTemperature to %s', this.accessory.displayName, nunjucks.renderString(this.accessory.context.device[this.uniq_id].clr_temp_val_tpl, interim));
+      }
+
       this.service.getCharacteristic(this.platform.Characteristic.ColorTemperature).updateValue(nunjucks.renderString(this.accessory.context.device[this.uniq_id].clr_temp_val_tpl, interim));
-      this.platform.log.info('statusUpdate %s ColorTemperature to %s', this.accessory.displayName, nunjucks.renderString(this.accessory.context.device[this.uniq_id].clr_temp_val_tpl, interim));
+
+      // this.platform.log.info('statusUpdate %s ColorTemperature to %s', this.accessory.displayName, nunjucks.renderString(this.accessory.context.device[this.uniq_id].clr_temp_val_tpl, interim));
 
     }
 
-    this.platform.log.info('statusUpdate %s to %s', this.accessory.displayName, nunjucks.renderString(this.accessory.context.device[this.uniq_id].val_tpl, interim));
+    // this.platform.log.info('statusUpdate %s to %s', this.accessory.displayName, nunjucks.renderString(this.accessory.context.device[this.uniq_id].val_tpl, interim));
   }
 
   /**
