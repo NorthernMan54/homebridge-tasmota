@@ -9,7 +9,11 @@ var connection;
 export class Mqtt extends EventEmitter {
 
   constructor(config) {
-    connection = mqttClient.connect('mqtt://' + config.mqttHost);
+    var options = {
+      username: config['mqttUsername'] || "",
+      password: config['mqttPassword'] || ""
+    }
+    connection = mqttClient.connect('mqtt://' + config.mqttHost, options);
     super();
     // debug("this", this);
     // debug("Connecting", this);
