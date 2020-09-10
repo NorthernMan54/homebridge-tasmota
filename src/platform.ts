@@ -198,7 +198,7 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
   }
 
   unregister(accessory, timeoutID) {
-    debug('Removing %s', accessory.displayName);
+    this.log.error('Removing %s', accessory.displayName);
     this.timeouts[timeoutID] = null;
     this.api.unregisterPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
     // callback();

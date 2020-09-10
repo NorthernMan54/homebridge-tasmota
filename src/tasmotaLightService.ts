@@ -194,7 +194,7 @@ export class tasmotaLightService {
    */
 
   availabilityUpdate(topic, message) {
-    this.platform.log.error('availabilityUpdate %s to %s', this.service.displayName, message);
+    this.platform.log.info('availabilityUpdate %s to %s', this.service.displayName, message);
     // debug("MQTT", this.accessory.displayName, topic, message.toString());
     /*
 

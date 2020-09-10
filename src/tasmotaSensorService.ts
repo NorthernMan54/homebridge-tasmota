@@ -118,11 +118,11 @@ export class tasmotaSensorService {
    */
 
   availabilityUpdate(topic, message) {
-    this.platform.log.error('availabilityUpdate %s to %s', this.service.displayName, message);
+    this.platform.log.info('availabilityUpdate %s to %s', this.service.displayName, message);
 
     const availability = (message.toString() === this.accessory.context.device[this.uniq_id].pl_not_avail ? new Error(this.accessory.displayName + ' ' + message.toString()) : 0);
 
-    this.service.getCharacteristic(this.platform.Characteristic.On).updateValue(availability);
+    this.characteristic.updateValue(availability);
   }
 }
 
