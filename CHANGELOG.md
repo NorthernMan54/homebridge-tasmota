@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. This project uses [Semantic Versioning](https://semver.org/).
 
+## 0.0.26 (2020-09-10)
+
+## [Version 0.0.26](https://github.com/northernman54/homebridge-tasmota/compare/v0.0.26...v0.0.26)
+
+#### Changes
+
+- Fixed updating sensor status on startup
+
 ## 0.0.24 (2020-09-10)
 
 ## [Version 0.0.24](https://github.com/northernman54/homebridge-tasmota/compare/v0.0.21...v0.0.24)

@@ -56,8 +56,6 @@ Under the covers this plugin leverages the Home Assistant Auto Discovery Functio
 
 i.e. "Scanner Scanner"
 
-2 - It can take up to 5 minutes for initial status/values to appear after restarting homebridge.
-
 ## Discord Server
 
 A channel #tasmota has been created on the Homebridge Discord Server.

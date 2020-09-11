@@ -84,7 +84,9 @@ export class tasmotaSensorService {
     nunjucks.configure({
       autoescape: true,
     });
-
+    // Get current status for accessory/service on startup
+    const teleperiod = this.accessory.context.device[this.uniq_id].stat_t.substr(0, this.accessory.context.device[this.uniq_id].stat_t.lastIndexOf('/') + 1).replace('tele', 'cmnd') + 'teleperiod';
+    this.accessory.context.mqttHost.sendMessage(teleperiod, '300');
   }
 
   /*
@@ -96,6 +98,7 @@ export class tasmotaSensorService {
   */
 
   statusUpdate(topic, message) {
+    debug('statusUpdate', this.service.displayName, topic, message.toString());
 
     this.accessory.context.timeout = this.platform.autoCleanup(this.accessory);
     const interim = {
