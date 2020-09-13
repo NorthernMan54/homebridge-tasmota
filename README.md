@@ -52,9 +52,19 @@ Under the covers this plugin leverages the Home Assistant Auto Discovery Functio
 
 ## Known issues
 
-1 - Accessory names are doubled with Tasmota version 8.1.3 to 8.4 - This is an issue with Tasmota firmware and is being tracked [here](https://github.com/arendst/Tasmota/issues/8995).  As a workaround downgrade to Tasmota version 8.1
+### Accessory Names Doubled
+
+Accessory names are doubled with Tasmota version 8.1.3 to 8.4 - This is an issue with Tasmota firmware and is being tracked [here](https://github.com/arendst/Tasmota/issues/8995).  As a workaround downgrade to Tasmota version 8.1
 
 i.e. "Scanner Scanner"
+
+### Phantom Devices or Services
+
+As device discovery is leveraging Home Assistant MQTT Auto Discovery, it is using these retained messages on your MQTT server, and will create and recreate them based on these retained messages.  To eradicate these phantom devices the retained messages for the appropriate accessory / device need to removed from your MQTT server using a tool like MQTT Explorer.
+
+The Home Assistant MQTT Auto Discovery messages live under the topic 'homeassistant/' and a device can have multiple messages that need to be removed depending on the number and type of services.  If you make a mistake and accidentally delete a message for an active device, rebooting the device or setting 'setoption19 1' will recreate messages.
+
+If you change the configuration in Tasmota of an existing device, and the old characteristics are still visible, you will need to clean up the 'Home Assistant MQTT Auto Discovery' messages for the device then disconnect the device for the cleanup period.  You can temporarily change the cleanup period to 0.125 which is approx 10 minutes if your in a hurry.
 
 ## Discord Server
 
@@ -68,5 +78,5 @@ A channel #tasmota has been created on the Homebridge Discord Server.
 * [x] Add support for multiple relays
 * [ ] Add support for RGB Lights
 * [x] Enable debug logging via config.json
-* [ ] Clean up README
+* [x] Clean up README
 * [x] Clean up debug and production logging

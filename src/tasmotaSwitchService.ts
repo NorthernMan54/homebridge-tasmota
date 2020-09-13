@@ -20,36 +20,6 @@ export class tasmotaSwitchService {
     private readonly accessory: PlatformAccessory,
     private readonly uniq_id: string,
   ) {
-
-    /*
-    {
-      name: 'Stereo Tasmota',
-      stat_t: 'tele/tasmota_00F861/STATE',
-      avty_t: 'tele/tasmota_00F861/LWT',
-      pl_avail: 'Online',
-      pl_not_avail: 'Offline',
-      cmd_t: 'cmnd/tasmota_00F861/POWER',
-      val_tpl: '{{value_json.POWER}}',
-      pl_off: 'OFF',
-      pl_on: 'ON',
-      uniq_id: '00F861_RL_1',
-      dev: { ids: [ '00F861' ] },
-      tasmotaType: 'switch'
-    }
-    */
-
-    // debug("This", this);
-
-    // set accessory information
-    /*
-    this.accessory.getService(this.platform.Service.AccessoryInformation)!
-      .setCharacteristic(this.platform.Characteristic.Manufacturer, 'Tasmota')
-      .setCharacteristic(this.platform.Characteristic.Model, 'Default-Model')
-      .setCharacteristic(this.platform.Characteristic.SerialNumber, 'Default-Serial');
-    */
-
-    // get the LightBulb service if it exists, otherwise create a new LightBulb service
-    // you can create multiple services for each accessory
     const uuid = this.platform.api.hap.uuid.generate(accessory.context.device[this.uniq_id].uniq_id);
 
     this.service = this.accessory.getService(uuid) || this.accessory.addService(this.platform.Service.Switch, accessory.context.device[this.uniq_id].name, uuid);
@@ -78,10 +48,15 @@ export class tasmotaSwitchService {
       autoescape: true,
     });
 
+    this.refresh();
+  }
+
+  refresh() {
     // Get current status for accessory/service on startup
     const telePeriod = this.accessory.context.device[this.uniq_id].cmd_t.substr(0, this.accessory.context.device[this.uniq_id].cmd_t.lastIndexOf('/') + 1) + 'teleperiod';
     this.accessory.context.mqttHost.sendMessage(telePeriod, '300');
   }
+
 
   /**
    * Handle "STATE" messages from Tasmotastat_t:
@@ -90,22 +65,7 @@ export class tasmotaSwitchService {
 
   statusUpdate(topic, message) {
     // debug("MQTT", topic, message.toString());
-    /* stat_t: 'tele/tasmota_00F861/STATE',
-     * pl_off: 'OFF',
-       pl_on: 'ON',
-     *
-     {"Time":"1970-01-01T18:24:07",
-     "Uptime":"0T18:24:08",
-     "UptimeSec":66248,
-     "Heap":23,
-     "SleepMode":"Dynamic",
-     "Sleep":50,
-     "LoadAvg":19,
-     "MqttCount":1,
-     "POWER":"ON",
-     "Wifi":{"AP":2,"SSId":"The_Beach","BSSId":"34:12:98:08:9D:2A","Channel":11,"RSSI":82,"Signal":-59,"LinkCount":1,"Downtime":"0T00:00:03"}}
 
-     */
     this.accessory.context.timeout = this.platform.autoCleanup(this.accessory);
     const interim = {
       value_json: JSON.parse(message.toString()),
@@ -113,16 +73,14 @@ export class tasmotaSwitchService {
 
     if (this.characteristic.value !== (nunjucks.renderString(this.accessory.context.device[this.uniq_id].val_tpl, interim) === this.accessory.context.device[this.uniq_id].pl_on ? true : false)) {
 
-      this.platform.log.info('statusUpdate %s to %s', this.service.displayName, nunjucks.renderString(this.accessory.context.device[this.uniq_id].val_tpl, interim));
+      this.platform.log.info('Updating \'%s\' to %s', this.service.displayName, nunjucks.renderString(this.accessory.context.device[this.uniq_id].val_tpl, interim));
 
     } else {
 
-      this.platform.log.debug('statusUpdate %s to %s', this.service.displayName, nunjucks.renderString(this.accessory.context.device[this.uniq_id].val_tpl, interim));
+      this.platform.log.debug('Updating \'%s\' to %s', this.service.displayName, nunjucks.renderString(this.accessory.context.device[this.uniq_id].val_tpl, interim));
     }
 
     this.characteristic.updateValue((nunjucks.renderString(this.accessory.context.device[this.uniq_id].val_tpl, interim) === this.accessory.context.device[this.uniq_id].pl_on ? true : false));
-
-    // this.platform.log.info('statusUpdate %s to %s', this.service.displayName, nunjucks.renderString(this.accessory.context.device[this.uniq_id].val_tpl, interim));
   }
 
   /**
@@ -131,21 +89,10 @@ export class tasmotaSwitchService {
    */
 
   availabilityUpdate(topic, message) {
-    this.platform.log.info('availabilityUpdate %s to %s', this.service.displayName, message);
-    // debug("MQTT", this.accessory.displayName, topic, message.toString());
-    /*
-
-    avty_t: 'tele/tasmota_00F861/LWT',
-    pl_avail: 'Online',
-    pl_not_avail: 'Offline',
-
-    */
+    this.platform.log.info('Marking switch accessory \'%s\' to %s', this.service.displayName, message);
 
     const availability = (message.toString() === this.accessory.context.device[this.uniq_id].pl_not_avail ? new Error(this.accessory.displayName + ' ' + message.toString()) : 0);
-
     this.service.getCharacteristic(this.platform.Characteristic.On).updateValue(availability);
-
-    // debug('statusUpdate %s to %s', this.service.displayName, message, availability);
   }
 
   /**
@@ -163,3 +110,37 @@ export class tasmotaSwitchService {
   }
 
 }
+
+/* stat_t: 'tele/tasmota_00F861/STATE',
+ * pl_off: 'OFF',
+   pl_on: 'ON',
+ *
+ {"Time":"1970-01-01T18:24:07",
+ "Uptime":"0T18:24:08",
+ "UptimeSec":66248,
+ "Heap":23,
+ "SleepMode":"Dynamic",
+ "Sleep":50,
+ "LoadAvg":19,
+ "MqttCount":1,
+ "POWER":"ON",
+ "Wifi":{"AP":2,"SSId":"The_Beach","BSSId":"34:12:98:08:9D:2A","Channel":11,"RSSI":82,"Signal":-59,"LinkCount":1,"Downtime":"0T00:00:03"}}
+
+ */
+
+ /*
+ {
+   name: 'Stereo Tasmota',
+   stat_t: 'tele/tasmota_00F861/STATE',
+   avty_t: 'tele/tasmota_00F861/LWT',
+   pl_avail: 'Online',
+   pl_not_avail: 'Offline',
+   cmd_t: 'cmnd/tasmota_00F861/POWER',
+   val_tpl: '{{value_json.POWER}}',
+   pl_off: 'OFF',
+   pl_on: 'ON',
+   uniq_id: '00F861_RL_1',
+   dev: { ids: [ '00F861' ] },
+   tasmotaType: 'switch'
+ }
+ */

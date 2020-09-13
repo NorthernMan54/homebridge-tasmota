@@ -9,6 +9,10 @@ All notable changes to this project will be documented in this file. This projec
 #### Changes
 
 - Fixed updating sensor status on startup
+- Removed duplicate service creation when a device restarts
+- Reduced frequency of status update messages to whole numbers only ( Issue #5 )
+- Cleanup logging messages and debug messages
+- Added logging of missing sensor data ( ie sensor removed or disconnected from device )
 
 ## 0.0.24 (2020-09-10)
 
