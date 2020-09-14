@@ -15,7 +15,7 @@ Homebridge Plugin for Tasmota Devices that leverage's the Home Assistant Auto Di
 * sensor - Generic (18) with a bme280 connected
 * relay - ESP with multiple relays connected.
 * Arilux LC06 - Light with Dimmer and Colour Temperature capabilities
-* [Franken sensor](docs/IMG_5365.jpg) - 2 DHT22 Temperature / Humidity Sensors, 2 BME280 Temperature / Humidity / Air Pressure Sensors ( pressure is not supported ) and a BH1750 Luminance.  In [Tasmota](docs/IMG_5367.png) and in [HomeKit](docs/IMG_5368.png)
+* [Franken sensor](docs/IMG_5365.jpg) - 2 DHT22 Temperature / Humidity Sensors, 2 BME280 Temperature / Humidity / Air Pressure Sensors ( pressure is not supported ) and a BH1750 Luminance.  In [Tasmota](docs/IMG_5367.png) and in [HomeKit](docs/IMG_5368.png).
 
 ## Installation / Configuration
 
@@ -29,7 +29,7 @@ For installation and configuration of the plugin please use the homebridge UI/co
 SetOption19 1
 ```
 
-* Please note that this setting will change the topics of your Tasmota device and a couple of other settings and will break existing integrations.  Please see here (under setoption19)[https://tasmota.github.io/docs/Commands/#setoption19]
+* Please note that this setting will change the topics of your Tasmota device and a couple of other settings and will break existing integrations.  Please see here [under setOption19](https://tasmota.github.io/docs/Commands/#setoption19).
 
 2. MQTT Topic Configuration
 
