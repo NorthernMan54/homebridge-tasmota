@@ -128,7 +128,7 @@ export class tasmotaSwitchService {
 
  */
 
- /*
+/*
  {
    name: 'Stereo Tasmota',
    stat_t: 'tele/tasmota_00F861/STATE',

@@ -16,7 +16,7 @@ const debug = createDebug('Tasmota:sensor');
 export class tasmotaSensorService {
   private service: Service;
   private characteristic: Characteristic;
-  private device_class: String;
+  private device_class: string;
 
   constructor(
     private readonly platform: tasmotaPlatform,
@@ -101,8 +101,8 @@ export class tasmotaSensorService {
 
     switch (this.device_class) {
       case 'illuminance':
-          // normalize LX in the range homebridge expects
-          value = ( value < 0.0001 ? 0.0001 : ( value > 100000 ? 100000 : value));
+        // normalize LX in the range homebridge expects
+        value = ( value < 0.0001 ? 0.0001 : ( value > 100000 ? 100000 : value));
         break;
     }
 
@@ -144,7 +144,7 @@ export class tasmotaSensorService {
 
 
   parseValue(valueTemplate, value) {
-    let result = nunjucks.renderString(valueTemplate, value);
+    const result = nunjucks.renderString(valueTemplate, value);
     if (result) {
       return parseFloat(result);
     } else {
