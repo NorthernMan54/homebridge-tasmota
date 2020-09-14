@@ -47,6 +47,11 @@ or
 tasmota/tele/STATE
 ```
 
+## Usefull Tasmota Device Options
+
+### [Enforce Home Assistant auto-discovery relay as light](https://tasmota.github.io/docs/Commands/#setoption30)
+
+
 ## Technical Details
 
 Under the covers this plugin leverages the Home Assistant Auto Discovery Function (setOption19) built into the Tasmota firmware and the [MQTT Discovery](https://www.home-assistant.io/docs/mqtt/discovery/) feature built into Home Assistant.  And uses the information provided by the Tasmota device to configure the HomeKit Accessory automatically without requiring within Homebridge.  
