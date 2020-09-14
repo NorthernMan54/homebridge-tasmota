@@ -72,6 +72,18 @@ The Home Assistant MQTT Auto Discovery messages live under the topic 'homeassist
 
 If you change the configuration in Tasmota of an existing device, and the old characteristics are still visible, you will need to clean up the 'Home Assistant MQTT Auto Discovery' messages for the device then disconnect the device for the cleanup period.  You can temporarily change the cleanup period to 0.125 which is approx 10 minutes if your in a hurry.
 
+### Frequency of sensor information updates
+
+Frequency of data updates is controlled by the Tasmota device itself and not the plugin itself.  The plugin does not poll the device for status, but processes telemetry updates as they are received.  The plugin watches for telemetry updates on the tele/SENSOR topic ie 'tasmota-5042/tele/SENSOR'.
+
+During initialization of the plugin, it sets the [teleperiod](https://tasmota.github.io/docs/Commands/#TelePeriod) option to 300 seconds ( 5 minutes ).  This is done to force the device to refresh status immediately after plugin startup.  And then further updates are published every 5 minutes by the accessory.
+
+To drive realtime updates of sensor value changes a rule would need to be created on the device to publish the new data on the appropriate tele/SENSOR topic for the device whenever a sensor changes value, something like this from the Tasmota rule cookbook.
+
+https://tasmota.github.io/docs/Rules/#transmit-sensor-value-only-when-a-delta-is-reached
+
+This is discussed in detail in this Tasmota issue https://github.com/arendst/Tasmota/issues/2567
+
 ## Discord Server
 
 A channel #tasmota has been created on the Homebridge Discord Server.
