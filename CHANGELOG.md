@@ -2,9 +2,17 @@
 
 All notable changes to this project will be documented in this file. This project uses [Semantic Versioning](https://semver.org/).
 
-## 0.0.26 (2020-09-10)
+## 0.0.27 (2020-09-16)
 
-## [Version 0.0.26](https://github.com/northernman54/homebridge-tasmota/compare/v0.0.26...v0.0.26)
+## [Version 0.0.27](https://github.com/northernman54/homebridge-tasmota/compare/v0.0.26...v0.0.27)
+
+#### Changes
+
+- Fix temperature sensors support for below zero temperatures
+
+## 0.0.26 (2020-09-13)
+
+## [Version 0.0.26](https://github.com/northernman54/homebridge-tasmota/compare/v0.0.24...v0.0.26)
 
 #### Changes
 
