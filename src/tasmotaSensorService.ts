@@ -88,8 +88,6 @@ export class tasmotaSensorService {
     this.accessory.context.mqttHost.sendMessage(teleperiod, '300');
   }
 
-
-
   statusUpdate(topic, message) {
     debug('statusUpdate', this.service.displayName, topic, message.toString());
 
@@ -98,8 +96,6 @@ export class tasmotaSensorService {
     let value = this.parseValue(this.accessory.context.device[this.uniq_id].val_tpl, {
       value_json: JSON.parse(message.toString()),
     });
-
-    // debug("This", this);
 
     // Sensor value tweaks or adjustments needed for homekit
 

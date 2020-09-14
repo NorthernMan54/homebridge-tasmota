@@ -13,7 +13,7 @@ All notable changes to this project will be documented in this file. This projec
 - Reduced frequency of status update messages to whole numbers only ( Issue #5 )
 - Cleanup logging messages and debug messages
 - Added logging of missing sensor data ( ie sensor removed or disconnected from device )
-- Fix for issue #6 luminace sensors
+- Fix for issue #6 luminance sensors
 
 ## 0.0.24 (2020-09-10)
 
