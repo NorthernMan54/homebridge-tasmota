@@ -16,6 +16,7 @@ const debug = createDebug('Tasmota:sensor');
 export class tasmotaSensorService {
   private service: Service;
   private characteristic: Characteristic;
+  private device_class: String;
 
   constructor(
     private readonly platform: tasmotaPlatform,
@@ -24,6 +25,7 @@ export class tasmotaSensorService {
   ) {
 
     const uuid = this.platform.api.hap.uuid.generate(accessory.context.device[this.uniq_id].uniq_id);
+    this.device_class = accessory.context.device[this.uniq_id].dev_cla;
     switch (accessory.context.device[this.uniq_id].dev_cla) {
       case 'temperature':
         this.platform.log.debug('Creating %s sensor %s', accessory.context.device[this.uniq_id].dev_cla, accessory.context.device[this.uniq_id].name);
@@ -53,6 +55,7 @@ export class tasmotaSensorService {
         break;
 
       case undefined:
+        // This is this sensor status object
         this.platform.log.debug('Setting accessory information', accessory.context.device[this.uniq_id].name);
         this.accessory.getService(this.platform.Service.AccessoryInformation)!
           .setCharacteristic(this.platform.Characteristic.Name, accessory.context.device[this.uniq_id].dev.name)
@@ -92,11 +95,24 @@ export class tasmotaSensorService {
 
     this.accessory.context.timeout = this.platform.autoCleanup(this.accessory);
 
-    const value = this.parseValue(this.accessory.context.device[this.uniq_id].val_tpl, {
+    let value = this.parseValue(this.accessory.context.device[this.uniq_id].val_tpl, {
       value_json: JSON.parse(message.toString()),
     });
 
-    if (value instanceof Error) { } else {
+    // debug("This", this);
+
+    // Sensor value tweaks or adjustments needed for homekit
+
+    switch (this.device_class) {
+      case 'illuminance':
+          // normalize LX in the range homebridge expects
+          value = ( value < 0.0001 ? 0.0001 : ( value > 100000 ? 100000 : value));
+        break;
+    }
+
+    if (value instanceof Error) {
+      // Error has already been handled
+    } else {
       if (this.characteristic.value != value && this.delta(this.characteristic.value, value)) {
         this.platform.log.info('Updating \'%s\' to %s', this.service.displayName, value);
       } else {
@@ -134,7 +150,7 @@ export class tasmotaSensorService {
   parseValue(valueTemplate, value) {
     let result = nunjucks.renderString(valueTemplate, value);
     if (result) {
-      return result;
+      return parseFloat(result);
     } else {
       this.platform.log.error('ERROR: Sensor %s missing data', this.service.displayName);
       return (new Error('Missing sensor value'));
