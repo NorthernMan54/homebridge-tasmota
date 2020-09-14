@@ -84,6 +84,15 @@ https://tasmota.github.io/docs/Rules/#transmit-sensor-value-only-when-a-delta-is
 
 This is discussed in detail in this Tasmota issue https://github.com/arendst/Tasmota/issues/2567
 
+This is a sample Tasmota rule for BH1750 Illuminance sensor to send updates with every value change.
+
+```
+Rule1 ON BH1750#Illuminance!=%var1% DO Backlog var1 %value%; teleperiod 300; ENDON
+Rule1 1
+```
+
+As a side effect the rule resets the `teleperiod` to 300 seconds similar to restarting the plugin.
+
 ## Discord Server
 
 A channel #tasmota has been created on the Homebridge Discord Server.
@@ -95,6 +104,7 @@ A channel #tasmota has been created on the Homebridge Discord Server.
 * [x] Add support for sensors
 * [x] Add support for multiple relays
 * [ ] Add support for RGB Lights
+* [ ] Phantom sensors don't go 'Not Responding' on a device with working sensors.
 * [x] Enable debug logging via config.json
 * [x] Clean up README
 * [x] Clean up debug and production logging
