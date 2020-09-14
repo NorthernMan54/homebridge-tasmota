@@ -33,6 +33,14 @@ export class tasmotaSensorService {
         this.service = this.accessory.getService(uuid) || this.accessory.addService(this.platform.Service.TemperatureSensor, accessory.context.device[this.uniq_id].name, uuid);
 
         this.service.setCharacteristic(this.platform.Characteristic.Name, accessory.context.device[this.uniq_id].name);
+
+        // Burr winter is coming
+
+        this.service.getCharacteristic(this.platform.Characteristic.CurrentTemperature)
+          .setProps({
+            minValue: -100,
+            maxValue: 100
+          });
         this.characteristic = this.service.getCharacteristic(this.platform.Characteristic.CurrentTemperature);
         break;
       case 'humidity':
@@ -102,7 +110,7 @@ export class tasmotaSensorService {
     switch (this.device_class) {
       case 'illuminance':
         // normalize LX in the range homebridge expects
-        value = ( value < 0.0001 ? 0.0001 : ( value > 100000 ? 100000 : value));
+        value = (value < 0.0001 ? 0.0001 : (value > 100000 ? 100000 : value));
         break;
     }
 
