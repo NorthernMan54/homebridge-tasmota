@@ -2,6 +2,7 @@ import { Service, PlatformAccessory, CharacteristicValue, CharacteristicSetCallb
 
 import { tasmotaPlatform } from './platform';
 import nunjucks from 'nunjucks';
+import convert from 'color-convert';
 
 import createDebug from 'debug';
 const debug = createDebug('Tasmota:light');
@@ -11,9 +12,11 @@ const debug = createDebug('Tasmota:light');
  * An instance of this class is created for each accessory your platform registers
  * Each accessory may expose multiple services of different service types.
  */
+
 export class tasmotaLightService {
   private service: Service;
   private characteristic: Characteristic;
+  private update: ChangeHSB;
 
   constructor(
     private readonly platform: tasmotaPlatform,
@@ -51,6 +54,18 @@ export class tasmotaLightService {
     if (accessory.context.device[this.uniq_id].clr_temp_cmd_t) {
       (this.service.getCharacteristic(this.platform.Characteristic.ColorTemperature) || this.service.addCharacteristic(this.platform.Characteristic.ColorTemperature))
         .on('set', this.setColorTemperature.bind(this));
+    }
+
+    // Does the lightbulb include a RGB characteristic
+
+    if (accessory.context.device[this.uniq_id].rgb_cmd_t) {
+
+      this.update = new ChangeHSB(accessory, this);
+
+      (this.service.getCharacteristic(this.platform.Characteristic.Hue) || this.service.addCharacteristic(this.platform.Characteristic.Hue))
+        .on('set', this.setHue.bind(this));
+      (this.service.getCharacteristic(this.platform.Characteristic.Saturation) || this.service.addCharacteristic(this.platform.Characteristic.Saturation))
+        .on('set', this.setSaturation.bind(this));
     }
 
     nunjucks.configure({
@@ -147,9 +162,43 @@ export class tasmotaLightService {
 
   setBrightness(value: CharacteristicValue, callback: CharacteristicSetCallback) {
     this.platform.log.info('%s Set Characteristic Brightness ->', this.accessory.displayName, value);
+    if (this.service.getCharacteristic(this.platform.Characteristic.Hue)) {
+      this.update.put({
+        Brightness: value
+      }).then(() => {
+        // debug("setTargetTemperature", this, thermostat);
+        callback(null);
+      }).catch((error) => {
+        callback(error);
+      });
+    } else {
+      this.accessory.context.mqttHost.sendMessage(this.accessory.context.device[this.uniq_id].bri_cmd_t, value.toString());
+      callback(null);
+    }
+  }
 
-    this.accessory.context.mqttHost.sendMessage(this.accessory.context.device[this.uniq_id].bri_cmd_t, value.toString());
-    callback(null);
+  setHue(value: CharacteristicValue, callback: CharacteristicSetCallback) {
+    this.platform.log.info('%s Set Characteristic Hue ->', this.accessory.displayName, value);
+    this.update.put({
+      Hue: value
+    }).then(() => {
+      // debug("setTargetTemperature", this, thermostat);
+      callback(null);
+    }).catch((error) => {
+      callback(error);
+    });
+  }
+
+  setSaturation(value: CharacteristicValue, callback: CharacteristicSetCallback) {
+    this.platform.log.info('%s Set Characteristic Saturation ->', this.accessory.displayName, value);
+    this.update.put({
+      Saturation: value
+    }).then(() => {
+      // debug("setTargetTemperature", this, thermostat);
+      callback(null, value);
+    }).catch((error) => {
+      callback(error);
+    });
   }
 
   setColorTemperature(value: CharacteristicValue, callback: CharacteristicSetCallback) {
@@ -159,6 +208,142 @@ export class tasmotaLightService {
   }
 
 }
+
+
+
+// Consolidate update requests received over 100ms into a single update
+
+class ChangeHSB {
+  private desiredState;
+  private deferrals;
+  private waitTimeUpdate;
+  private timeout;
+  private accessory;
+  private service;
+  private platform;
+
+  constructor(accessory, that
+
+  ) {
+    debug("ChangeHSB", this);
+    this.accessory = accessory;
+    this.platform = that.platform;
+    this.service = that.service;
+    // this.accessory = that.accessory;
+    this.desiredState = {};
+    this.deferrals = [];
+    this.waitTimeUpdate = 100; // wait 100ms before processing change
+    this.timeout = null;
+  }
+
+  put(state) {
+    debug("put %s ->", this.accessory.displayName, state, this.desiredState);
+    return new Promise((resolve, reject) => {
+
+      for (const key in state) {
+        // console.log("ChangeThermostat", accessory);
+        this.desiredState[key] = state[key];
+      }
+      const d = {
+        resolve: resolve,
+        reject: reject
+      };
+      this.deferrals.push(d);
+      // debug("THAT", this.that);
+      // debug("setTimeout", this.timeout);
+
+      if (!this.timeout) {
+        this.timeout = setTimeout(() => {
+          debug("put start", this.desiredState);
+          for (const d of this.deferrals) {
+            d.resolve();
+          }
+
+          // debug("this.that", this.that);
+          debug("Brightness", this.service.getCharacteristic(this.platform.Characteristic.Brightness).value);
+
+          // debug("HSV->RGB", convert.hsv.rgb(90,100,100));
+
+          debug("HSV->RGB", this.desiredState.Hue, this.desiredState.Saturation, (this.desiredState.Brightness ? this.desiredState.Brightness : this.service.getCharacteristic(this.platform.Characteristic.Brightness).value));
+
+          debug("HSV->RGB", convert.hsv.rgb(this.desiredState.Hue, this.desiredState.Saturation, (this.desiredState.Brightness ? this.desiredState.Brightness : this.service.getCharacteristic(this.platform.Characteristic.Brightness).value)));
+
+          debug("HSL->RGB", convert.hsl.rgb(this.desiredState.Hue, this.desiredState.Saturation, (this.desiredState.Brightness ? this.desiredState.Brightness : this.service.getCharacteristic(this.platform.Characteristic.Brightness).value)));
+
+          this.desiredState = {};
+          this.deferrals = [];
+          this.timeout = null;
+
+          /*
+          thermostats.ChangeThermostat(this.desiredState).then((thermostat) => {
+            for (const d of this.deferrals) {
+              d.resolve(thermostat);
+            }
+            this.desiredState = {};
+            this.deferrals = [];
+            this.timeout = null;
+            // debug("put complete", thermostat);
+          }).catch((error) => {
+            for (const d of this.deferrals) {
+              d.reject(error);
+            }
+            this.desiredState = {};
+            this.deferrals = [];
+            this.timeout = null;
+            // debug("put error", error);
+          });
+
+          */
+
+        }, this.waitTimeUpdate);
+      }
+
+    });
+  };
+}
+
+function updateLight(update) {
+  console.log(update);
+}
+
+/*
+
+// RGB Led Strip
+
+{ "name": "Tasmota",
+  "cmd_t": "~cmnd/POWER",
+  "stat_t": "~tele/STATE",
+  "val_tpl": "{{value_json.POWER}}",
+  "pl_off": "OFF",
+  "pl_on": "ON",
+  "avty_t": "~tele/LWT",
+  "pl_avail": "Online",
+  "pl_not_avail": "Offline",
+  "uniq_id": "DC4492_LI_1",
+  "device": { "identifiers": ["DC4492"], "connections": [["mac", "5C:CF:7F:DC:44:92"]] },
+  "~": "tasmota/",
+
+  "bri_cmd_t": "~cmnd/Dimmer",
+  "bri_stat_t": "~tele/STATE",
+  "bri_scl": 100,
+  "on_cmd_type": "brightness",
+  "bri_val_tpl": "{{value_json.Dimmer}}",
+
+  "rgb_cmd_t": "~cmnd/Color2",
+  "rgb_stat_t": "~tele/STATE",
+  "rgb_val_tpl": "{{value_json.Color.split(',')[0:3]|join(',')}}",
+
+  "fx_cmd_t": "~cmnd/Scheme",
+  "fx_stat_t": "~tele/STATE",
+  "fx_val_tpl": "{{value_json.Scheme}}",
+  "fx_list": ["0", "1", "2", "3", "4"]
+}
+
+*/
+
+
+
+
 
 /*
 
