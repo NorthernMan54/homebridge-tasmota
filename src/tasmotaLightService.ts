@@ -290,7 +290,8 @@ class ChangeHSB {
 // Color conversion functions
 
 function rgb2hsv (r, g, b) {
-    let rabs, gabs, babs, rr, gg, bb, h, s, v, diff, diffc, percentRoundFn;
+    const rabs, gabs, babs, diffc, percentRoundFn;
+    let rr, gg, bb, h, s, v, diff;
     rabs = r / 255;
     gabs = g / 255;
     babs = b / 255;
