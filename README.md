@@ -16,6 +16,8 @@ Homebridge Plugin for Tasmota Devices that leverage's the Home Assistant Auto Di
 * relay - ESP with multiple relays connected.
 * Arilux LC06 - Light with Dimmer and Colour Temperature capabilities
 * [Franken sensor](docs/IMG_5365.jpg) - 2 DHT22 Temperature / Humidity Sensors, 2 BME280 Temperature / Humidity / Air Pressure Sensors ( pressure is not supported ) and a BH1750 Luminance.  In [Tasmota](docs/IMG_5367.png) and in [HomeKit](docs/IMG_5368.png).
+* ws2812 addressable RGB led light strip
+* RGB LED Light Strip
 
 ## Installation / Configuration
 
@@ -103,7 +105,7 @@ A channel #tasmota has been created on the Homebridge Discord Server.
 * [x] Add automated removal of non-responding devices
 * [x] Add support for sensors
 * [x] Add support for multiple relays
-* [ ] Add support for RGB Lights
+* [x] Add support for RGB Lights
 * [ ] Phantom sensors don't go 'Not Responding' on a device with working sensors.
 * [x] Enable debug logging via config.json
 * [x] Clean up README
