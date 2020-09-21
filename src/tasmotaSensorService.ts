@@ -39,7 +39,7 @@ export class tasmotaSensorService {
         this.service.getCharacteristic(this.platform.Characteristic.CurrentTemperature)
           .setProps({
             minValue: -100,
-            maxValue: 100
+            maxValue: 100,
           });
         this.characteristic = this.service.getCharacteristic(this.platform.Characteristic.CurrentTemperature);
         break;
