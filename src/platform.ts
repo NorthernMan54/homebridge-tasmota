@@ -29,7 +29,7 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
   private cleanup;
   private timeouts = {};
   private timeoutCounter = 1;
-  private debug = false;
+  private debug;
   public statusEvent = {};
 
   constructor(
@@ -40,8 +40,8 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
     this.log.debug('Finished initializing platform:', this.config.name);
 
     this.cleanup = this.config['cleanup'] || 24; // Default removal of defunct devices after 24 hours
-
     this.debug = this.config['debug'] || false;
+
     if (this.debug) {
 
       let namespaces = debugEnable.disable();
