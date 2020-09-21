@@ -2,7 +2,6 @@ import { Service, PlatformAccessory, CharacteristicValue, CharacteristicSetCallb
 
 import { tasmotaPlatform } from './platform';
 import nunjucks from 'nunjucks';
-import convert from 'color-convert';
 
 import createDebug from 'debug';
 const debug = createDebug('Tasmota:light');
@@ -68,6 +67,7 @@ export class tasmotaLightService {
         .on('set', this.setSaturation.bind(this));
     }
 
+    nunjucks.installJinjaCompat();
     nunjucks.configure({
       autoescape: true,
     });
@@ -139,6 +139,37 @@ export class tasmotaLightService {
 
       this.service.getCharacteristic(this.platform.Characteristic.ColorTemperature).updateValue(nunjucks.renderString(this.accessory.context.device[this.uniq_id].clr_temp_val_tpl, interim));
     }
+
+    // Update color settings
+
+    if (this.accessory.context.device[this.uniq_id].rgb_stat_t) {
+
+
+      debug("RGB->HSL RGB(%s,%s,%s) HSB(%s) From Tasmota HSB(%s)", nunjucks.renderString(this.accessory.context.device[this.uniq_id].rgb_val_tpl, interim).split(',')[0], nunjucks.renderString(this.accessory.context.device[this.uniq_id].rgb_val_tpl, interim).split(',')[1], nunjucks.renderString(this.accessory.context.device[this.uniq_id].rgb_val_tpl, interim).split(',')[2], rgb2hsv(nunjucks.renderString(this.accessory.context.device[this.uniq_id].rgb_val_tpl, interim).split(',')[0], nunjucks.renderString(this.accessory.context.device[this.uniq_id].rgb_val_tpl, interim).split(',')[1], nunjucks.renderString(this.accessory.context.device[this.uniq_id].rgb_val_tpl, interim).split(',')[2]), JSON.parse(message.toString()).HSBColor);
+
+      const hsb = rgb2hsv(nunjucks.renderString(this.accessory.context.device[this.uniq_id].rgb_val_tpl, interim).split(',')[0], nunjucks.renderString(this.accessory.context.device[this.uniq_id].rgb_val_tpl, interim).split(',')[1], nunjucks.renderString(this.accessory.context.device[this.uniq_id].rgb_val_tpl, interim).split(',')[2]);
+
+
+      // Use debug logging for no change updates, and info when a change occurred
+
+      if (this.service.getCharacteristic(this.platform.Characteristic.Hue).value != hsb.h) {
+        this.platform.log.info('Updating \'%s\' Hue to %s', this.accessory.displayName, hsb.h);
+      } else {
+        this.platform.log.debug('Updating \'%s\' Hue to %s', this.accessory.displayName, hsb.h);
+      }
+
+      if (this.service.getCharacteristic(this.platform.Characteristic.Saturation).value != hsb.s) {
+        this.platform.log.info('Updating \'%s\' Saturation to %s', this.accessory.displayName, hsb.s);
+      } else {
+        this.platform.log.debug('Updating \'%s\' Saturation to %s', this.accessory.displayName, hsb.s);
+      }
+
+      this.service.getCharacteristic(this.platform.Characteristic.Hue).updateValue(hsb.h);
+      this.service.getCharacteristic(this.platform.Characteristic.Saturation).updateValue(hsb.s);
+
+    }
+
+
   }
 
   /**
@@ -162,19 +193,8 @@ export class tasmotaLightService {
 
   setBrightness(value: CharacteristicValue, callback: CharacteristicSetCallback) {
     this.platform.log.info('%s Set Characteristic Brightness ->', this.accessory.displayName, value);
-    if (this.service.getCharacteristic(this.platform.Characteristic.Hue)) {
-      this.update.put({
-        Brightness: value
-      }).then(() => {
-        // debug("setTargetTemperature", this, thermostat);
-        callback(null);
-      }).catch((error) => {
-        callback(error);
-      });
-    } else {
-      this.accessory.context.mqttHost.sendMessage(this.accessory.context.device[this.uniq_id].bri_cmd_t, value.toString());
-      callback(null);
-    }
+    this.accessory.context.mqttHost.sendMessage(this.accessory.context.device[this.uniq_id].bri_cmd_t, value.toString());
+    callback(null);
   }
 
   setHue(value: CharacteristicValue, callback: CharacteristicSetCallback) {
@@ -219,29 +239,24 @@ class ChangeHSB {
   private waitTimeUpdate;
   private timeout;
   private accessory;
-  private service;
-  private platform;
+  private readonly uniq_id: string;
 
   constructor(accessory, that
 
   ) {
     debug("ChangeHSB", this);
     this.accessory = accessory;
-    this.platform = that.platform;
-    this.service = that.service;
-    // this.accessory = that.accessory;
+    this.uniq_id = that.uniq_id;
     this.desiredState = {};
     this.deferrals = [];
     this.waitTimeUpdate = 100; // wait 100ms before processing change
     this.timeout = null;
+
   }
 
   put(state) {
-    debug("put %s ->", this.accessory.displayName, state, this.desiredState);
     return new Promise((resolve, reject) => {
-
       for (const key in state) {
-        // console.log("ChangeThermostat", accessory);
         this.desiredState[key] = state[key];
       }
       const d = {
@@ -249,51 +264,21 @@ class ChangeHSB {
         reject: reject
       };
       this.deferrals.push(d);
-      // debug("THAT", this.that);
-      // debug("setTimeout", this.timeout);
 
       if (!this.timeout) {
         this.timeout = setTimeout(() => {
           debug("put start", this.desiredState);
+          debug("HSL->RGB", hsl2rgb(this.desiredState.Hue, this.desiredState.Saturation, 50).toString());
+
+          this.accessory.context.mqttHost.sendMessage(this.accessory.context.device[this.uniq_id].rgb_cmd_t, hsl2rgb(this.desiredState.Hue, this.desiredState.Saturation, 50).toString());
+
           for (const d of this.deferrals) {
             d.resolve();
           }
 
-          // debug("this.that", this.that);
-          debug("Brightness", this.service.getCharacteristic(this.platform.Characteristic.Brightness).value);
-
-          // debug("HSV->RGB", convert.hsv.rgb(90,100,100));
-
-          debug("HSV->RGB", this.desiredState.Hue, this.desiredState.Saturation, (this.desiredState.Brightness ? this.desiredState.Brightness : this.service.getCharacteristic(this.platform.Characteristic.Brightness).value));
-
-          debug("HSV->RGB", convert.hsv.rgb(this.desiredState.Hue, this.desiredState.Saturation, (this.desiredState.Brightness ? this.desiredState.Brightness : this.service.getCharacteristic(this.platform.Characteristic.Brightness).value)));
-
-          debug("HSL->RGB", convert.hsl.rgb(this.desiredState.Hue, this.desiredState.Saturation, (this.desiredState.Brightness ? this.desiredState.Brightness : this.service.getCharacteristic(this.platform.Characteristic.Brightness).value)));
-
           this.desiredState = {};
           this.deferrals = [];
           this.timeout = null;
-
-          /*
-          thermostats.ChangeThermostat(this.desiredState).then((thermostat) => {
-            for (const d of this.deferrals) {
-              d.resolve(thermostat);
-            }
-            this.desiredState = {};
-            this.deferrals = [];
-            this.timeout = null;
-            // debug("put complete", thermostat);
-          }).catch((error) => {
-            for (const d of this.deferrals) {
-              d.reject(error);
-            }
-            this.desiredState = {};
-            this.deferrals = [];
-            this.timeout = null;
-            // debug("put error", error);
-          });
-
-          */
 
         }, this.waitTimeUpdate);
       }
@@ -302,9 +287,93 @@ class ChangeHSB {
   };
 }
 
-function updateLight(update) {
-  console.log(update);
+// Color conversion functions
+
+function rgb2hsv (r, g, b) {
+    let rabs, gabs, babs, rr, gg, bb, h, s, v, diff, diffc, percentRoundFn;
+    rabs = r / 255;
+    gabs = g / 255;
+    babs = b / 255;
+    v = Math.max(rabs, gabs, babs),
+    diff = v - Math.min(rabs, gabs, babs);
+    diffc = c => (v - c) / 6 / diff + 1 / 2;
+//    percentRoundFn = num => Math.round(num * 100) / 100;
+    percentRoundFn = num => Math.round(num);
+    if (diff == 0) {
+        h = s = 0;
+    } else {
+        s = diff / v;
+        rr = diffc(rabs);
+        gg = diffc(gabs);
+        bb = diffc(babs);
+
+        if (rabs === v) {
+            h = bb - gg;
+        } else if (gabs === v) {
+            h = (1 / 3) + rr - bb;
+        } else if (babs === v) {
+            h = (2 / 3) + gg - rr;
+        }
+        if (h < 0) {
+            h += 1;
+        }else if (h > 1) {
+            h -= 1;
+        }
+    }
+    return {
+        h: Math.round(h * 360),
+        s: percentRoundFn(s * 100),
+        v: percentRoundFn(v * 100)
+    };
 }
+
+function hsl2rgb(h1,s1,l1) {
+	const h = h1 / 360;
+	const s = s1 / 100;
+	const l = l1 / 100;
+	let t2;
+	let t3;
+	let val;
+
+	if (s === 0) {
+		val = l * 255;
+		return [val, val, val];
+	}
+
+	if (l < 0.5) {
+		t2 = l * (1 + s);
+	} else {
+		t2 = l + s - l * s;
+	}
+
+	const t1 = 2 * l - t2;
+
+	const rgb = [0, 0, 0];
+	for (let i = 0; i < 3; i++) {
+		t3 = h + 1 / 3 * -(i - 1);
+		if (t3 < 0) {
+			t3++;
+		}
+
+		if (t3 > 1) {
+			t3--;
+		}
+
+		if (6 * t3 < 1) {
+			val = t1 + (t2 - t1) * 6 * t3;
+		} else if (2 * t3 < 1) {
+			val = t2;
+		} else if (3 * t3 < 2) {
+			val = t1 + (t2 - t1) * (2 / 3 - t3) * 6;
+		} else {
+			val = t1;
+		}
+
+		rgb[i] = Math.round(val * 255);
+	}
+
+	return rgb;
+};
 
 /*
 

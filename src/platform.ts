@@ -270,6 +270,17 @@ function normalizeMessage(message) {
       message.clr_temp_cmd_t = message.clr_temp_cmd_t.replace('~', message['~']);
       message.clr_temp_stat_t = message.clr_temp_stat_t.replace('~', message['~']);
     }
+
+    if (message.rgb_cmd_t) {
+      message.rgb_cmd_t = message.rgb_cmd_t.replace('~', message['~']);
+      message.rgb_stat_t = message.rgb_stat_t.replace('~', message['~']);
+    }
+
+    if (message.fx_cmd_t) {
+      message.fx_cmd_t = message.fx_cmd_t.replace('~', message['~']);
+      message.fx_stat_t = message.fx_stat_t.replace('~', message['~']);
+    }
+
   }
 
   /*

@@ -84,6 +84,7 @@ export class tasmotaSensorService {
       accessory.context.mqttHost.on(accessory.context.device[this.uniq_id].avty_t, this.availabilityUpdate.bind(this));
     }
 
+    nunjucks.installJinjaCompat();
     nunjucks.configure({
       autoescape: true,
     });

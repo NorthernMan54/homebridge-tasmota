@@ -9,6 +9,7 @@ All notable changes to this project will be documented in this file. This projec
 #### Changes
 
 - Fix temperature sensors support for below zero temperatures
+- Added support for RGB and Color changing light bulbs ( issue #11 )
 
 ## 0.0.26 (2020-09-13)
 
