@@ -290,16 +290,15 @@ class ChangeHSB {
 // Color conversion functions
 
 function rgb2hsv (r, g, b) {
-    const rabs, gabs, babs, diffc, percentRoundFn;
     let rr, gg, bb, h, s, v, diff;
-    rabs = r / 255;
-    gabs = g / 255;
-    babs = b / 255;
+    const rabs = r / 255;
+    const gabs = g / 255;
+    const babs = b / 255;
     v = Math.max(rabs, gabs, babs),
     diff = v - Math.min(rabs, gabs, babs);
-    diffc = c => (v - c) / 6 / diff + 1 / 2;
+    const diffc = c => (v - c) / 6 / diff + 1 / 2;
 //    percentRoundFn = num => Math.round(num * 100) / 100;
-    percentRoundFn = num => Math.round(num);
+    const percentRoundFn = num => Math.round(num);
     if (diff == 0) {
         h = s = 0;
     } else {
