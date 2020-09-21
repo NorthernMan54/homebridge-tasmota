@@ -5,6 +5,7 @@ npm audit fix
 #if npm audit; then
 #  npm run-script document
 #  rm *orig* *toc\.*
+  npm run-script prepublishOnly
   git add .
   npm version patch -m "$1" --force
   npm publish --tag latest

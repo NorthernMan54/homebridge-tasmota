@@ -234,11 +234,11 @@ export class tasmotaLightService {
 // Consolidate update requests received over 100ms into a single update
 
 class ChangeHSB {
-  private desiredState;
+  private desiredState: Record<string, unknown>;
   private deferrals;
-  private waitTimeUpdate;
-  private timeout;
-  private accessory;
+  private waitTimeUpdate: number;
+  private timeout: NodeJS.Timeout | null ;
+  private accessory: PlatformAccessory;
   private readonly uniq_id: string;
 
   constructor(accessory, that,
