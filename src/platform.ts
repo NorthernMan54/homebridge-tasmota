@@ -5,6 +5,7 @@ import { PLATFORM_NAME, PLUGIN_NAME } from './settings';
 import { tasmotaSwitchService } from './tasmotaSwitchService';
 import { tasmotaLightService } from './tasmotaLightService';
 import { tasmotaSensorService } from './tasmotaSensorService';
+import { tasmotaBinarySensorService } from './tasmotaBinarySensorService';
 import { Mqtt } from './lib/Mqtt';
 import createDebug from 'debug';
 import debugEnable from 'debug';
@@ -133,10 +134,10 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
         existingAccessory.context.device[uniq_id] = message;
 
         if (this.services[uniq_id]) {
-          this.log.info('Restoring existing service from cache:', message.name);
+          this.log.warn('Restoring existing service from cache:', message.name);
           this.services[uniq_id].refresh();
         } else {
-          this.log.info('Creating service:', message.name);
+          this.log.info('Creating service:', message.name, message.tasmotaType);
           switch (message.tasmotaType) {
             case 'sensor':
               this.services[uniq_id] = new tasmotaSensorService(this, existingAccessory, uniq_id);
@@ -147,8 +148,11 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
             case 'switch':
               this.services[uniq_id] = new tasmotaSwitchService(this, existingAccessory, uniq_id);
               break;
+            case 'binary_sensor':
+              this.services[uniq_id] = new tasmotaBinarySensorService(this, existingAccessory, uniq_id);
+              break;
             default:
-              this.log.info('Warning: Unhandled Tasmota device type', message.tasmotaType);
+              this.log.warn('Warning: Unhandled Tasmota device type', message.tasmotaType);
           }
         }
 
@@ -176,10 +180,12 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
             break;
           case 'sensor':
             this.services[uniq_id] = new tasmotaSensorService(this, accessory, uniq_id);
-            // debug("load", this.services[uniq_id]);
+            break;
+          case 'binary_sensor':
+            this.services[uniq_id] = new tasmotaBinarySensorService(this, accessory, uniq_id);
             break;
           default:
-            this.log.info('Warning: Unhandled Tasmota device type', message.tasmotaType);
+            this.log.warn('Warning: Unhandled Tasmota device type', message.tasmotaType);
         }
         this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
         this.accessories.push(accessory);
@@ -300,6 +306,18 @@ function normalizeMessage(message) {
     manufacturer: 'Tasmota'
   },
   */
+
+  if(message.unique_id) {
+    message.uniq_id = message.unique_id;
+  }
+
+  if(message.device_class) {
+    message.dev_cla = message.device_class;
+  }
+
+  if(message.payload_on) {
+    message.pl_on = message.payload_on;
+  }
 
   if (message.device) {
     message.dev = message.device;

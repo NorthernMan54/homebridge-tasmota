@@ -52,6 +52,7 @@ export class Mqtt extends EventEmitter {
               switch (subject[1]) {
                 case "switch":
                 case "sensor":
+                case "binary_sensor":
                 case "light":
                   // debug("emit", subject[1], this);
                   this.emit('Discovered', device);
