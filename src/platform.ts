@@ -105,8 +105,8 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
       // number or MAC address
       const message = normalizeMessage(config);
       // debug('normalizeMessage ->', message);
-      let identifier = message.dev.ids[0];
-      let uniq_id = message.uniq_id;
+      const identifier = message.dev.ids[0];
+      const uniq_id = message.uniq_id;
 
       const uuid = this.api.hap.uuid.generate(identifier);
 
@@ -231,7 +231,7 @@ function normalizeMessage(message) {
     model: 'mdl',
     sw_version: 'sw',
     manufacturer: 'mf',
-    identifiers: 'ids'
+    identifiers: 'ids',
   };
 
   message = renameKeys(message, translation);
@@ -248,40 +248,39 @@ function normalizeMessage(message) {
 }
 
 function replaceStringsInObject(obj, findStr, replaceStr, cache = new Map()) {
-    if (cache && cache.has(obj)) return cache.get(obj);
+  if (cache && cache.has(obj)) {
+    return cache.get(obj);
+  }
 
-    const result = {};
+  const result = {};
 
-    cache && cache.set(obj, result);
+  cache && cache.set(obj, result);
 
-    for (let [key, value] of Object.entries(obj)) {
-        let v: any = null;
+  for (const [key, value] of Object.entries(obj)) {
+    let v: any = null;
 
-        if(typeof value === 'string'){
-            v = value.replace(RegExp(findStr, 'gi'), replaceStr);
-        }
-        else if (Array.isArray(value)) {
-            // debug('isArray', value);
-            v = value;
-            // for (var i = 0; i < value.length; i++) {
-            //    v[i] = replaceStringsInObject(value, findStr, replaceStr, cache);
-            // }
-        }
-        else if(typeof value === 'object'){
-            // debug('object', value);
-            v = replaceStringsInObject(value, findStr, replaceStr, cache);
-        }
-        else {
-            v = value;
-        }
-        result[key] = v;
+    if(typeof value === 'string'){
+      v = value.replace(RegExp(findStr, 'gi'), replaceStr);
+    } else if (Array.isArray(value)) {
+      // debug('isArray', value);
+      v = value;
+      // for (var i = 0; i < value.length; i++) {
+      //    v[i] = replaceStringsInObject(value, findStr, replaceStr, cache);
+      // }
+    } else if(typeof value === 'object'){
+      // debug('object', value);
+      v = replaceStringsInObject(value, findStr, replaceStr, cache);
+    } else {
+      v = value;
     }
+    result[key] = v;
+  }
 
-    return result;
+  return result;
 }
 
 function renameKeys(o, mapShortToLong) {
-  var build, key, destKey, ix, value;
+  let build, key, destKey, ix, value;
 
   if (Array.isArray(o)) {
     build = [];
@@ -296,7 +295,7 @@ function renameKeys(o, mapShortToLong) {
     value = o[key];
 
     // If this is an object, recurse
-    if (typeof value === "object") {
+    if (typeof value === 'object') {
       // debug('recurse', value);
       value = renameKeys(value, mapShortToLong);
     }

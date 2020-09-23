@@ -19,6 +19,8 @@ Homebridge Plugin for Tasmota Devices that leverage's the Home Assistant Auto Di
 * ws2812 addressable RGB led light strip
 * RGB LED Light Strip
 
+* WemosDB - Doorbell device
+
 ## Installation / Configuration
 
 For installation and configuration of the plugin please use the homebridge UI/console.
