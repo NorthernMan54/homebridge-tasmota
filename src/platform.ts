@@ -104,7 +104,7 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
       // something globally unique, but constant, for example, the device serial
       // number or MAC address
       const message = normalizeMessage(config);
-      debug('normalizeMessage ->', message);
+      // debug('normalizeMessage ->', message);
       let identifier = message.dev.ids[0];
       let uniq_id = message.uniq_id;
 

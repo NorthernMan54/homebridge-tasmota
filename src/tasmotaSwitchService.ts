@@ -42,7 +42,9 @@ export class tasmotaSwitchService {
 
       debug('Creating statusUpdate listener for', accessory.context.device[this.uniq_id].stat_t);
       accessory.context.mqttHost.on(accessory.context.device[this.uniq_id].stat_t, this.statusUpdate.bind(this));
+      accessory.context.mqttHost.statusSubscribe(accessory.context.device[this.uniq_id].stat_t);
       accessory.context.mqttHost.on(accessory.context.device[this.uniq_id].avty_t, this.availabilityUpdate.bind(this));
+      accessory.context.mqttHost.availabilitySubscribe(accessory.context.device[this.uniq_id].avty_t);
     }
     nunjucks.installJinjaCompat();
     nunjucks.configure({

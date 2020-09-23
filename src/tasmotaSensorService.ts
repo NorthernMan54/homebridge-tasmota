@@ -81,7 +81,9 @@ export class tasmotaSensorService {
     if (this.characteristic) {
       this.platform.log.debug('Creating statusUpdate listener for %s %s', accessory.context.device[this.uniq_id].stat_t, accessory.context.device[this.uniq_id].name);
       platform.statusEvent[this.uniq_id] = accessory.context.mqttHost.on(accessory.context.device[this.uniq_id].stat_t, this.statusUpdate.bind(this));
+      accessory.context.mqttHost.statusSubscribe(accessory.context.device[this.uniq_id].stat_t);
       accessory.context.mqttHost.on(accessory.context.device[this.uniq_id].avty_t, this.availabilityUpdate.bind(this));
+      accessory.context.mqttHost.availabilitySubscribe(accessory.context.device[this.uniq_id].avty_t);
     }
 
     nunjucks.installJinjaCompat();

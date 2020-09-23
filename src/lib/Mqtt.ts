@@ -20,6 +20,7 @@ export class Mqtt extends EventEmitter {
     connection.on('connect', function(this: Mqtt) {
       // debug("Connected", this);
       connection.subscribe("homeassistant/#");
+      /*
       connection.subscribe("tele/+/STATE");
       connection.subscribe("tele/+/SENSOR");
       connection.subscribe("tele/+/LWT");
@@ -28,6 +29,7 @@ export class Mqtt extends EventEmitter {
       connection.subscribe("+/tele/SENSOR");
       connection.subscribe("+/tele/LWT");
       connection.subscribe("+/stat/RESULT");
+      */
     });
 
     connection.on('message', (topic, message) => {
@@ -71,6 +73,14 @@ export class Mqtt extends EventEmitter {
 
     });
 
+  }
+
+  availabilitySubscribe(topic) {
+    connection.subscribe(topic);
+  }
+
+  statusSubscribe(topic) {
+    connection.subscribe(topic);
   }
 
   sendMessage(topic, message) {
