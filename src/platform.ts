@@ -24,6 +24,7 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
   // this is used to track restored cached accessories
   public readonly accessories: PlatformAccessory[] = [];
   public readonly services = {};
+  private discoveryTopicMap: any = [];
 
   // Auto removal of non responding devices
 
@@ -97,7 +98,37 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
 
     // debug('MqttHost', mqttHost);
 
-    mqttHost.on('Discovered', (config) => {
+    mqttHost.on('Remove', (topic) => {
+
+
+      if (this.discoveryTopicMap[topic]) {
+        const existingAccessory = this.accessories.find(accessory => accessory.UUID === this.discoveryTopicMap[topic].uuid);
+        if (existingAccessory) {
+          debug('Remove', this.discoveryTopicMap[topic]);
+          switch (this.discoveryTopicMap[topic].type) {
+            case 'Service':
+              if (this.services[this.discoveryTopicMap[topic].uniq_id].service) {
+                debug('Found Service', this.services[this.discoveryTopicMap[topic].uniq_id].service.displayName);
+                existingAccessory.removeService(this.services[this.discoveryTopicMap[topic].uniq_id].service);
+                this.api.updatePlatformAccessories([existingAccessory]);
+              } else { debug('Found Service', this.services[this.discoveryTopicMap[topic].uniq_id]); };
+              break;
+            case 'Accessory':
+
+              debug('Found Accessory', existingAccessory.displayName);
+              this.api.unregisterPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [existingAccessory]);
+
+              break;
+          }
+        }
+
+      } else {
+        // debug('Remove', topic);
+      }
+
+    });
+
+    mqttHost.on('Discovered', (topic, config) => {
       debug('Discovered ->', config.name, config);
 
       // generate a unique id for the accessory this should be generated from
@@ -105,8 +136,8 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
       // number or MAC address
       const message = normalizeMessage(config);
       // debug('normalizeMessage ->', message);
-      const identifier = message.dev.ids[0];
-      const uniq_id = message.uniq_id;
+      const identifier = message.dev.ids[0];      // Unique per accessory
+      const uniq_id = message.uniq_id;            // Unique per service
 
       const uuid = this.api.hap.uuid.generate(identifier);
 
@@ -128,6 +159,8 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
         existingAccessory.context.mqttHost = mqttHost;
         existingAccessory.context.device[uniq_id] = message;
 
+        this.discoveryTopicMap[topic] = { topic: topic, type: 'Service', uniq_id: uniq_id, uuid: uuid };
+
         if (this.services[uniq_id]) {
           this.log.warn('Restoring existing service from cache:', message.name);
           this.services[uniq_id].refresh();
@@ -136,15 +169,23 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
           switch (message.tasmotaType) {
             case 'sensor':
               this.services[uniq_id] = new tasmotaSensorService(this, existingAccessory, uniq_id);
+              if (!message.dev_cla) { // This is the device status topic
+                this.discoveryTopicMap[topic] = { topic: topic, type: 'Accessory', uniq_id: uniq_id, uuid: uuid };
+              } else {
+                this.discoveryTopicMap[topic] = { topic: topic, type: 'Service', uniq_id: uniq_id, uuid: uuid };
+              };
               break;
             case 'light':
               this.services[uniq_id] = new tasmotaLightService(this, existingAccessory, uniq_id);
+              this.discoveryTopicMap[topic] = { topic: topic, type: 'Service', uniq_id: uniq_id, uuid: uuid };
               break;
             case 'switch':
               this.services[uniq_id] = new tasmotaSwitchService(this, existingAccessory, uniq_id);
+              this.discoveryTopicMap[topic] = { topic: topic, type: 'Service', uniq_id: uniq_id, uuid: uuid };
               break;
             case 'binary_sensor':
               this.services[uniq_id] = new tasmotaBinarySensorService(this, existingAccessory, uniq_id);
+              this.discoveryTopicMap[topic] = { topic: topic, type: 'Service', uniq_id: uniq_id };
               break;
             default:
               this.log.warn('Warning: Unhandled Tasmota device type', message.tasmotaType);
@@ -171,15 +212,23 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
         switch (message.tasmotaType) {
           case 'switch':
             this.services[uniq_id] = new tasmotaSwitchService(this, accessory, uniq_id);
+            this.discoveryTopicMap[topic] = { topic: topic, type: 'Service', uniq_id: uniq_id };
             break;
           case 'light':
             this.services[uniq_id] = new tasmotaLightService(this, accessory, uniq_id);
+            this.discoveryTopicMap[topic] = { topic: topic, type: 'Service', uniq_id: uniq_id };
             break;
           case 'sensor':
             this.services[uniq_id] = new tasmotaSensorService(this, accessory, uniq_id);
+            if (!message.dev_cla) { // This is the device status topic
+              this.discoveryTopicMap[topic] = { topic: topic, type: 'Accessory', uniq_id: uniq_id };
+            } else {
+              this.discoveryTopicMap[topic] = { topic: topic, type: 'Service', uniq_id: uniq_id };
+            };
             break;
           case 'binary_sensor':
             this.services[uniq_id] = new tasmotaBinarySensorService(this, accessory, uniq_id);
+            this.discoveryTopicMap[topic] = { topic: topic, type: 'Service', uniq_id: uniq_id };
             break;
           default:
             this.log.warn('Warning: Unhandled Tasmota device type', message.tasmotaType);
@@ -259,7 +308,7 @@ function replaceStringsInObject(obj, findStr, replaceStr, cache = new Map()) {
   for (const [key, value] of Object.entries(obj)) {
     let v: any = null;
 
-    if(typeof value === 'string'){
+    if (typeof value === 'string') {
       v = value.replace(RegExp(findStr, 'gi'), replaceStr);
     } else if (Array.isArray(value)) {
       // debug('isArray', value);
@@ -267,7 +316,7 @@ function replaceStringsInObject(obj, findStr, replaceStr, cache = new Map()) {
       // for (var i = 0; i < value.length; i++) {
       //    v[i] = replaceStringsInObject(value, findStr, replaceStr, cache);
       // }
-    } else if(typeof value === 'object'){
+    } else if (typeof value === 'object') {
       // debug('object', value);
       v = replaceStringsInObject(value, findStr, replaceStr, cache);
     } else {

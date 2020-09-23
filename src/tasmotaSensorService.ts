@@ -63,7 +63,7 @@ export class tasmotaSensorService {
         break;
 
       case undefined:
-        // This is this sensor status object
+        // This is this Device status object
         this.platform.log.debug('Setting accessory information', accessory.context.device[this.uniq_id].name);
         this.accessory.getService(this.platform.Service.AccessoryInformation)!
           .setCharacteristic(this.platform.Characteristic.Name, accessory.context.device[this.uniq_id].dev.name)

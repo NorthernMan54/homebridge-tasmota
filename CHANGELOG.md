@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file. This project uses [Semantic Versioning](https://semver.org/).
 
+## 0.0.29 (2020-09-16)
+
+## [Version 0.0.29](https://github.com/northernman54/homebridge-tasmota/compare/v0.0.27...v0.0.29)
+
+#### Changes
+
+- Added support for WemosDB - My esp8266 doorbell monitor
+- Improved translation of home assistant abbreviations
+- Improved topic subscriptions
+- Ability to refresh accessory name and other device details from Device
+
 ## 0.0.27 (2020-09-16)
 
 ## [Version 0.0.27](https://github.com/northernman54/homebridge-tasmota/compare/v0.0.26...v0.0.27)
