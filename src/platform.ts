@@ -104,15 +104,10 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
       // something globally unique, but constant, for example, the device serial
       // number or MAC address
       const message = normalizeMessage(config);
-      // debug('normalizeMessage ->', message);
-      let identifier, uniq_id;
-      if (message.device && message.device.identifiers) {
-        identifier = message.device.identifiers[0];
-        uniq_id = message.uniq_id;
-      } else {
-        identifier = message.dev.ids[0];
-        uniq_id = message.uniq_id;
-      }
+      debug('normalizeMessage ->', message);
+      let identifier = message.dev.ids[0];
+      let uniq_id = message.uniq_id;
+
       const uuid = this.api.hap.uuid.generate(identifier);
 
       // see if an accessory with the same uuid has already been registered and restored from
@@ -155,6 +150,8 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
               this.log.warn('Warning: Unhandled Tasmota device type', message.tasmotaType);
           }
         }
+
+        this.api.updatePlatformAccessories([existingAccessory]);
 
       } else {
         // the accessory does not yet exist, so we need to create it
@@ -224,113 +221,88 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
 
 
 function normalizeMessage(message) {
-  /*
-    {
-    name: 'Kitchen Sink',
-    cmd_t: '~cmnd/POWER',
-    stat_t: '~tele/STATE',
-    val_tpl: '{{value_json.POWER}}',
-    pl_off: 'OFF',
-    pl_on: 'ON',
-    avty_t: '~tele/LWT',
-    pl_avail: 'Online',
-    pl_not_avail: 'Offline',
-    uniq_id: '284CCF_LI_1',
-    device: { identifiers: [ '284CCF' ] },
-    '~': 'sonoff/',
-    bri_cmd_t: '~cmnd/Dimmer',
-    bri_stat_t: '~tele/STATE',
-    bri_scl: 100,
-    on_cmd_type: 'brightness',
-    bri_val_tpl: '{{value_json.Dimmer}}',
-    tasmotaType: 'light'
-    }
 
-    {
-    name: 'Scanner Tasmota',
-    stat_t: 'tele/tasmota_00705C/STATE',
-    avty_t: 'tele/tasmota_00705C/LWT',
-    pl_avail: 'Online',
-    pl_not_avail: 'Offline',
-    cmd_t: 'cmnd/tasmota_00705C/POWER',
-    val_tpl: '{{value_json.POWER}}',
-    pl_off: 'OFF',
-    pl_on: 'ON',
-    uniq_id: '00705C_RL_1',
-    dev: { ids: [ '00705C' ] },
-    tasmotaType: 'switch'
-    }
-  */
+  const translation = {
+    unique_id: 'uniq_id',
+    device_class: 'dev_cla',
+    payload_on: 'pl_on',
+    payload_off: 'pl_off',
+    device: 'dev',
+    model: 'mdl',
+    sw_version: 'sw',
+    manufacturer: 'mf',
+    identifiers: 'ids'
+  };
+
+  message = renameKeys(message, translation);
 
   if (message['~']) {
-    message.stat_t = message.stat_t.replace('~', message['~']);
-    message.avty_t = message.avty_t.replace('~', message['~']);
-    if (message.cmd_t) {
-      message.cmd_t = message.cmd_t.replace('~', message['~']);
-    }
-    if (message.bri_cmd_t) {
-      message.bri_cmd_t = message.bri_cmd_t.replace('~', message['~']);
-      message.bri_stat_t = message.bri_stat_t.replace('~', message['~']);
-    }
-    if (message.clr_temp_cmd_t) {
-      message.clr_temp_cmd_t = message.clr_temp_cmd_t.replace('~', message['~']);
-      message.clr_temp_stat_t = message.clr_temp_stat_t.replace('~', message['~']);
-    }
-
-    if (message.rgb_cmd_t) {
-      message.rgb_cmd_t = message.rgb_cmd_t.replace('~', message['~']);
-      message.rgb_stat_t = message.rgb_stat_t.replace('~', message['~']);
-    }
-
-    if (message.fx_cmd_t) {
-      message.fx_cmd_t = message.fx_cmd_t.replace('~', message['~']);
-      message.fx_stat_t = message.fx_stat_t.replace('~', message['~']);
-    }
-
-  }
-
-  /*
-  dev: {
-    ids: [ '00705C' ],
-    name: 'Scanner',
-    mdl: 'WiOn',
-    sw: '8.4.0(tasmota)',
-    mf: 'Tasmota'
-  },
-
-  device: {
-    identifiers: [ '284CCF' ],
-    name: 'Kitchen Sink',
-    model: 'Tuya Dimmer',
-    sw_version: '6.5.0(release-sonoff)',
-    manufacturer: 'Tasmota'
-  },
-  */
-
-  if(message.unique_id) {
-    message.uniq_id = message.unique_id;
-  }
-
-  if(message.device_class) {
-    message.dev_cla = message.device_class;
-  }
-
-  if(message.payload_on) {
-    message.pl_on = message.payload_on;
-  }
-
-  if (message.device) {
-    message.dev = message.device;
-    message.dev.mdl = message.dev.model;
-    message.dev.sw = message.dev.sw_version;
-    message.dev.mf = message.dev.manufacturer;
-    message.dev.ids = message.dev.identifiers;
+    message = replaceStringsInObject(message, '~', message['~']);
   }
 
   if (message.stat_t === 'sonoff/tele/STATE' || message.stat_t === 'tasmota/tele/STATE') {
     console.log('ERROR: %s has an incorrectly configure MQTT Topic, please make it unique.', message.name);
   }
 
-  // debug("normalizeMessage", message);
   return (message);
+}
+
+function replaceStringsInObject(obj, findStr, replaceStr, cache = new Map()) {
+    if (cache && cache.has(obj)) return cache.get(obj);
+
+    const result = {};
+
+    cache && cache.set(obj, result);
+
+    for (let [key, value] of Object.entries(obj)) {
+        let v: any = null;
+
+        if(typeof value === 'string'){
+            v = value.replace(RegExp(findStr, 'gi'), replaceStr);
+        }
+        else if (Array.isArray(value)) {
+            // debug('isArray', value);
+            v = value;
+            // for (var i = 0; i < value.length; i++) {
+            //    v[i] = replaceStringsInObject(value, findStr, replaceStr, cache);
+            // }
+        }
+        else if(typeof value === 'object'){
+            // debug('object', value);
+            v = replaceStringsInObject(value, findStr, replaceStr, cache);
+        }
+        else {
+            v = value;
+        }
+        result[key] = v;
+    }
+
+    return result;
+}
+
+function renameKeys(o, mapShortToLong) {
+  var build, key, destKey, ix, value;
+
+  if (Array.isArray(o)) {
+    build = [];
+  } else {
+    build = {};
+  }
+  for (key in o) {
+    // Get the destination key
+    destKey = mapShortToLong[key] || key;
+
+    // Get the value
+    value = o[key];
+
+    // If this is an object, recurse
+    if (typeof value === "object") {
+      // debug('recurse', value);
+      value = renameKeys(value, mapShortToLong);
+    }
+
+    // Set it on the result using the destination key
+    build[destKey] = value;
+  }
+  return build;
 }
