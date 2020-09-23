@@ -9,13 +9,18 @@ var connection;
 export class Mqtt extends EventEmitter {
 
   constructor(config) {
-    connection = mqttClient.connect('mqtt://' + config.mqttHost);
+    var options = {
+      username: config['mqttUsername'] || "",
+      password: config['mqttPassword'] || ""
+    }
+    connection = mqttClient.connect('mqtt://' + config.mqttHost, options);
     super();
     // debug("this", this);
     // debug("Connecting", this);
     connection.on('connect', function(this: Mqtt) {
       // debug("Connected", this);
       connection.subscribe("homeassistant/#");
+      /*
       connection.subscribe("tele/+/STATE");
       connection.subscribe("tele/+/SENSOR");
       connection.subscribe("tele/+/LWT");
@@ -24,6 +29,7 @@ export class Mqtt extends EventEmitter {
       connection.subscribe("+/tele/SENSOR");
       connection.subscribe("+/tele/LWT");
       connection.subscribe("+/stat/RESULT");
+      */
     });
 
     connection.on('message', (topic, message) => {
@@ -48,6 +54,7 @@ export class Mqtt extends EventEmitter {
               switch (subject[1]) {
                 case "switch":
                 case "sensor":
+                case "binary_sensor":
                 case "light":
                   // debug("emit", subject[1], this);
                   this.emit('Discovered', device);
@@ -66,6 +73,14 @@ export class Mqtt extends EventEmitter {
 
     });
 
+  }
+
+  availabilitySubscribe(topic) {
+    connection.subscribe(topic);
+  }
+
+  statusSubscribe(topic) {
+    connection.subscribe(topic);
   }
 
   sendMessage(topic, message) {

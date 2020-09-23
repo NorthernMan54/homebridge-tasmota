@@ -22,6 +22,20 @@
         "default": "mqtt.local",
         "description": "This is the name / ip address for your MQTT Server."
       },
+      "mqttUsername": {
+        "title": "Username",
+        "type": "string",
+        "required": false,
+        "default": "",
+        "description": "This is the Username for your MQTT Broker."
+      },
+      "mqttPassword": {
+        "title": "Password",
+        "type": "string",
+        "required": false,
+        "default": "",
+        "description": "This is the Password for your MQTT Broker."
+      },
       "cleanup": {
         "title": "Disconnected Device Cleanup Timing",
         "type": "number",

@@ -16,6 +16,7 @@ const debug = createDebug('Tasmota:sensor');
 export class tasmotaSensorService {
   private service: Service;
   private characteristic: Characteristic;
+  private device_class: string;
 
   constructor(
     private readonly platform: tasmotaPlatform,
@@ -23,72 +24,113 @@ export class tasmotaSensorService {
     private readonly uniq_id: string,
   ) {
 
-    if (accessory.context.device[this.uniq_id].dev_cla) {
+    const uuid = this.platform.api.hap.uuid.generate(accessory.context.device[this.uniq_id].uniq_id);
+    this.device_class = accessory.context.device[this.uniq_id].dev_cla;
+    switch (accessory.context.device[this.uniq_id].dev_cla) {
+      case 'temperature':
+        this.platform.log.debug('Creating %s sensor %s', accessory.context.device[this.uniq_id].dev_cla, accessory.context.device[this.uniq_id].name);
 
-      const uuid = this.platform.api.hap.uuid.generate(accessory.context.device[this.uniq_id].uniq_id);
-      switch (accessory.context.device[this.uniq_id].dev_cla) {
-        case 'temperature':
-          debug('Creating %s sensor %s', accessory.context.device[this.uniq_id].dev_cla, accessory.context.device[this.uniq_id].name);
+        this.service = this.accessory.getService(uuid) || this.accessory.addService(this.platform.Service.TemperatureSensor, accessory.context.device[this.uniq_id].name, uuid);
 
-          this.service = this.accessory.getService(uuid) || this.accessory.addService(this.platform.Service.TemperatureSensor, accessory.context.device[this.uniq_id].name, uuid);
+        this.service.setCharacteristic(this.platform.Characteristic.Name, accessory.context.device[this.uniq_id].name);
 
-          this.service.setCharacteristic(this.platform.Characteristic.Name, accessory.context.device[this.uniq_id].name);
+        // Burr winter is coming
 
-          this.characteristic = this.service.getCharacteristic(this.platform.Characteristic.CurrentTemperature);
+        this.service.getCharacteristic(this.platform.Characteristic.CurrentTemperature)
+          .setProps({
+            minValue: -100,
+            maxValue: 100,
+          });
+        this.characteristic = this.service.getCharacteristic(this.platform.Characteristic.CurrentTemperature);
+        break;
+      case 'humidity':
+        this.platform.log.debug('Creating %s sensor %s', accessory.context.device[this.uniq_id].dev_cla, accessory.context.device[this.uniq_id].name);
 
-          debug('Creating statusUpdate listener for %s %s', accessory.context.device[this.uniq_id].stat_t, accessory.context.device[this.uniq_id].name);
+        this.service = this.accessory.getService(uuid) || this.accessory.addService(this.platform.Service.HumiditySensor, accessory.context.device[this.uniq_id].name, uuid);
 
-          accessory.context.mqttHost.on(accessory.context.device[this.uniq_id].stat_t, this.statusUpdate.bind(this));
-          accessory.context.mqttHost.on(accessory.context.device[this.uniq_id].avty_t, this.availabilityUpdate.bind(this));
-          break;
-        case 'humidity':
-          debug('Creating %s sensor %s', accessory.context.device[this.uniq_id].dev_cla, accessory.context.device[this.uniq_id].name);
+        this.service.setCharacteristic(this.platform.Characteristic.Name, accessory.context.device[this.uniq_id].name);
+        this.characteristic = this.service.getCharacteristic(this.platform.Characteristic.CurrentRelativeHumidity);
 
-          this.service = this.accessory.getService(uuid) || this.accessory.addService(this.platform.Service.HumiditySensor, accessory.context.device[this.uniq_id].name, uuid);
+        break;
+      case 'illuminance':
+        this.platform.log.debug('Creating %s sensor %s', accessory.context.device[this.uniq_id].dev_cla, accessory.context.device[this.uniq_id].name);
 
-          this.service.setCharacteristic(this.platform.Characteristic.Name, accessory.context.device[this.uniq_id].name);
+        this.service = this.accessory.getService(uuid) || this.accessory.addService(this.platform.Service.LightSensor, accessory.context.device[this.uniq_id].name, uuid);
 
-          this.characteristic = this.service.getCharacteristic(this.platform.Characteristic.CurrentRelativeHumidity);
+        this.service.setCharacteristic(this.platform.Characteristic.Name, accessory.context.device[this.uniq_id].name);
+        this.characteristic = this.service.getCharacteristic(this.platform.Characteristic.CurrentAmbientLightLevel);
 
-          debug('Creating statusUpdate listener for %s %s', accessory.context.device[this.uniq_id].stat_t, accessory.context.device[this.uniq_id].name);
+        break;
 
-          accessory.context.mqttHost.on(accessory.context.device[this.uniq_id].stat_t, this.statusUpdate.bind(this));
-          accessory.context.mqttHost.on(accessory.context.device[this.uniq_id].avty_t, this.availabilityUpdate.bind(this));
-          break;
-      }
-
-    } else {
-      // Home Assistant State and device details
-      this.accessory.getService(this.platform.Service.AccessoryInformation)!
-        .setCharacteristic(this.platform.Characteristic.Name, accessory.context.device[this.uniq_id].dev.name)
-        .setCharacteristic(this.platform.Characteristic.Manufacturer, accessory.context.device[this.uniq_id].dev.mf)
-        .setCharacteristic(this.platform.Characteristic.Model, accessory.context.device[this.uniq_id].dev.mdl)
-        .setCharacteristic(this.platform.Characteristic.FirmwareRevision, accessory.context.device[this.uniq_id].dev.sw)
-        .setCharacteristic(this.platform.Characteristic.SerialNumber, accessory.context.device[this.uniq_id].dev.ids[0]);
+      case undefined:
+        // This is this sensor status object
+        this.platform.log.debug('Setting accessory information', accessory.context.device[this.uniq_id].name);
+        this.accessory.getService(this.platform.Service.AccessoryInformation)!
+          .setCharacteristic(this.platform.Characteristic.Name, accessory.context.device[this.uniq_id].dev.name)
+          .setCharacteristic(this.platform.Characteristic.Manufacturer, accessory.context.device[this.uniq_id].dev.mf)
+          .setCharacteristic(this.platform.Characteristic.Model, accessory.context.device[this.uniq_id].dev.mdl)
+          .setCharacteristic(this.platform.Characteristic.FirmwareRevision, accessory.context.device[this.uniq_id].dev.sw)
+          .setCharacteristic(this.platform.Characteristic.SerialNumber, accessory.context.device[this.uniq_id].dev.ids[0]);
+        break;
+      default:
+        this.platform.log.warn('Warning: Unhandled Tasmota sensor type', accessory.context.device[this.uniq_id].dev_cla);
     }
 
+    // setup event listeners for services / characteristics
+
+    if (this.characteristic) {
+      this.platform.log.debug('Creating statusUpdate listener for %s %s', accessory.context.device[this.uniq_id].stat_t, accessory.context.device[this.uniq_id].name);
+      platform.statusEvent[this.uniq_id] = accessory.context.mqttHost.on(accessory.context.device[this.uniq_id].stat_t, this.statusUpdate.bind(this));
+      accessory.context.mqttHost.statusSubscribe(accessory.context.device[this.uniq_id].stat_t);
+      accessory.context.mqttHost.on(accessory.context.device[this.uniq_id].avty_t, this.availabilityUpdate.bind(this));
+      accessory.context.mqttHost.availabilitySubscribe(accessory.context.device[this.uniq_id].avty_t);
+    }
+
+    nunjucks.installJinjaCompat();
     nunjucks.configure({
       autoescape: true,
     });
-
+    this.refresh();
   }
 
-  /*
-
-  {"Time":"2020-08-28T17:39:01",
-  "BME280":{"Temperature":21.2,"Humidity":64.5,"Pressure":991.4}
-  ,"PressureUnit":"hPa","TempUnit":"C"}
-
-  */
+  refresh() {
+    // Get current status for accessory/service on startup
+    const teleperiod = this.accessory.context.device[this.uniq_id].stat_t.substr(0, this.accessory.context.device[this.uniq_id].stat_t.lastIndexOf('/') + 1).replace('tele', 'cmnd') + 'teleperiod';
+    this.accessory.context.mqttHost.sendMessage(teleperiod, '300');
+  }
 
   statusUpdate(topic, message) {
+    debug('statusUpdate', this.service.displayName, topic, message.toString());
 
-    const interim = {
+    this.accessory.context.timeout = this.platform.autoCleanup(this.accessory);
+
+    let value = this.parseValue(this.accessory.context.device[this.uniq_id].val_tpl, {
       value_json: JSON.parse(message.toString()),
-    };
-    this.characteristic.updateValue(nunjucks.renderString(this.accessory.context.device[this.uniq_id].val_tpl, interim));
-    this.platform.log.info('statusUpdate %s to %s', this.service.displayName, nunjucks.renderString(this.accessory.context.device[this.uniq_id].val_tpl, interim));
+    });
+
+    // Sensor value tweaks or adjustments needed for homekit
+
+    switch (this.device_class) {
+      case 'illuminance':
+        // normalize LX in the range homebridge expects
+        value = (value < 0.0001 ? 0.0001 : (value > 100000 ? 100000 : value));
+        break;
+    }
+
+    if (value instanceof Error) {
+      // Error has already been handled
+    } else {
+      if (this.characteristic.value != value && this.delta(this.characteristic.value, value)) {
+        this.platform.log.info('Updating \'%s\' to %s', this.service.displayName, value);
+      } else {
+        this.platform.log.debug('Updating \'%s\' to %s', this.service.displayName, value);
+      }
+    }
+
+    this.characteristic.updateValue(value);
   }
+
+
 
   /**
    * Handle "LWT" Last Will and Testament messages from Tasmota
@@ -96,13 +138,44 @@ export class tasmotaSensorService {
    */
 
   availabilityUpdate(topic, message) {
-    this.platform.log.error('availabilityUpdate %s to %s', this.service.displayName, message);
+    // debug("availabilityUpdate", this, topic, message.toString());
+    this.platform.log.info('Marking sensor accessory \'%s\' to %s', this.service.displayName, message);
 
     const availability = (message.toString() === this.accessory.context.device[this.uniq_id].pl_not_avail ? new Error(this.accessory.displayName + ' ' + message.toString()) : 0);
 
-    this.service.getCharacteristic(this.platform.Characteristic.On).updateValue(availability);
+    this.characteristic.updateValue(availability);
+  }
+
+  // Utility functions for status update
+
+  delta(value1, value2) {
+    // debug("delta", (parseInt(value1) !== parseInt(value2)));
+    return (parseInt(value1) !== parseInt(value2));
+  }
+
+
+  parseValue(valueTemplate, value) {
+    const result = nunjucks.renderString(valueTemplate, value);
+    if (result) {
+      return parseFloat(result);
+    } else {
+      this.platform.log.error('ERROR: Sensor %s missing data', this.service.displayName);
+      return (new Error('Missing sensor value'));
+    }
   }
 }
+
+
+/*
+
+Status update message - BME280
+
+{"Time":"2020-08-28T17:39:01",
+"BME280":{"Temperature":21.2,"Humidity":64.5,"Pressure":991.4}
+,"PressureUnit":"hPa","TempUnit":"C"}
+
+*/
+
 
 /*
 

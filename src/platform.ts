@@ -5,6 +5,7 @@ import { PLATFORM_NAME, PLUGIN_NAME } from './settings';
 import { tasmotaSwitchService } from './tasmotaSwitchService';
 import { tasmotaLightService } from './tasmotaLightService';
 import { tasmotaSensorService } from './tasmotaSensorService';
+import { tasmotaBinarySensorService } from './tasmotaBinarySensorService';
 import { Mqtt } from './lib/Mqtt';
 import createDebug from 'debug';
 import debugEnable from 'debug';
@@ -22,13 +23,15 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
 
   // this is used to track restored cached accessories
   public readonly accessories: PlatformAccessory[] = [];
+  public readonly services = {};
 
   // Auto removal of non responding devices
 
   private cleanup;
   private timeouts = {};
-  private timeoutCounter = 0;
-  private debug = false;
+  private timeoutCounter = 1;
+  private debug;
+  public statusEvent = {};
 
   constructor(
     public readonly log: Logger,
@@ -38,8 +41,8 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
     this.log.debug('Finished initializing platform:', this.config.name);
 
     this.cleanup = this.config['cleanup'] || 24; // Default removal of defunct devices after 24 hours
-
     this.debug = this.config['debug'] || false;
+
     if (this.debug) {
 
       let namespaces = debugEnable.disable();
@@ -102,14 +105,9 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
       // number or MAC address
       const message = normalizeMessage(config);
       // debug('normalizeMessage ->', message);
-      let identifier, uniq_id;
-      if (message.device && message.device.identifiers) {
-        identifier = message.device.identifiers[0];
-        uniq_id = message.uniq_id;
-      } else {
-        identifier = message.dev.ids[0];
-        uniq_id = message.uniq_id;
-      }
+      let identifier = message.dev.ids[0];
+      let uniq_id = message.uniq_id;
+
       const uuid = this.api.hap.uuid.generate(identifier);
 
       // see if an accessory with the same uuid has already been registered and restored from
@@ -118,7 +116,7 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
 
       if (existingAccessory) {
         // the accessory already exists
-        this.log.info('Restoring existing service from cache:', message.name);
+
 
         // if you need to update the accessory.context then you should run `api.updatePlatformAccessories`. eg.:
         // existingAccessory.context.device = device;
@@ -130,19 +128,30 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
         existingAccessory.context.mqttHost = mqttHost;
         existingAccessory.context.device[uniq_id] = message;
 
-        switch (message.tasmotaType) {
-          case 'sensor':
-            new tasmotaSensorService(this, existingAccessory, uniq_id);
-            break;
-          case 'light':
-            new tasmotaLightService(this, existingAccessory, uniq_id);
-            break;
-          case 'switch':
-            new tasmotaSwitchService(this, existingAccessory, uniq_id);
-            break;
-          default:
-            this.log.info('Warning: Unhandled Tasmota device type', message.tasmotaType);
+        if (this.services[uniq_id]) {
+          this.log.warn('Restoring existing service from cache:', message.name);
+          this.services[uniq_id].refresh();
+        } else {
+          this.log.info('Creating service:', message.name, message.tasmotaType);
+          switch (message.tasmotaType) {
+            case 'sensor':
+              this.services[uniq_id] = new tasmotaSensorService(this, existingAccessory, uniq_id);
+              break;
+            case 'light':
+              this.services[uniq_id] = new tasmotaLightService(this, existingAccessory, uniq_id);
+              break;
+            case 'switch':
+              this.services[uniq_id] = new tasmotaSwitchService(this, existingAccessory, uniq_id);
+              break;
+            case 'binary_sensor':
+              this.services[uniq_id] = new tasmotaBinarySensorService(this, existingAccessory, uniq_id);
+              break;
+            default:
+              this.log.warn('Warning: Unhandled Tasmota device type', message.tasmotaType);
+          }
         }
+
+        this.api.updatePlatformAccessories([existingAccessory]);
 
       } else {
         // the accessory does not yet exist, so we need to create it
@@ -161,16 +170,19 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
         // this is imported from `platformAccessory.ts`
         switch (message.tasmotaType) {
           case 'switch':
-            new tasmotaSwitchService(this, accessory, uniq_id);
+            this.services[uniq_id] = new tasmotaSwitchService(this, accessory, uniq_id);
             break;
           case 'light':
-            new tasmotaLightService(this, accessory, uniq_id);
+            this.services[uniq_id] = new tasmotaLightService(this, accessory, uniq_id);
             break;
           case 'sensor':
-            new tasmotaSensorService(this, accessory, uniq_id);
+            this.services[uniq_id] = new tasmotaSensorService(this, accessory, uniq_id);
+            break;
+          case 'binary_sensor':
+            this.services[uniq_id] = new tasmotaBinarySensorService(this, accessory, uniq_id);
             break;
           default:
-            this.log.info('Warning: Unhandled Tasmota device type', message.tasmotaType);
+            this.log.warn('Warning: Unhandled Tasmota device type', message.tasmotaType);
         }
         this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
         this.accessories.push(accessory);
@@ -182,112 +194,115 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
   autoCleanup(accessory) {
     let timeoutID;
 
+    // debug("autoCleanup", accessory.displayName, accessory.context.timeout, this.timeouts);
+
     if (accessory.context.timeout) {
       timeoutID = accessory.context.timeout;
       clearTimeout(this.timeouts[timeoutID]);
+      delete this.timeouts[timeoutID];
+
     }
 
     timeoutID = this.timeoutCounter++;
-
-    // debug("Cleanup", this.cleanup);
-
     this.timeouts[timeoutID] = setTimeout(this.unregister.bind(this), this.cleanup * 60 * 60 * 1000, accessory, timeoutID);
 
     return (timeoutID);
   }
 
   unregister(accessory, timeoutID) {
-      debug('Removing %s', accessory.displayName);
-      this.timeouts[timeoutID] = null;
-      this.api.unregisterPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
-      // callback();
-    }
+    this.log.error('Removing %s', accessory.displayName);
+    this.timeouts[timeoutID] = null;
+    this.api.unregisterPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
+    // callback();
+  }
 }
 
 /* The various Tasmota firmware's have a slightly different flavors of the message. */
 
 
 function normalizeMessage(message) {
-  /*
-    {
-    name: 'Kitchen Sink',
-    cmd_t: '~cmnd/POWER',
-    stat_t: '~tele/STATE',
-    val_tpl: '{{value_json.POWER}}',
-    pl_off: 'OFF',
-    pl_on: 'ON',
-    avty_t: '~tele/LWT',
-    pl_avail: 'Online',
-    pl_not_avail: 'Offline',
-    uniq_id: '284CCF_LI_1',
-    device: { identifiers: [ '284CCF' ] },
-    '~': 'sonoff/',
-    bri_cmd_t: '~cmnd/Dimmer',
-    bri_stat_t: '~tele/STATE',
-    bri_scl: 100,
-    on_cmd_type: 'brightness',
-    bri_val_tpl: '{{value_json.Dimmer}}',
-    tasmotaType: 'light'
-    }
 
-    {
-    name: 'Scanner Tasmota',
-    stat_t: 'tele/tasmota_00705C/STATE',
-    avty_t: 'tele/tasmota_00705C/LWT',
-    pl_avail: 'Online',
-    pl_not_avail: 'Offline',
-    cmd_t: 'cmnd/tasmota_00705C/POWER',
-    val_tpl: '{{value_json.POWER}}',
-    pl_off: 'OFF',
-    pl_on: 'ON',
-    uniq_id: '00705C_RL_1',
-    dev: { ids: [ '00705C' ] },
-    tasmotaType: 'switch'
-    }
-  */
+  const translation = {
+    unique_id: 'uniq_id',
+    device_class: 'dev_cla',
+    payload_on: 'pl_on',
+    payload_off: 'pl_off',
+    device: 'dev',
+    model: 'mdl',
+    sw_version: 'sw',
+    manufacturer: 'mf',
+    identifiers: 'ids'
+  };
+
+  message = renameKeys(message, translation);
 
   if (message['~']) {
-    message.stat_t = message.stat_t.replace('~', message['~']);
-    message.avty_t = message.avty_t.replace('~', message['~']);
-    if (message.cmd_t) {
-      message.cmd_t = message.cmd_t.replace('~', message['~']);
-    }
-    if (message.bri_cmd_t) {
-      message.bri_cmd_t = message.bri_cmd_t.replace('~', message['~']);
-      message.bri_stat_t = message.bri_stat_t.replace('~', message['~']);
-    }
-  }
-
-  /*
-  dev: {
-    ids: [ '00705C' ],
-    name: 'Scanner',
-    mdl: 'WiOn',
-    sw: '8.4.0(tasmota)',
-    mf: 'Tasmota'
-  },
-
-  device: {
-    identifiers: [ '284CCF' ],
-    name: 'Kitchen Sink',
-    model: 'Tuya Dimmer',
-    sw_version: '6.5.0(release-sonoff)',
-    manufacturer: 'Tasmota'
-  },
-  */
-
-  if (message.device) {
-    message.dev = message.device;
-    message.dev.mdl = message.dev.model;
-    message.dev.sw = message.dev.sw_version;
-    message.dev.mf = message.dev.manufacturer;
-    message.dev.ids = message.dev.identifiers;
+    message = replaceStringsInObject(message, '~', message['~']);
   }
 
   if (message.stat_t === 'sonoff/tele/STATE' || message.stat_t === 'tasmota/tele/STATE') {
     console.log('ERROR: %s has an incorrectly configure MQTT Topic, please make it unique.', message.name);
   }
 
-  // debug("normalizeMessage", message);
   return (message);
+}
+
+function replaceStringsInObject(obj, findStr, replaceStr, cache = new Map()) {
+    if (cache && cache.has(obj)) return cache.get(obj);
+
+    const result = {};
+
+    cache && cache.set(obj, result);
+
+    for (let [key, value] of Object.entries(obj)) {
+        let v: any = null;
+
+        if(typeof value === 'string'){
+            v = value.replace(RegExp(findStr, 'gi'), replaceStr);
+        }
+        else if (Array.isArray(value)) {
+            // debug('isArray', value);
+            v = value;
+            // for (var i = 0; i < value.length; i++) {
+            //    v[i] = replaceStringsInObject(value, findStr, replaceStr, cache);
+            // }
+        }
+        else if(typeof value === 'object'){
+            // debug('object', value);
+            v = replaceStringsInObject(value, findStr, replaceStr, cache);
+        }
+        else {
+            v = value;
+        }
+        result[key] = v;
+    }
+
+    return result;
+}
+
+function renameKeys(o, mapShortToLong) {
+  var build, key, destKey, ix, value;
+
+  if (Array.isArray(o)) {
+    build = [];
+  } else {
+    build = {};
+  }
+  for (key in o) {
+    // Get the destination key
+    destKey = mapShortToLong[key] || key;
+
+    // Get the value
+    value = o[key];
+
+    // If this is an object, recurse
+    if (typeof value === "object") {
+      // debug('recurse', value);
+      value = renameKeys(value, mapShortToLong);
+    }
+
+    // Set it on the result using the destination key
+    build[destKey] = value;
+  }
+  return build;
 }

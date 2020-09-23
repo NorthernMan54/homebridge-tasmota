@@ -15,13 +15,13 @@ assignees: ''
 **Logs:**
 
 ```
-Show the Homebridge logs here, remove any sensitive information.
+Show the Homebridge logs here with the DEBUG flag set, remove any sensitive information.
 ```
 
-**Plugin Config:**
+**Tasmota Device Config:**
 
-```json
-Show your Homebridge config.json here, remove any sensitive information.
+```
+Please include the Tasmota Module Type / Configuration and Template ( if used )
 ```
 
 **Screenshots:**
@@ -29,6 +29,7 @@ Show your Homebridge config.json here, remove any sensitive information.
 
 **Environment:**
 
+* **Tasmota Version**:
 * **Plugin Version**:
 * **Homebridge Version**: <!-- homebridge -V -->
 * **Node.js Version**: <!-- node -v -->
