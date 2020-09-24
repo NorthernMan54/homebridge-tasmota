@@ -104,20 +104,24 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
       if (this.discoveryTopicMap[topic]) {
         const existingAccessory = this.accessories.find(accessory => accessory.UUID === this.discoveryTopicMap[topic].uuid);
         if (existingAccessory) {
-          debug('Remove', this.discoveryTopicMap[topic]);
+          // debug('Remove', this.discoveryTopicMap[topic]);
           switch (this.discoveryTopicMap[topic].type) {
             case 'Service':
               if (this.services[this.discoveryTopicMap[topic].uniq_id].service) {
-                debug('Found Service', this.services[this.discoveryTopicMap[topic].uniq_id].service.displayName);
+                this.log.info('Removing Service', this.services[this.discoveryTopicMap[topic].uniq_id].service.displayName);
+
                 existingAccessory.removeService(this.services[this.discoveryTopicMap[topic].uniq_id].service);
+                delete this.services[this.discoveryTopicMap[topic].uniq_id];
                 this.api.updatePlatformAccessories([existingAccessory]);
-              } else { debug('Found Service', this.services[this.discoveryTopicMap[topic].uniq_id]); };
+              } else {
+                // debug('Found Service', this.services[this.discoveryTopicMap[topic].uniq_id]);
+              }
               break;
             case 'Accessory':
+              this.log.info('Removing Accessory', existingAccessory.displayName);
 
-              debug('Found Accessory', existingAccessory.displayName);
+              this.accessories.splice(this.accessories.findIndex(accessory => accessory.UUID === this.discoveryTopicMap[topic].uuid), 1);
               this.api.unregisterPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [existingAccessory]);
-
               break;
           }
         }
@@ -148,7 +152,7 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
       if (existingAccessory) {
         // the accessory already exists
 
-
+        this.log.info('Found existing accessory:', message.name);
         // if you need to update the accessory.context then you should run `api.updatePlatformAccessories`. eg.:
         // existingAccessory.context.device = device;
         // this.api.updatePlatformAccessories([existingAccessory]);
@@ -173,7 +177,7 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
                 this.discoveryTopicMap[topic] = { topic: topic, type: 'Accessory', uniq_id: uniq_id, uuid: uuid };
               } else {
                 this.discoveryTopicMap[topic] = { topic: topic, type: 'Service', uniq_id: uniq_id, uuid: uuid };
-              };
+              }
               break;
             case 'light':
               this.services[uniq_id] = new tasmotaLightService(this, existingAccessory, uniq_id);
@@ -224,7 +228,7 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
               this.discoveryTopicMap[topic] = { topic: topic, type: 'Accessory', uniq_id: uniq_id };
             } else {
               this.discoveryTopicMap[topic] = { topic: topic, type: 'Service', uniq_id: uniq_id };
-            };
+            }
             break;
           case 'binary_sensor':
             this.services[uniq_id] = new tasmotaBinarySensorService(this, accessory, uniq_id);

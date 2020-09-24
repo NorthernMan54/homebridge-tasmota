@@ -12,6 +12,8 @@ All notable changes to this project will be documented in this file. This projec
 - Improved translation of home assistant abbreviations
 - Improved topic subscriptions
 - Ability to refresh accessory name and other device details from Device
+- Device removal when setoption19 is set to 0
+- Device reconfiguration when setoption30 is changed
 
 ## 0.0.27 (2020-09-16)
 
