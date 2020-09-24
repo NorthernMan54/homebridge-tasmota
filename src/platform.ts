@@ -333,7 +333,7 @@ function replaceStringsInObject(obj, findStr, replaceStr, cache = new Map()) {
 }
 
 function renameKeys(o, mapShortToLong) {
-  let build, key, destKey, ix, value;
+  let build, key, destKey, value;
 
   if (Array.isArray(o)) {
     build = [];
