@@ -16,6 +16,8 @@ export class tasmotaLightService {
   private service: Service;
   private characteristic: Characteristic;
   private update: ChangeHSB;
+  private statusSubscribe;
+  private availabilitySubscribe;
 
   constructor(
     private readonly platform: tasmotaPlatform,
@@ -37,8 +39,11 @@ export class tasmotaLightService {
       // .on('get', this.getOn.bind(this));               // GET - bind to the `getOn` method below
 
       debug('Creating statusUpdate listener for', accessory.context.device[this.uniq_id].stat_t);
+      this.statusSubscribe = { event: accessory.context.device[this.uniq_id].stat_t, callback: this.statusUpdate.bind(this)};
       accessory.context.mqttHost.on(accessory.context.device[this.uniq_id].stat_t, this.statusUpdate.bind(this));
       accessory.context.mqttHost.statusSubscribe(accessory.context.device[this.uniq_id].stat_t);
+
+      this.availabilitySubscribe = { event: accessory.context.device[this.uniq_id].avty_t, callback: this.availabilityUpdate.bind(this)};
       accessory.context.mqttHost.on(accessory.context.device[this.uniq_id].avty_t, this.availabilityUpdate.bind(this));
       accessory.context.mqttHost.availabilitySubscribe(accessory.context.device[this.uniq_id].avty_t);
     }

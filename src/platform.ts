@@ -110,6 +110,13 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
               if (this.services[this.discoveryTopicMap[topic].uniq_id].service) {
                 this.log.info('Removing Service', this.services[this.discoveryTopicMap[topic].uniq_id].service.displayName);
 
+                if (this.services[this.discoveryTopicMap[topic].uniq_id].statusSubscribe) {
+                  debug("Cleaned up listeners", mqttHost);
+                  debug(this.services[this.discoveryTopicMap[topic].uniq_id].statusSubscribe.event, this.services[this.discoveryTopicMap[topic].uniq_id].statusSubscribe.callback);
+                  mqttHost.removeAllListeners(this.services[this.discoveryTopicMap[topic].uniq_id].statusSubscribe.event);
+                  debug("Cleaned up listeners", mqttHost);
+                }
+
                 existingAccessory.removeService(this.services[this.discoveryTopicMap[topic].uniq_id].service);
                 delete this.services[this.discoveryTopicMap[topic].uniq_id];
                 this.api.updatePlatformAccessories([existingAccessory]);
