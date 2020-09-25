@@ -33,7 +33,7 @@ export class Mqtt extends EventEmitter {
     });
 
     connection.on('message', (topic, message) => {
-      // debug("Message: Topic %s -> %s", topic, message);
+      debug("Message: Topic %s -> %s", topic, message.toString());
 
       const subject = topic.split('/');
 
@@ -44,12 +44,7 @@ export class Mqtt extends EventEmitter {
             try {
               const device = JSON.parse(message.toString());
 
-
-              // debug("subject", subject[1]);
-
               device.tasmotaType = subject[1];
-
-              // this.emit('Discovered', device);
 
               switch (subject[1]) {
                 case "switch":
@@ -66,15 +61,14 @@ export class Mqtt extends EventEmitter {
             }
           } else {
             this.emit('Remove', topic);
+            debug('Remove', topic);
           }
           break;
         default:
           this.emit(topic, topic, message);
           break;
       }
-
     });
-
   }
 
   availabilitySubscribe(topic) {

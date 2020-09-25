@@ -23,7 +23,7 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
 
   // this is used to track restored cached accessories
   public readonly accessories: PlatformAccessory[] = [];
-  public readonly services = {};
+  public readonly services: any = {};
   private discoveryTopicMap: any = [];
 
   // Auto removal of non responding devices
@@ -100,33 +100,41 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
 
     mqttHost.on('Remove', (topic) => {
 
-
       if (this.discoveryTopicMap[topic]) {
         const existingAccessory = this.accessories.find(accessory => accessory.UUID === this.discoveryTopicMap[topic].uuid);
         if (existingAccessory) {
           // debug('Remove', this.discoveryTopicMap[topic]);
           switch (this.discoveryTopicMap[topic].type) {
             case 'Service':
-              if (this.services[this.discoveryTopicMap[topic].uniq_id].service) {
-                this.log.info('Removing Service', this.services[this.discoveryTopicMap[topic].uniq_id].service.displayName);
-
-                if (this.services[this.discoveryTopicMap[topic].uniq_id].statusSubscribe) {
-                  debug("Cleaned up listeners", mqttHost);
-                  debug(this.services[this.discoveryTopicMap[topic].uniq_id].statusSubscribe.event, this.services[this.discoveryTopicMap[topic].uniq_id].statusSubscribe.callback);
-                  mqttHost.removeAllListeners(this.services[this.discoveryTopicMap[topic].uniq_id].statusSubscribe.event);
-                  debug("Cleaned up listeners", mqttHost);
-                }
-
-                existingAccessory.removeService(this.services[this.discoveryTopicMap[topic].uniq_id].service);
-                delete this.services[this.discoveryTopicMap[topic].uniq_id];
-                this.api.updatePlatformAccessories([existingAccessory]);
-              } else {
-                // debug('Found Service', this.services[this.discoveryTopicMap[topic].uniq_id]);
-              }
+              this.serviceCleanup(this.discoveryTopicMap[topic].uniq_id, existingAccessory);
               break;
             case 'Accessory':
               this.log.info('Removing Accessory', existingAccessory.displayName);
+              // debug('Services', this.services);
+              debug('Accessory', this.discoveryTopicMap[topic]);
 
+              // debug('FILTER', this.services.filter(x => x.UUID === this.discoveryTopicMap[topic].uuid));
+
+              var services = this.services;
+              var uuid = this.discoveryTopicMap[topic].uuid;
+              const output: string[] = [];
+              Object.keys(services).some(function(k: any) {
+                // debug(k);
+                // debug(services[k].accessory.UUID);
+                if (uuid === services[k].accessory.UUID) {
+                  output.push(k);
+                  // this.serviceCleanup(k);
+                }
+              });
+
+
+              debug('list', output);
+
+              output.forEach(element => {
+                this.serviceCleanup(element, existingAccessory);
+              });
+
+              // Remove accessory
               this.accessories.splice(this.accessories.findIndex(accessory => accessory.UUID === this.discoveryTopicMap[topic].uuid), 1);
               this.api.unregisterPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [existingAccessory]);
               break;
@@ -134,7 +142,7 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
         }
 
       } else {
-        // debug('Remove', topic);
+        debug('Remove failed', topic);
       }
 
     });
@@ -250,6 +258,29 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
       }
     });
   }
+
+  serviceCleanup(uniq_id, existingAccessory) {
+    // debug('this', this);
+    if (this.services[uniq_id].service) {
+      this.log.info('Removing Service', this.services[uniq_id].service.displayName);
+
+      if (this.services[uniq_id].statusSubscribe) {
+        // debug("Cleaned up listeners", mqttHost);
+        debug(this.services[uniq_id].statusSubscribe.event);
+        existingAccessory.context.mqttHost.removeAllListeners(this.services[uniq_id].statusSubscribe.event);
+        existingAccessory.context.mqttHost.removeAllListeners(this.services[uniq_id].availabilitySubscribe.event);
+        debug("Cleaned up listeners", existingAccessory.context.mqttHost);
+      }
+
+      existingAccessory.removeService(this.services[uniq_id].service);
+      delete this.services[uniq_id];
+      this.api.updatePlatformAccessories([existingAccessory]);
+    } else {
+      debug('No service', uniq_id);
+    }
+  };
+
+  //
 
   autoCleanup(accessory) {
     let timeoutID;
