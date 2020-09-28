@@ -17,22 +17,25 @@ const debug = createDebug('Tasmota:platform');
  * This class is the main constructor for your plugin, this is where you should
  * parse the user config and discover/register accessories with Homebridge.
  */
+
+interface DiscoveryTopicMap { topic: string, type: string, uniq_id: string, uuid: string }
+
 export class tasmotaPlatform implements DynamicPlatformPlugin {
   public readonly Service: typeof Service = this.api.hap.Service;
   public readonly Characteristic: typeof Characteristic = this.api.hap.Characteristic;
 
   // this is used to track restored cached accessories
   public readonly accessories: PlatformAccessory[] = [];
-  public readonly services: any = {};
-  private discoveryTopicMap: any = [];
+  public readonly services: tasmotaSwitchService[] | tasmotaLightService[] | tasmotaSensorService[] | tasmotaBinarySensorService[] = [];
+  private discoveryTopicMap: DiscoveryTopicMap[] = [];
 
   // Auto removal of non responding devices
 
-  private cleanup;
-  private timeouts = {};
+  private cleanup: any;
+  private timeouts: ReturnType<typeof setTimeout>[] = [];
   private timeoutCounter = 1;
-  private debug;
-  public statusEvent = {};
+  private debug: any;
+  // public statusEvent = {};
 
   constructor(
     public readonly log: Logger,
@@ -109,34 +112,7 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
               this.serviceCleanup(this.discoveryTopicMap[topic].uniq_id, existingAccessory);
               break;
             case 'Accessory':
-              this.log.info('Removing Accessory', existingAccessory.displayName);
-              // debug('Services', this.services);
-              // debug('Accessory', this.discoveryTopicMap[topic]);
-
-              // debug('FILTER', this.services.filter(x => x.UUID === this.discoveryTopicMap[topic].uuid));
-
-              var services = this.services;
-              var uuid = this.discoveryTopicMap[topic].uuid;
-              const output: string[] = [];
-              Object.keys(services).some(function(k: any) {
-                // debug(k);
-                // debug(services[k].accessory.UUID);
-                if (uuid === services[k].accessory.UUID) {
-                  output.push(k);
-                  // this.serviceCleanup(k);
-                }
-              });
-
-
-              // debug('list', output);
-
-              output.forEach(element => {
-                this.serviceCleanup(element, existingAccessory);
-              });
-
-              // Remove accessory
-              this.accessories.splice(this.accessories.findIndex(accessory => accessory.UUID === this.discoveryTopicMap[topic].uuid), 1);
-              this.api.unregisterPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [existingAccessory]);
+              this.accessoryCleanup(this.discoveryTopicMap[topic].uuid, existingAccessory);
               break;
           }
           delete this.discoveryTopicMap[topic];
@@ -275,7 +251,7 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
     });
   }
 
-  serviceCleanup(uniq_id, existingAccessory) {
+  serviceCleanup(uniq_id: string, existingAccessory: PlatformAccessory) {
     debug('serviceCleanup', uniq_id);
     if (this.services[uniq_id].service) {
       this.log.info('Removing Service', this.services[uniq_id].service.displayName);
@@ -294,11 +270,41 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
     } else {
       debug('No service', uniq_id);
     }
-  };
+  }
+
+  accessoryCleanup(uuid: string, existingAccessory: PlatformAccessory) {
+    this.log.info('Removing Accessory', existingAccessory.displayName);
+    // debug('Services', this.services);
+    // debug('Accessory', this.discoveryTopicMap[topic]);
+
+    // debug('FILTER', this.services.filter(x => x.UUID === this.discoveryTopicMap[topic].uuid));
+
+    const services = this.services;
+    const output: string[] = [];
+
+    Object.keys(services).some((k: any) => {
+      // debug(k);
+      // debug(services[k].accessory.UUID);
+      if (uuid === services[k].accessory.UUID) {
+        output.push(k);
+        // this.serviceCleanup(k);
+      }
+    });
+
+    // debug('list', output);
+
+    output.forEach(element => {
+      this.serviceCleanup(element, existingAccessory);
+    });
+
+    // Remove accessory
+    this.accessories.splice(this.accessories.findIndex(accessory => accessory.UUID === uuid), 1);
+    this.api.unregisterPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [existingAccessory]);
+  }
 
   //
 
-  autoCleanup(accessory) {
+  autoCleanup(accessory: PlatformAccessory) {
     let timeoutID;
 
     // debug("autoCleanup", accessory.displayName, accessory.context.timeout, this.timeouts);
@@ -316,9 +322,9 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
     return (timeoutID);
   }
 
-  unregister(accessory, timeoutID) {
+  unregister(accessory: PlatformAccessory, timeoutID: ReturnType<typeof setTimeout>) {
     this.log.error('Removing %s', accessory.displayName);
-    this.timeouts[timeoutID] = null;
+    delete this.timeouts[timeoutID];
     this.api.unregisterPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
     // callback();
   }

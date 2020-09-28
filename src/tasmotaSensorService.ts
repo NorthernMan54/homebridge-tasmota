@@ -13,16 +13,21 @@ const debug = createDebug('Tasmota:sensor');
  * An instance of this class is created for each accessory your platform registers
  * Each accessory may expose multiple services of different service types.
  */
+
+ interface Subscription {
+   event: string, callback: any
+ }
+
 export class tasmotaSensorService {
-  private service: Service;
+  public service: Service;
   private characteristic: Characteristic;
   private device_class: string;
-  private statusSubscribe;
-  private availabilitySubscribe;
+  public statusSubscribe: Subscription;
+  public availabilitySubscribe: Subscription;
 
   constructor(
     private readonly platform: tasmotaPlatform,
-    private readonly accessory: PlatformAccessory,
+    public readonly accessory: PlatformAccessory,
     private readonly uniq_id: string,
   ) {
 

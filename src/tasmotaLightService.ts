@@ -12,16 +12,20 @@ const debug = createDebug('Tasmota:light');
  * Each accessory may expose multiple services of different service types.
  */
 
+ interface Subscription {
+   event: string, callback: any
+ }
+
 export class tasmotaLightService {
-  private service: Service;
+  public service: Service;
   private characteristic: Characteristic;
   private update: ChangeHSB;
-  private statusSubscribe;
-  private availabilitySubscribe;
+  public statusSubscribe: Subscription;
+  public availabilitySubscribe: Subscription;
 
   constructor(
     private readonly platform: tasmotaPlatform,
-    private readonly accessory: PlatformAccessory,
+    public readonly accessory: PlatformAccessory,
     private readonly uniq_id: string,
   ) {
 

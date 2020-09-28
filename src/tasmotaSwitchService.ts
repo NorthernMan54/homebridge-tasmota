@@ -11,15 +11,20 @@ const debug = createDebug('Tasmota:switch');
  * An instance of this class is created for each accessory your platform registers
  * Each accessory may expose multiple services of different service types.
  */
+
+ interface Subscription {
+   event: string, callback: any
+ }
+
 export class tasmotaSwitchService {
-  private service: Service;
+  public service: Service;
   private characteristic: Characteristic;
-  private statusSubscribe;
-  private availabilitySubscribe;
+  public statusSubscribe: Subscription;
+  public availabilitySubscribe: Subscription;
 
   constructor(
     private readonly platform: tasmotaPlatform,
-    private readonly accessory: PlatformAccessory,
+    public readonly accessory: PlatformAccessory,
     private readonly uniq_id: string,
   ) {
     const uuid = this.platform.api.hap.uuid.generate(accessory.context.device[this.uniq_id].uniq_id);
@@ -73,7 +78,7 @@ export class tasmotaSwitchService {
    */
 
   statusUpdate(topic, message) {
-    debug("MQTT", topic, message.toString());
+    debug('MQTT', topic, message.toString());
 
     this.accessory.context.timeout = this.platform.autoCleanup(this.accessory);
     const interim = {
