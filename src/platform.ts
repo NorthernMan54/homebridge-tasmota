@@ -32,7 +32,7 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
   // Auto removal of non responding devices
 
   private cleanup: any;
-  private timeouts: ReturnType<typeof setTimeout>[] = [];
+  private timeouts = {};
   private timeoutCounter = 1;
   private debug: any;
   // public statusEvent = {};
@@ -322,9 +322,9 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
     return (timeoutID);
   }
 
-  unregister(accessory: PlatformAccessory, timeoutID: ReturnType<typeof setTimeout>) {
+  unregister(accessory: PlatformAccessory, timeoutID) {
     this.log.error('Removing %s', accessory.displayName);
-    delete this.timeouts[timeoutID];
+    this.timeouts[timeoutID] = null;
     this.api.unregisterPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
     // callback();
   }
