@@ -33,7 +33,7 @@ export class Mqtt extends EventEmitter {
     });
 
     connection.on('message', (topic, message) => {
-      debug("Message: Topic %s -> %s", topic, message.toString());
+      // debug("Message: Topic %s -> %s", topic, message.toString());
 
       const subject = topic.split('/');
 
@@ -61,7 +61,7 @@ export class Mqtt extends EventEmitter {
             }
           } else {
             this.emit('Remove', topic);
-            debug('Remove', topic);
+            // debug('Remove', topic);
           }
           break;
         default:

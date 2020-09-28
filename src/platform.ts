@@ -99,7 +99,7 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
     // debug('MqttHost', mqttHost);
 
     mqttHost.on('Remove', (topic) => {
-
+      // debug('remove-0', topic);
       if (this.discoveryTopicMap[topic]) {
         const existingAccessory = this.accessories.find(accessory => accessory.UUID === this.discoveryTopicMap[topic].uuid);
         if (existingAccessory) {
@@ -111,7 +111,7 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
             case 'Accessory':
               this.log.info('Removing Accessory', existingAccessory.displayName);
               // debug('Services', this.services);
-              debug('Accessory', this.discoveryTopicMap[topic]);
+              // debug('Accessory', this.discoveryTopicMap[topic]);
 
               // debug('FILTER', this.services.filter(x => x.UUID === this.discoveryTopicMap[topic].uuid));
 
@@ -128,7 +128,7 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
               });
 
 
-              debug('list', output);
+              // debug('list', output);
 
               output.forEach(element => {
                 this.serviceCleanup(element, existingAccessory);
@@ -139,16 +139,19 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
               this.api.unregisterPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [existingAccessory]);
               break;
           }
+          delete this.discoveryTopicMap[topic];
+        } else {
+          debug('missing accessory', topic, this.discoveryTopicMap[topic]);
         }
 
       } else {
-        debug('Remove failed', topic);
+        // debug('Remove failed', topic);
       }
 
     });
 
     mqttHost.on('Discovered', (topic, config) => {
-      debug('Discovered ->', config.name, config);
+      debug('Discovered ->', topic, config.name, config);
 
       // generate a unique id for the accessory this should be generated from
       // something globally unique, but constant, for example, the device serial
@@ -183,6 +186,18 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
         if (this.services[uniq_id]) {
           this.log.warn('Restoring existing service from cache:', message.name);
           this.services[uniq_id].refresh();
+          switch (message.tasmotaType) {
+            case 'sensor':
+              if (!message.dev_cla) { // This is the device status topic
+                this.discoveryTopicMap[topic] = { topic: topic, type: 'Accessory', uniq_id: uniq_id, uuid: uuid };
+              } else {
+                this.discoveryTopicMap[topic] = { topic: topic, type: 'Service', uniq_id: uniq_id, uuid: uuid };
+              }
+              // debug('discoveryTopicMap', this.discoveryTopicMap[topic]);
+              break;
+            default:
+              this.discoveryTopicMap[topic] = { topic: topic, type: 'Service', uniq_id: uniq_id, uuid: uuid };
+          }
         } else {
           this.log.info('Creating service:', message.name, message.tasmotaType);
           switch (message.tasmotaType) {
@@ -193,6 +208,7 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
               } else {
                 this.discoveryTopicMap[topic] = { topic: topic, type: 'Service', uniq_id: uniq_id, uuid: uuid };
               }
+              // debug('discoveryTopicMap', this.discoveryTopicMap[topic]);
               break;
             case 'light':
               this.services[uniq_id] = new tasmotaLightService(this, existingAccessory, uniq_id);
@@ -204,7 +220,7 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
               break;
             case 'binary_sensor':
               this.services[uniq_id] = new tasmotaBinarySensorService(this, existingAccessory, uniq_id);
-              this.discoveryTopicMap[topic] = { topic: topic, type: 'Service', uniq_id: uniq_id };
+              this.discoveryTopicMap[topic] = { topic: topic, type: 'Service', uniq_id: uniq_id, uuid: uuid };
               break;
             default:
               this.log.warn('Warning: Unhandled Tasmota device type', message.tasmotaType);
@@ -231,23 +247,23 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
         switch (message.tasmotaType) {
           case 'switch':
             this.services[uniq_id] = new tasmotaSwitchService(this, accessory, uniq_id);
-            this.discoveryTopicMap[topic] = { topic: topic, type: 'Service', uniq_id: uniq_id };
+            this.discoveryTopicMap[topic] = { topic: topic, type: 'Service', uniq_id: uniq_id, uuid: uuid };
             break;
           case 'light':
             this.services[uniq_id] = new tasmotaLightService(this, accessory, uniq_id);
-            this.discoveryTopicMap[topic] = { topic: topic, type: 'Service', uniq_id: uniq_id };
+            this.discoveryTopicMap[topic] = { topic: topic, type: 'Service', uniq_id: uniq_id, uuid: uuid };
             break;
           case 'sensor':
             this.services[uniq_id] = new tasmotaSensorService(this, accessory, uniq_id);
             if (!message.dev_cla) { // This is the device status topic
-              this.discoveryTopicMap[topic] = { topic: topic, type: 'Accessory', uniq_id: uniq_id };
+              this.discoveryTopicMap[topic] = { topic: topic, type: 'Accessory', uniq_id: uniq_id, uuid: uuid };
             } else {
-              this.discoveryTopicMap[topic] = { topic: topic, type: 'Service', uniq_id: uniq_id };
+              this.discoveryTopicMap[topic] = { topic: topic, type: 'Service', uniq_id: uniq_id, uuid: uuid };
             }
             break;
           case 'binary_sensor':
             this.services[uniq_id] = new tasmotaBinarySensorService(this, accessory, uniq_id);
-            this.discoveryTopicMap[topic] = { topic: topic, type: 'Service', uniq_id: uniq_id };
+            this.discoveryTopicMap[topic] = { topic: topic, type: 'Service', uniq_id: uniq_id, uuid: uuid };
             break;
           default:
             this.log.warn('Warning: Unhandled Tasmota device type', message.tasmotaType);
@@ -260,16 +276,16 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
   }
 
   serviceCleanup(uniq_id, existingAccessory) {
-    // debug('this', this);
+    debug('serviceCleanup', uniq_id);
     if (this.services[uniq_id].service) {
       this.log.info('Removing Service', this.services[uniq_id].service.displayName);
 
       if (this.services[uniq_id].statusSubscribe) {
         // debug("Cleaned up listeners", mqttHost);
-        debug(this.services[uniq_id].statusSubscribe.event);
+        // debug(this.services[uniq_id].statusSubscribe.event);
         existingAccessory.context.mqttHost.removeAllListeners(this.services[uniq_id].statusSubscribe.event);
         existingAccessory.context.mqttHost.removeAllListeners(this.services[uniq_id].availabilitySubscribe.event);
-        debug("Cleaned up listeners", existingAccessory.context.mqttHost);
+        // debug("Cleaned up listeners", existingAccessory.context.mqttHost);
       }
 
       existingAccessory.removeService(this.services[uniq_id].service);
