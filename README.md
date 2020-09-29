@@ -21,9 +21,9 @@ Homebridge Plugin for Tasmota Devices that leverage's the Home Assistant Auto Di
 
 * WemosDB - Doorbell device
 
-## Tasmota Sensor Devices that do not work or have issues
+## Tasmota Devices that do not work or have issues
 
-For autodiscovery to work and the proper device to be created in Homebridge the device needs to include its 'device_class' as part of the discovery message.  Majority of the basic sensor types that use GPIO pins do not include this type of information, but others the use I2C do.  An easy way to quickly determine if the Tasmota knows what type of device it is, is if the Tasmota page knows the type of sensor information.  Like temperature.
+For autodiscovery to work and the proper device to be created in Homebridge the device needs to include its 'device_class' as part of the discovery message.  Majority of the basic sensor types that use GPIO pins do not include this type of information, but other sensors that use I2C do.  An easy way to quickly determine if the Tasmota knows what type of device it is, is if the Tasmota page knows the type of sensor information.  Like temperature.
 
 * [Motion Sensors](https://tasmota.github.io/docs/PIR-Motion-Sensors/)
 

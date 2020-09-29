@@ -29,7 +29,7 @@ async function test() {
   await sendMessage('setoption30 0', 10, 'Change to switch');
   await sendMessage('setoption30 1', 10, 'Change to lamp');
   await sendMessage('setoption30 0', 10, 'Change to switch');
-  await sendMessage('setoption19 0', 0, 'Remove device');
+  await sendMessage('setoption19 0', 1, 'Remove device');
   process.exit();
 }
 
