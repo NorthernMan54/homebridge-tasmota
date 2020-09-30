@@ -14,9 +14,9 @@ const debug = createDebug('Tasmota:sensor');
  * Each accessory may expose multiple services of different service types.
  */
 
- interface Subscription {
-   event: string, callback: any
- }
+interface Subscription {
+  event: string, callback: any
+}
 
 export class tasmotaSensorService {
   public service: Service;
@@ -68,23 +68,34 @@ export class tasmotaSensorService {
         this.characteristic = this.service.getCharacteristic(this.platform.Characteristic.CurrentAmbientLightLevel);
 
         break;
+      case 'co2':
+        this.platform.log.debug('Creating %s sensor %s', accessory.context.device[this.uniq_id].dev_cla, accessory.context.device[this.uniq_id].name);
 
+        this.service = this.accessory.getService(uuid) || this.accessory.addService(this.platform.Service.CarbonDioxideSensor, accessory.context.device[this.uniq_id].name, uuid);
+
+        this.service.setCharacteristic(this.platform.Characteristic.Name, accessory.context.device[this.uniq_id].name);
+        this.characteristic = this.service.getCharacteristic(this.platform.Characteristic.CarbonDioxideLevel);
+
+        break;
+      case 'pm25':
+        this.platform.log.debug('Creating %s sensor %s', accessory.context.device[this.uniq_id].dev_cla, accessory.context.device[this.uniq_id].name);
+
+        this.service = this.accessory.getService(uuid) || this.accessory.addService(this.platform.Service.AirQualitySensor, accessory.context.device[this.uniq_id].name, uuid);
+
+        this.service.setCharacteristic(this.platform.Characteristic.Name, accessory.context.device[this.uniq_id].name);
+        this.characteristic = this.service.getCharacteristic(this.platform.Characteristic.AirParticulateDensity);
+        this.service.setCharacteristic(this.platform.Characteristic.AirParticulateSize, this.platform.Characteristic.AirParticulateSize._2_5_M);
+
+        break;
       case undefined:
-        if ('mdi:molecule-co2' == accessory.context.device[this.uniq_id].ic) {
-          this.platform.log.debug('Creating CO2 sensor %s', accessory.context.device[this.uniq_id].name);
-          this.service = this.accessory.getService(uuid) || this.accessory.addService(this.platform.Service.CarbonDioxideSensor, accessory.context.device[this.uniq_id].name, uuid);
-          this.service.setCharacteristic(this.platform.Characteristic.Name, accessory.context.device[this.uniq_id].name);
-          this.characteristic = this.service.getCharacteristic(this.platform.Characteristic.CarbonDioxideLevel);
-        } else {
-          // This is this Device status object
-          this.platform.log.debug('Setting accessory information', accessory.context.device[this.uniq_id].name);
-          this.accessory.getService(this.platform.Service.AccessoryInformation)!
-            .setCharacteristic(this.platform.Characteristic.Name, accessory.context.device[this.uniq_id].dev.name)
-            .setCharacteristic(this.platform.Characteristic.Manufacturer, accessory.context.device[this.uniq_id].dev.mf)
-            .setCharacteristic(this.platform.Characteristic.Model, accessory.context.device[this.uniq_id].dev.mdl)
-            .setCharacteristic(this.platform.Characteristic.FirmwareRevision, accessory.context.device[this.uniq_id].dev.sw)
-            .setCharacteristic(this.platform.Characteristic.SerialNumber, accessory.context.device[this.uniq_id].dev.ids[0]);
-        }
+        // This is this Device status object
+        this.platform.log.debug('Setting accessory information', accessory.context.device[this.uniq_id].name);
+        this.accessory.getService(this.platform.Service.AccessoryInformation)!
+          .setCharacteristic(this.platform.Characteristic.Name, accessory.context.device[this.uniq_id].dev.name)
+          .setCharacteristic(this.platform.Characteristic.Manufacturer, accessory.context.device[this.uniq_id].dev.mf)
+          .setCharacteristic(this.platform.Characteristic.Model, accessory.context.device[this.uniq_id].dev.mdl)
+          .setCharacteristic(this.platform.Characteristic.FirmwareRevision, accessory.context.device[this.uniq_id].dev.sw)
+          .setCharacteristic(this.platform.Characteristic.SerialNumber, accessory.context.device[this.uniq_id].dev.ids[0]);
         break;
       default:
         this.platform.log.warn('Warning: Unhandled Tasmota sensor type', accessory.context.device[this.uniq_id].dev_cla);
@@ -94,10 +105,10 @@ export class tasmotaSensorService {
 
     if (this.characteristic) {
       this.platform.log.debug('Creating statusUpdate listener for %s %s', accessory.context.device[this.uniq_id].stat_t, accessory.context.device[this.uniq_id].name);
-      this.statusSubscribe = { event: accessory.context.device[this.uniq_id].stat_t, callback: this.statusUpdate.bind(this)};
+      this.statusSubscribe = { event: accessory.context.device[this.uniq_id].stat_t, callback: this.statusUpdate.bind(this) };
       accessory.context.mqttHost.on(accessory.context.device[this.uniq_id].stat_t, this.statusUpdate.bind(this));
 
-      this.availabilitySubscribe = { event: accessory.context.device[this.uniq_id].avty_t, callback: this.availabilityUpdate.bind(this)};
+      this.availabilitySubscribe = { event: accessory.context.device[this.uniq_id].avty_t, callback: this.availabilityUpdate.bind(this) };
       accessory.context.mqttHost.statusSubscribe(accessory.context.device[this.uniq_id].stat_t);
       accessory.context.mqttHost.on(accessory.context.device[this.uniq_id].avty_t, this.availabilityUpdate.bind(this));
       this.availabilitySubscribe = accessory.context.mqttHost.availabilitySubscribe(accessory.context.device[this.uniq_id].avty_t);
@@ -131,6 +142,13 @@ export class tasmotaSensorService {
       case 'illuminance':
         // normalize LX in the range homebridge expects
         value = (value < 0.0001 ? 0.0001 : (value > 100000 ? 100000 : value));
+        break;
+      case 'co2':
+        if (value > 1200) {
+          this.service.setCharacteristic(this.platform.Characteristic.CarbonDioxideDetected, this.platform.Characteristic.CarbonDioxideDetected.CO2_LEVELS_ABNORMAL);
+        } else {
+          this.service.setCharacteristic(this.platform.Characteristic.CarbonDioxideDetected, this.platform.Characteristic.CarbonDioxideDetected.CO2_LEVELS_NORMAL);
+        }
         break;
     }
 
