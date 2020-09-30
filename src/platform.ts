@@ -357,6 +357,14 @@ function normalizeMessage(message) {
     console.log('ERROR: %s has an incorrectly configure MQTT Topic, please make it unique.', message.name);
   }
 
+  if (!message.dev_cla && message.uniq_id) {
+    if (message.uniq_id.match(/_(CarbonDioxide|eCO2)$/)) {
+      message.dev_cla = 'co2';
+    } else if (message.uniq_id.match(/_AirQuality$/)) {
+      message.dev_cla = 'pm25';
+    }
+  }
+
   return (message);
 }
 
