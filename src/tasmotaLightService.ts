@@ -12,14 +12,20 @@ const debug = createDebug('Tasmota:light');
  * Each accessory may expose multiple services of different service types.
  */
 
+ interface Subscription {
+   event: string, callback: any
+ }
+
 export class tasmotaLightService {
-  private service: Service;
+  public service: Service;
   private characteristic: Characteristic;
   private update: ChangeHSB;
+  public statusSubscribe: Subscription;
+  public availabilitySubscribe: Subscription;
 
   constructor(
     private readonly platform: tasmotaPlatform,
-    private readonly accessory: PlatformAccessory,
+    public readonly accessory: PlatformAccessory,
     private readonly uniq_id: string,
   ) {
 
@@ -37,8 +43,11 @@ export class tasmotaLightService {
       // .on('get', this.getOn.bind(this));               // GET - bind to the `getOn` method below
 
       debug('Creating statusUpdate listener for', accessory.context.device[this.uniq_id].stat_t);
+      this.statusSubscribe = { event: accessory.context.device[this.uniq_id].stat_t, callback: this.statusUpdate.bind(this)};
       accessory.context.mqttHost.on(accessory.context.device[this.uniq_id].stat_t, this.statusUpdate.bind(this));
       accessory.context.mqttHost.statusSubscribe(accessory.context.device[this.uniq_id].stat_t);
+
+      this.availabilitySubscribe = { event: accessory.context.device[this.uniq_id].avty_t, callback: this.availabilityUpdate.bind(this)};
       accessory.context.mqttHost.on(accessory.context.device[this.uniq_id].avty_t, this.availabilityUpdate.bind(this));
       accessory.context.mqttHost.availabilitySubscribe(accessory.context.device[this.uniq_id].avty_t);
     }

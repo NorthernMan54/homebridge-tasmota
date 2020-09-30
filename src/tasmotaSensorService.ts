@@ -13,14 +13,21 @@ const debug = createDebug('Tasmota:sensor');
  * An instance of this class is created for each accessory your platform registers
  * Each accessory may expose multiple services of different service types.
  */
+
+ interface Subscription {
+   event: string, callback: any
+ }
+
 export class tasmotaSensorService {
-  private service: Service;
+  public service: Service;
   private characteristic: Characteristic;
   private device_class: string;
+  public statusSubscribe: Subscription;
+  public availabilitySubscribe: Subscription;
 
   constructor(
     private readonly platform: tasmotaPlatform,
-    private readonly accessory: PlatformAccessory,
+    public readonly accessory: PlatformAccessory,
     private readonly uniq_id: string,
   ) {
 
@@ -63,14 +70,21 @@ export class tasmotaSensorService {
         break;
 
       case undefined:
-        // This is this sensor status object
-        this.platform.log.debug('Setting accessory information', accessory.context.device[this.uniq_id].name);
-        this.accessory.getService(this.platform.Service.AccessoryInformation)!
-          .setCharacteristic(this.platform.Characteristic.Name, accessory.context.device[this.uniq_id].dev.name)
-          .setCharacteristic(this.platform.Characteristic.Manufacturer, accessory.context.device[this.uniq_id].dev.mf)
-          .setCharacteristic(this.platform.Characteristic.Model, accessory.context.device[this.uniq_id].dev.mdl)
-          .setCharacteristic(this.platform.Characteristic.FirmwareRevision, accessory.context.device[this.uniq_id].dev.sw)
-          .setCharacteristic(this.platform.Characteristic.SerialNumber, accessory.context.device[this.uniq_id].dev.ids[0]);
+        if ('mdi:molecule-co2' == accessory.context.device[this.uniq_id].ic) {
+          this.platform.log.debug('Creating CO2 sensor %s', accessory.context.device[this.uniq_id].name);
+          this.service = this.accessory.getService(uuid) || this.accessory.addService(this.platform.Service.CarbonDioxideSensor, accessory.context.device[this.uniq_id].name, uuid);
+          this.service.setCharacteristic(this.platform.Characteristic.Name, accessory.context.device[this.uniq_id].name);
+          this.characteristic = this.service.getCharacteristic(this.platform.Characteristic.CarbonDioxideLevel);
+        } else {
+          // This is this Device status object
+          this.platform.log.debug('Setting accessory information', accessory.context.device[this.uniq_id].name);
+          this.accessory.getService(this.platform.Service.AccessoryInformation)!
+            .setCharacteristic(this.platform.Characteristic.Name, accessory.context.device[this.uniq_id].dev.name)
+            .setCharacteristic(this.platform.Characteristic.Manufacturer, accessory.context.device[this.uniq_id].dev.mf)
+            .setCharacteristic(this.platform.Characteristic.Model, accessory.context.device[this.uniq_id].dev.mdl)
+            .setCharacteristic(this.platform.Characteristic.FirmwareRevision, accessory.context.device[this.uniq_id].dev.sw)
+            .setCharacteristic(this.platform.Characteristic.SerialNumber, accessory.context.device[this.uniq_id].dev.ids[0]);
+        }
         break;
       default:
         this.platform.log.warn('Warning: Unhandled Tasmota sensor type', accessory.context.device[this.uniq_id].dev_cla);
@@ -80,10 +94,13 @@ export class tasmotaSensorService {
 
     if (this.characteristic) {
       this.platform.log.debug('Creating statusUpdate listener for %s %s', accessory.context.device[this.uniq_id].stat_t, accessory.context.device[this.uniq_id].name);
-      platform.statusEvent[this.uniq_id] = accessory.context.mqttHost.on(accessory.context.device[this.uniq_id].stat_t, this.statusUpdate.bind(this));
+      this.statusSubscribe = { event: accessory.context.device[this.uniq_id].stat_t, callback: this.statusUpdate.bind(this)};
+      accessory.context.mqttHost.on(accessory.context.device[this.uniq_id].stat_t, this.statusUpdate.bind(this));
+
+      this.availabilitySubscribe = { event: accessory.context.device[this.uniq_id].avty_t, callback: this.availabilityUpdate.bind(this)};
       accessory.context.mqttHost.statusSubscribe(accessory.context.device[this.uniq_id].stat_t);
       accessory.context.mqttHost.on(accessory.context.device[this.uniq_id].avty_t, this.availabilityUpdate.bind(this));
-      accessory.context.mqttHost.availabilitySubscribe(accessory.context.device[this.uniq_id].avty_t);
+      this.availabilitySubscribe = accessory.context.mqttHost.availabilitySubscribe(accessory.context.device[this.uniq_id].avty_t);
     }
 
     nunjucks.installJinjaCompat();
