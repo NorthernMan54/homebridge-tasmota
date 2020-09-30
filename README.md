@@ -18,6 +18,7 @@ Homebridge Plugin for Tasmota Devices that leverage's the Home Assistant Auto Di
 * [Franken sensor](docs/IMG_5365.jpg) - 2 DHT22 Temperature / Humidity Sensors, 2 BME280 Temperature / Humidity / Air Pressure Sensors ( pressure is not supported ) and a BH1750 Luminance.  In [Tasmota](docs/IMG_5367.png) and in [HomeKit](docs/IMG_5368.png).
 * ws2812 addressable RGB led light strip
 * RGB LED Light Strip
+* Support for [AZ-7798 CO2 Monitor](https://tasmota.github.io/docs/AZ-7798) - Tks Jeroen Vermeulen
 
 * WemosDB - Doorbell device
 
