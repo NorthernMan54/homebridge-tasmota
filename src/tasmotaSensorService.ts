@@ -68,7 +68,25 @@ export class tasmotaSensorService {
         this.characteristic = this.service.getCharacteristic(this.platform.Characteristic.CurrentAmbientLightLevel);
 
         break;
+      case 'co2':
+        this.platform.log.debug('Creating %s sensor %s', accessory.context.device[this.uniq_id].dev_cla, accessory.context.device[this.uniq_id].name);
 
+        this.service = this.accessory.getService(uuid) || this.accessory.addService(this.platform.Service.CarbonDioxideSensor, accessory.context.device[this.uniq_id].name, uuid);
+
+        this.service.setCharacteristic(this.platform.Characteristic.Name, accessory.context.device[this.uniq_id].name);
+        this.characteristic = this.service.getCharacteristic(this.platform.Characteristic.CarbonDioxideLevel);
+
+        break;
+      case 'pm25':
+        this.platform.log.debug('Creating %s sensor %s', accessory.context.device[this.uniq_id].dev_cla, accessory.context.device[this.uniq_id].name);
+
+        this.service = this.accessory.getService(uuid) || this.accessory.addService(this.platform.Service.AirQualitySensor, accessory.context.device[this.uniq_id].name, uuid);
+
+        this.service.setCharacteristic(this.platform.Characteristic.Name, accessory.context.device[this.uniq_id].name);
+        this.characteristic = this.service.getCharacteristic(this.platform.Characteristic.AirParticulateDensity);
+        this.service.setCharacteristic(this.platform.Characteristic.AirParticulateSize, this.platform.Characteristic.AirParticulateSize._2_5_M);
+
+        break;
       case undefined:
         if ('mdi:molecule-co2' == accessory.context.device[this.uniq_id].ic) {
           this.platform.log.debug('Creating CO2 sensor %s', accessory.context.device[this.uniq_id].name);
@@ -131,6 +149,13 @@ export class tasmotaSensorService {
       case 'illuminance':
         // normalize LX in the range homebridge expects
         value = (value < 0.0001 ? 0.0001 : (value > 100000 ? 100000 : value));
+        break;
+      case 'co2':
+        if (value > 1200) {
+          this.service.setCharacteristic(this.platform.Characteristic.CarbonDioxideDetected, this.platform.Characteristic.CarbonDioxideDetected.CO2_LEVELS_ABNORMAL);
+        } else {
+          this.service.setCharacteristic(this.platform.Characteristic.CarbonDioxideDetected, this.platform.Characteristic.CarbonDioxideDetected.CO2_LEVELS_NORMAL);
+        }
         break;
     }
 
