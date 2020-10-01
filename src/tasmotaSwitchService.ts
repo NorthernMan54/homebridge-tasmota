@@ -99,7 +99,7 @@ export class tasmotaSwitchService {
 
       this.characteristic.updateValue((nunjucks.renderString(this.accessory.context.device[this.uniq_id].val_tpl, interim) === this.accessory.context.device[this.uniq_id].pl_on ? true : false));
     } catch (err) {
-      this.platform.log.error("ERROR: message parsing error", this.service.displayName, topic, message.toString());
+      this.platform.log.error('ERROR: message parsing error', this.service.displayName, topic, message.toString());
     }
   }
 
