@@ -59,13 +59,6 @@ export class tasmotaLightService {
         .on('set', this.setBrightness.bind(this));
     }
 
-    // Does the lightbulb include a colour temperature characteristic
-
-    if (accessory.context.device[this.uniq_id].clr_temp_cmd_t) {
-      (this.service.getCharacteristic(this.platform.Characteristic.ColorTemperature) || this.service.addCharacteristic(this.platform.Characteristic.ColorTemperature))
-        .on('set', this.setColorTemperature.bind(this));
-    }
-
     // Does the lightbulb include a RGB characteristic
 
     if (accessory.context.device[this.uniq_id].rgb_cmd_t) {
@@ -76,6 +69,13 @@ export class tasmotaLightService {
         .on('set', this.setHue.bind(this));
       (this.service.getCharacteristic(this.platform.Characteristic.Saturation) || this.service.addCharacteristic(this.platform.Characteristic.Saturation))
         .on('set', this.setSaturation.bind(this));
+    }
+
+    // Does the lightbulb include a colour temperature characteristic
+
+    if (accessory.context.device[this.uniq_id].clr_temp_cmd_t) {
+      (this.service.getCharacteristic(this.platform.Characteristic.ColorTemperature) || this.service.addCharacteristic(this.platform.Characteristic.ColorTemperature))
+        .on('set', this.setColorTemperature.bind(this));
     }
 
     nunjucks.installJinjaCompat();
@@ -135,22 +135,6 @@ export class tasmotaLightService {
       this.service.getCharacteristic(this.platform.Characteristic.Brightness).updateValue(nunjucks.renderString(this.accessory.context.device[this.uniq_id].bri_val_tpl, interim));
     }
 
-    // Update color temperature if supported
-
-    if (this.accessory.context.device[this.uniq_id].clr_temp_cmd_t) {
-
-      // Use debug logging for no change updates, and info when a change occurred
-
-      if (this.service.getCharacteristic(this.platform.Characteristic.ColorTemperature).value != nunjucks.renderString(this.accessory.context.device[this.uniq_id].clr_temp_val_tpl, interim)) {
-
-        this.platform.log.info('Updating \'%s\' ColorTemperature to %s', this.accessory.displayName, nunjucks.renderString(this.accessory.context.device[this.uniq_id].clr_temp_val_tpl, interim));
-      } else {
-        this.platform.log.debug('Updating \'%s\' ColorTemperature to %s', this.accessory.displayName, nunjucks.renderString(this.accessory.context.device[this.uniq_id].clr_temp_val_tpl, interim));
-      }
-
-      this.service.getCharacteristic(this.platform.Characteristic.ColorTemperature).updateValue(nunjucks.renderString(this.accessory.context.device[this.uniq_id].clr_temp_val_tpl, interim));
-    }
-
     // Update color settings
 
     if (this.accessory.context.device[this.uniq_id].rgb_stat_t) {
@@ -178,6 +162,22 @@ export class tasmotaLightService {
       this.service.getCharacteristic(this.platform.Characteristic.Hue).updateValue(hsb.h);
       this.service.getCharacteristic(this.platform.Characteristic.Saturation).updateValue(hsb.s);
 
+    }
+
+    // Update color temperature if supported
+
+    if (this.accessory.context.device[this.uniq_id].clr_temp_cmd_t) {
+
+      // Use debug logging for no change updates, and info when a change occurred
+
+      if (this.service.getCharacteristic(this.platform.Characteristic.ColorTemperature).value != nunjucks.renderString(this.accessory.context.device[this.uniq_id].clr_temp_val_tpl, interim)) {
+
+        this.platform.log.info('Updating \'%s\' ColorTemperature to %s', this.accessory.displayName, nunjucks.renderString(this.accessory.context.device[this.uniq_id].clr_temp_val_tpl, interim));
+      } else {
+        this.platform.log.debug('Updating \'%s\' ColorTemperature to %s', this.accessory.displayName, nunjucks.renderString(this.accessory.context.device[this.uniq_id].clr_temp_val_tpl, interim));
+      }
+
+      this.service.getCharacteristic(this.platform.Characteristic.ColorTemperature).updateValue(nunjucks.renderString(this.accessory.context.device[this.uniq_id].clr_temp_val_tpl, interim));
     }
 
 

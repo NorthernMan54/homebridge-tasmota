@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. This project uses [Semantic Versioning](https://semver.org/).
 
+## 0.0.35 (2020-09-30)
+
+## [Version 0.0.29](https://github.com/northernman54/homebridge-tasmota/compare/v0.0.22...v0.0.32)
+
+#### Changes
+
+- Fix for OpenMQTTGateway devices crashing plugin
+
 ## 0.0.32 (2020-09-30)
 
 ## [Version 0.0.29](https://github.com/northernman54/homebridge-tasmota/compare/v0.0.27...v0.0.32)
@@ -14,7 +22,7 @@ All notable changes to this project will be documented in this file. This projec
 - Ability to refresh accessory name and other device details from Device
 - Device removal when setoption19 is set to 0
 - Device reconfiguration when setoption30 is changed
-- Support for [AZ-7798 CO2 Monitor](https://tasmota.github.io/docs/AZ-7798) - Tks Jeroen Vermeulen 
+- Support for [AZ-7798 CO2 Monitor](https://tasmota.github.io/docs/AZ-7798) - Tks Jeroen Vermeulen
 
 ## 0.0.27 (2020-09-16)
 

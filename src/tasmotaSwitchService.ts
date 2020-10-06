@@ -12,9 +12,9 @@ const debug = createDebug('Tasmota:switch');
  * Each accessory may expose multiple services of different service types.
  */
 
- interface Subscription {
-   event: string, callback: any
- }
+interface Subscription {
+  event: string, callback: any
+}
 
 export class tasmotaSwitchService {
   public service: Service;
@@ -48,14 +48,16 @@ export class tasmotaSwitchService {
       // .on('get', this.getOn.bind(this));               // GET - bind to the `getOn` method below
 
       debug('Creating statusUpdate listener for', accessory.context.device[this.uniq_id].stat_t);
-      this.statusSubscribe = { event: accessory.context.device[this.uniq_id].stat_t, callback: this.statusUpdate.bind(this)};
+      this.statusSubscribe = { event: accessory.context.device[this.uniq_id].stat_t, callback: this.statusUpdate.bind(this) };
       accessory.context.mqttHost.on(accessory.context.device[this.uniq_id].stat_t, this.statusUpdate.bind(this));
       accessory.context.mqttHost.statusSubscribe(accessory.context.device[this.uniq_id].stat_t);
 
-
-      this.availabilitySubscribe = { event: accessory.context.device[this.uniq_id].avty_t, callback: this.availabilityUpdate.bind(this)};
-      accessory.context.mqttHost.on(accessory.context.device[this.uniq_id].avty_t, this.availabilityUpdate.bind(this));
-      accessory.context.mqttHost.availabilitySubscribe(accessory.context.device[this.uniq_id].avty_t);
+      // Fix for OpenMQTTGateway device
+      if (accessory.context.device[this.uniq_id].avty_t) {
+        this.availabilitySubscribe = { event: accessory.context.device[this.uniq_id].avty_t, callback: this.availabilityUpdate.bind(this) };
+        accessory.context.mqttHost.on(accessory.context.device[this.uniq_id].avty_t, this.availabilityUpdate.bind(this));
+        accessory.context.mqttHost.availabilitySubscribe(accessory.context.device[this.uniq_id].avty_t);
+      }
     }
     nunjucks.installJinjaCompat();
     nunjucks.configure({
@@ -80,21 +82,25 @@ export class tasmotaSwitchService {
   statusUpdate(topic, message) {
     debug('MQTT', topic, message.toString());
 
-    this.accessory.context.timeout = this.platform.autoCleanup(this.accessory);
-    const interim = {
-      value_json: JSON.parse(message.toString()),
-    };
+    try {
+      this.accessory.context.timeout = this.platform.autoCleanup(this.accessory);
+      const interim = {
+        value_json: JSON.parse(message.toString()),
+      };
 
-    if (this.characteristic.value !== (nunjucks.renderString(this.accessory.context.device[this.uniq_id].val_tpl, interim) === this.accessory.context.device[this.uniq_id].pl_on ? true : false)) {
+      if (this.characteristic.value !== (nunjucks.renderString(this.accessory.context.device[this.uniq_id].val_tpl, interim) === this.accessory.context.device[this.uniq_id].pl_on ? true : false)) {
 
-      this.platform.log.info('Updating \'%s\' to %s', this.service.displayName, nunjucks.renderString(this.accessory.context.device[this.uniq_id].val_tpl, interim));
+        this.platform.log.info('Updating \'%s\' to %s', this.service.displayName, nunjucks.renderString(this.accessory.context.device[this.uniq_id].val_tpl, interim));
 
-    } else {
+      } else {
 
-      this.platform.log.debug('Updating \'%s\' to %s', this.service.displayName, nunjucks.renderString(this.accessory.context.device[this.uniq_id].val_tpl, interim));
+        this.platform.log.debug('Updating \'%s\' to %s', this.service.displayName, nunjucks.renderString(this.accessory.context.device[this.uniq_id].val_tpl, interim));
+      }
+
+      this.characteristic.updateValue((nunjucks.renderString(this.accessory.context.device[this.uniq_id].val_tpl, interim) === this.accessory.context.device[this.uniq_id].pl_on ? true : false));
+    } catch (err) {
+      this.platform.log.error('ERROR: message parsing error', this.service.displayName, topic, message.toString());
     }
-
-    this.characteristic.updateValue((nunjucks.renderString(this.accessory.context.device[this.uniq_id].val_tpl, interim) === this.accessory.context.device[this.uniq_id].pl_on ? true : false));
   }
 
   /**
