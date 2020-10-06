@@ -59,13 +59,6 @@ export class tasmotaLightService {
         .on('set', this.setBrightness.bind(this));
     }
 
-    // Does the lightbulb include a colour temperature characteristic
-
-    if (accessory.context.device[this.uniq_id].clr_temp_cmd_t) {
-      (this.service.getCharacteristic(this.platform.Characteristic.ColorTemperature) || this.service.addCharacteristic(this.platform.Characteristic.ColorTemperature))
-        .on('set', this.setColorTemperature.bind(this));
-    }
-
     // Does the lightbulb include a RGB characteristic
 
     if (accessory.context.device[this.uniq_id].rgb_cmd_t) {
@@ -76,6 +69,13 @@ export class tasmotaLightService {
         .on('set', this.setHue.bind(this));
       (this.service.getCharacteristic(this.platform.Characteristic.Saturation) || this.service.addCharacteristic(this.platform.Characteristic.Saturation))
         .on('set', this.setSaturation.bind(this));
+    }
+
+    // Does the lightbulb include a colour temperature characteristic
+
+    if (accessory.context.device[this.uniq_id].clr_temp_cmd_t) {
+      (this.service.getCharacteristic(this.platform.Characteristic.ColorTemperature) || this.service.addCharacteristic(this.platform.Characteristic.ColorTemperature))
+        .on('set', this.setColorTemperature.bind(this));
     }
 
     nunjucks.installJinjaCompat();

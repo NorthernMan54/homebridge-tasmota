@@ -134,15 +134,21 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
       // number or MAC address
       const message = normalizeMessage(config);
       // debug('normalizeMessage ->', message);
-      if (message.dev.ids[0]) {
+      if (message.dev && message.dev.ids[0]) {
         const identifier = message.dev.ids[0];      // Unique per accessory
         const uniq_id = message.uniq_id;            // Unique per service
 
         const uuid = this.api.hap.uuid.generate(identifier);
 
-        // see if an accessory with the same uuid has already been registered and restored from
-        // the cached devices we stored in the `configureAccessory` method above
-        const existingAccessory = this.accessories.find(accessory => accessory.UUID === uuid);
+      let override = { name: "Test"};
+
+      let merged = {...message, ...override};
+
+      // debug('merged', merged);
+
+      // see if an accessory with the same uuid has already been registered and restored from
+      // the cached devices we stored in the `configureAccessory` method above
+      const existingAccessory = this.accessories.find(accessory => accessory.UUID === uuid);
 
         if (existingAccessory) {
           // the accessory already exists

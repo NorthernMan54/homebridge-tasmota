@@ -239,8 +239,12 @@ Status update message - BME280
 
 /*
 
-Tasmota Model - Generic (18)
-BME280 connected to SCL -> D5 - GPIO14, SDA -> D6 - GPIO12
+Tasmota Model - Generic (18) - MCUIOT Device
+BME280 connected to:
+
+D5 - GPIO14 - SCL,
+D6 - GPIO12 -> SDA,
+D4 - GPIO2 -> LedLink
 
 {
   name: 'Sensor BME280 Temperature',
