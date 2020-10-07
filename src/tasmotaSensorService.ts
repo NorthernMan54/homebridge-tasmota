@@ -203,6 +203,25 @@ export class tasmotaSensorService {
 
 /*
 
+ZMAi-90 Power Meter Tasmota Config
+
+ZMAi-90 with PCB version 2011 F20439
+
+2) Set module as Tuya MCU (54)
+
+3) run:
+a)Backlog TuyaMCU 32,17; TuyaMCU 31,19; TuyaMCU 33,20; SetOption59 1
+
+Rule1 on System#Boot do RuleTimer1 5 endon on Rules#Timer=1 do backlog SerialSend5 55aa0001000000; RuleTimer1 5 endon
+rule1 1
+
+
+Not needed
+SetOption66 1 - Send TUYA Messages over MQTT
+
+
+
+
 Status update message - BME280
 
 {"Time":"2020-08-28T17:39:01",
