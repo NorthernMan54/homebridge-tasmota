@@ -157,6 +157,7 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
 
           existingAccessory.context.mqttHost = mqttHost;
           existingAccessory.context.device[uniq_id] = message;
+          existingAccessory.context.identifier = identifier;
 
           this.discoveryTopicMap[topic] = { topic: topic, type: 'Service', uniq_id: uniq_id, uuid: uuid };
 
@@ -218,6 +219,7 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
           accessory.context.device = {};
           accessory.context.device[uniq_id] = message;
           accessory.context.mqttHost = mqttHost;
+          accessory.context.identifier = identifier;
 
           // create the accessory handler for the newly create accessory
           // this is imported from `platformAccessory.ts`

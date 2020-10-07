@@ -10,7 +10,8 @@ All notable changes to this project will be documented in this file. This projec
 
 - Fix for OpenMQTTGateway devices crashing plugin
 - Fix for color flip flops
-- Support for Pressure sensors ( Only visible from HomeKit apps that support pressure )
+- Support for Pressure sensor on BME280 and other others ( Only visible from HomeKit apps that support pressure )
+- Support for ZMAi-90 Current Sensor / Switch
 - Support for Fakegato history for Temperature, Humidity and Pressure sensors.
 
 ## 0.0.32 (2020-09-30)

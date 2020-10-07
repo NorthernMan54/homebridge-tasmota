@@ -64,8 +64,6 @@ export class tasmotaSensorService {
       case 'pressure':
         this.platform.log.debug('Creating %s sensor %s', accessory.context.device[this.uniq_id].dev_cla, accessory.context.device[this.uniq_id].name);
 
-        debug("this.CustomCharacteristic.AtmosphericPressureSensor", this.CustomCharacteristic.AtmosphericPressureSensor);
-
         this.service = this.accessory.getService(uuid) || this.accessory.addService(this.CustomCharacteristic.AtmosphericPressureSensor, accessory.context.device[this.uniq_id].name, uuid);
 
         this.service.setCharacteristic(this.platform.Characteristic.Name, accessory.context.device[this.uniq_id].name);
@@ -100,6 +98,21 @@ export class tasmotaSensorService {
         this.service.setCharacteristic(this.platform.Characteristic.AirParticulateSize, this.platform.Characteristic.AirParticulateSize._2_5_M);
 
         break;
+      case 'power':
+        switch (this.uniq_id.replace(accessory.context.identifier, '').toLowerCase()) {
+          case '_energy_current': // Amps
+          case '_energy_voltage': // Voltage
+          case '_energy_power': // Watts
+          case '_energy_total': // Total Kilowatts
+            this.service = this.accessory.getService(this.platform.Service.Switch) || this.accessory.addService(this.platform.Service.Switch, accessory.context.device[this.uniq_id].name, uuid);
+            // debug('this.service', this.service);
+
+            this.characteristic = this.service.getCharacteristic(this.deviceClassToHKCharacteristic(this.uniq_id.replace(accessory.context.identifier, '').toLowerCase()));
+
+            break;
+          default:
+            this.platform.log.warn('Warning: Unhandled Tasmota power sensor type', this.uniq_id.replace(accessory.context.identifier, '').toLowerCase());
+        }
       case undefined:
         // This is this Device status object
         this.platform.log.debug('Setting accessory information', accessory.context.device[this.uniq_id].name);
@@ -132,6 +145,20 @@ export class tasmotaSensorService {
       autoescape: true,
     });
     this.refresh();
+  }
+
+  deviceClassToHKCharacteristic(device_class: String) {
+    switch (device_class) {
+      case '_energy_current': // Amps
+        return (this.CustomCharacteristic.ElectricCurrent);
+      case '_energy_voltage': // Voltage
+        return (this.CustomCharacteristic.Voltage);
+      case '_energy_power': // Watts
+        return (this.CustomCharacteristic.CurrentConsumption);
+      case '_energy_total': // Total Kilowatts
+        return (this.CustomCharacteristic.TotalConsumption);
+        break;
+    }
   }
 
   refresh() {
@@ -227,7 +254,8 @@ a)Backlog TuyaMCU 32,17; TuyaMCU 31,19; TuyaMCU 33,20; SetOption59 1
 
 Rule1 on System#Boot do RuleTimer1 5 endon on Rules#Timer=1 do backlog SerialSend5 55aa0001000000; RuleTimer1 5 endon
 rule1 1
-
+rule2 on Energy#Power != %var1% do backlog var1 %value%; teleperiod 300 endon
+rule2 1
 
 Not needed
 SetOption66 1 - Send TUYA Messages over MQTT
