@@ -29,7 +29,8 @@
   "dependencies": {
     "debug": "4.1.x",
     "mqtt": "4.2.x",
-    "nunjucks": "3.2.x"
+    "nunjucks": "3.2.x",
+    "fakegato-history": "0.5.x"
   },
   "devDependencies": {
     "@types/node": "^14.0.27",

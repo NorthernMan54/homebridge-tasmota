@@ -7,6 +7,7 @@ const debug = createDebug('Tasmota:mqtt');
 var connection;
 
 export class Mqtt extends EventEmitter {
+  public emit: any;
 
   constructor(config) {
     var options = {
@@ -58,6 +59,7 @@ export class Mqtt extends EventEmitter {
               }
             } catch (error) {
               debug("Error:", error);
+              debug("Triggerd by:", message.toString());
             }
           } else {
             this.emit('Remove', topic);

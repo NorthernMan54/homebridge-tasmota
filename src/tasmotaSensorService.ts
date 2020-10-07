@@ -1,7 +1,6 @@
 import { Service, PlatformAccessory, Characteristic } from 'homebridge';
 
 import { tasmotaPlatform } from './platform';
-// import { nunjucks } from 'nunjucks';
 
 import nunjucks from 'nunjucks';
 
@@ -24,14 +23,16 @@ export class tasmotaSensorService {
   private device_class: string;
   public statusSubscribe: Subscription;
   public availabilitySubscribe: Subscription;
+  private CustomCharacteristic;
 
   constructor(
     private readonly platform: tasmotaPlatform,
     public readonly accessory: PlatformAccessory,
     private readonly uniq_id: string,
   ) {
-
+    this.CustomCharacteristic = require('./lib/CustomCharacteristics')(platform.Service, platform.Characteristic);
     const uuid = this.platform.api.hap.uuid.generate(accessory.context.device[this.uniq_id].uniq_id);
+
     this.device_class = accessory.context.device[this.uniq_id].dev_cla;
     switch (accessory.context.device[this.uniq_id].dev_cla) {
       case 'temperature':
@@ -49,6 +50,7 @@ export class tasmotaSensorService {
             maxValue: 100,
           });
         this.characteristic = this.service.getCharacteristic(this.platform.Characteristic.CurrentTemperature);
+
         break;
       case 'humidity':
         this.platform.log.debug('Creating %s sensor %s', accessory.context.device[this.uniq_id].dev_cla, accessory.context.device[this.uniq_id].name);
@@ -57,6 +59,17 @@ export class tasmotaSensorService {
 
         this.service.setCharacteristic(this.platform.Characteristic.Name, accessory.context.device[this.uniq_id].name);
         this.characteristic = this.service.getCharacteristic(this.platform.Characteristic.CurrentRelativeHumidity);
+
+        break;
+      case 'pressure':
+        this.platform.log.debug('Creating %s sensor %s', accessory.context.device[this.uniq_id].dev_cla, accessory.context.device[this.uniq_id].name);
+
+        debug("this.CustomCharacteristic.AtmosphericPressureSensor", this.CustomCharacteristic.AtmosphericPressureSensor);
+
+        this.service = this.accessory.getService(uuid) || this.accessory.addService(this.CustomCharacteristic.AtmosphericPressureSensor, accessory.context.device[this.uniq_id].name, uuid);
+
+        this.service.setCharacteristic(this.platform.Characteristic.Name, accessory.context.device[this.uniq_id].name);
+        this.characteristic = this.service.getCharacteristic(this.CustomCharacteristic.AtmosphericPressureLevel);
 
         break;
       case 'illuminance':

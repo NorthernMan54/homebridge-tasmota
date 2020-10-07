@@ -140,15 +140,9 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
 
         const uuid = this.api.hap.uuid.generate(identifier);
 
-      let override = { name: "Test"};
-
-      let merged = {...message, ...override};
-
-      // debug('merged', merged);
-
-      // see if an accessory with the same uuid has already been registered and restored from
-      // the cached devices we stored in the `configureAccessory` method above
-      const existingAccessory = this.accessories.find(accessory => accessory.UUID === uuid);
+        // see if an accessory with the same uuid has already been registered and restored from
+        // the cached devices we stored in the `configureAccessory` method above
+        const existingAccessory = this.accessories.find(accessory => accessory.UUID === uuid);
 
         if (existingAccessory) {
           // the accessory already exists
@@ -264,14 +258,23 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
 
   serviceCleanup(uniq_id: string, existingAccessory: PlatformAccessory) {
     debug('serviceCleanup', uniq_id);
-    if (this.services[uniq_id].service) {
+    if (this.services[uniq_id] && this.services[uniq_id].service) {
       this.log.info('Removing Service', this.services[uniq_id].service.displayName);
 
       if (this.services[uniq_id].statusSubscribe) {
         // debug("Cleaned up listeners", mqttHost);
         // debug(this.services[uniq_id].statusSubscribe.event);
-        existingAccessory.context.mqttHost.removeAllListeners(this.services[uniq_id].statusSubscribe.event);
-        existingAccessory.context.mqttHost.removeAllListeners(this.services[uniq_id].availabilitySubscribe.event);
+        if (this.services[uniq_id].statusSubscribe.event) {
+          existingAccessory.context.mqttHost.removeAllListeners(this.services[uniq_id].statusSubscribe.event);
+
+        } else {
+          this.log.error('statusSubscribe.event missing', this.services[uniq_id].service.displayName);
+        }
+        if (this.services[uniq_id].availabilitySubscribe) {
+          existingAccessory.context.mqttHost.removeAllListeners(this.services[uniq_id].availabilitySubscribe.event);
+        } else {
+          this.log.error('availabilitySubscribe missing', this.services[uniq_id].service.displayName);
+        }
         // debug("Cleaned up listeners", existingAccessory.context.mqttHost);
       }
 
