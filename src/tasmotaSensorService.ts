@@ -31,7 +31,8 @@ export class tasmotaSensorService {
     public readonly accessory: PlatformAccessory,
     private readonly uniq_id: string,
   ) {
-    this.CustomCharacteristic = await import('./lib/CustomCharacteristics')(platform.Service, platform.Characteristic);
+    /* eslint-disable */
+    this.CustomCharacteristic = require('./lib/CustomCharacteristics')(platform.Service, platform.Characteristic);
     const uuid = this.platform.api.hap.uuid.generate(accessory.context.device[this.uniq_id].uniq_id);
 
     this.device_class = accessory.context.device[this.uniq_id].dev_cla;
