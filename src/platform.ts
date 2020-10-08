@@ -218,6 +218,7 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
             }
           }
 
+          debug('discoveryDevices - this.api.updatePlatformAccessories');
           this.api.updatePlatformAccessories([existingAccessory]);
 
         } else {
@@ -265,6 +266,7 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
             default:
               this.log.warn('Warning: Unhandled Tasmota device type', message.tasmotaType);
           }
+          debug('discovery devices - this.api.registerPlatformAccessories');
           this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
           this.accessories.push(accessory);
         }
@@ -299,6 +301,7 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
 
       existingAccessory.removeService(this.services[uniq_id].service);
       delete this.services[uniq_id];
+      debug('serviceCleanup - this.api.updatePlatformAccessories');
       this.api.updatePlatformAccessories([existingAccessory]);
     } else {
       debug('No service', uniq_id);
@@ -332,6 +335,7 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
 
     // Remove accessory
     this.accessories.splice(this.accessories.findIndex(accessory => accessory.UUID === uuid), 1);
+    debug('this.api.unregisterPlatformAccessories');
     this.api.unregisterPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [existingAccessory]);
   }
 
@@ -358,6 +362,7 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
   unregister(accessory: PlatformAccessory, timeoutID) {
     this.log.error('Removing %s', accessory.displayName);
     this.timeouts[timeoutID] = null;
+    debug('unregister - this.api.unregisterPlatformAccessories');
     this.api.unregisterPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
     // callback();
   }
@@ -391,7 +396,7 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
         element.fakegatoService.addEntry({
           time: Date.now(),
           power: this.accessories.find(accessory => accessory.UUID === element.uuid)?.getService(this.Service.Switch)?.getCharacteristic(this.CustomCharacteristic.CurrentConsumption).value ?? 0,
-          switch: (this.accessories.find(accessory => accessory.UUID === element.uuid)?.getService(this.Service.Switch)?.getCharacteristic(this.Characteristic.On).value ?? false ? 1 : 0 )
+          status: (this.accessories.find(accessory => accessory.UUID === element.uuid)?.getService(this.Service.Switch)?.getCharacteristic(this.Characteristic.On).value ?? false ? 1 : 0 )
         })
           break;
       }
