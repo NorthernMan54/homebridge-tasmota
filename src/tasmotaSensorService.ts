@@ -31,7 +31,7 @@ export class tasmotaSensorService {
     public readonly accessory: PlatformAccessory,
     private readonly uniq_id: string,
   ) {
-    this.CustomCharacteristic = require('./lib/CustomCharacteristics')(platform.Service, platform.Characteristic);
+    this.CustomCharacteristic = await import('./lib/CustomCharacteristics')(platform.Service, platform.Characteristic);
     const uuid = this.platform.api.hap.uuid.generate(accessory.context.device[this.uniq_id].uniq_id);
 
     this.device_class = accessory.context.device[this.uniq_id].dev_cla;
@@ -118,6 +118,7 @@ export class tasmotaSensorService {
           default:
             this.platform.log.warn('Warning: Unhandled Tasmota power sensor type', this.uniq_id.replace(accessory.context.identifier, '').toLowerCase());
         }
+        break;
       case undefined:
         // This is this Device status object
         this.platform.log.debug('Setting accessory information', accessory.context.device[this.uniq_id].name);

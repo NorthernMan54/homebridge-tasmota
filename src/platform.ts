@@ -64,7 +64,7 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
       debugEnable.enable(namespaces);
     }
 
-    this.CustomCharacteristic = require('./lib/CustomCharacteristics')(this.Service, this.Characteristic);
+    this.CustomCharacteristic = await import('./lib/CustomCharacteristics')(this.Service, this.Characteristic);
 
     // When this event is fired it means Homebridge has restored all cached accessories from disk.
     // Dynamic Platform plugins should only register new accessories after this event was fired,
