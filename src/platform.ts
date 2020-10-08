@@ -378,8 +378,8 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
       // debug('that', this.accessories.find(accessory => accessory.UUID === element.uuid));
       if (!element.fakegatoService) {
         element.fakegatoService = new this.FakeGatoHistoryService(element.type, this.accessories.find(accessory => accessory.UUID === element.uuid), {
-          storage: "fs",
-          minutes: .5
+          storage: 'fs',
+          minutes: .5,
         });
         element.fakegatoService.log = this.log;
       }
@@ -389,15 +389,15 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
             time: Date.now(),
             temp: this.accessories.find(accessory => accessory.UUID === element.uuid)?.getService(this.Service.TemperatureSensor)?.getCharacteristic(this.Characteristic.CurrentTemperature).value ?? 0,
             pressure: this.accessories.find(accessory => accessory.UUID === element.uuid)?.getService(this.CustomCharacteristic.AtmosphericPressureSensor)?.getCharacteristic(this.CustomCharacteristic.AtmosphericPressureLevel).value ?? 0,
-            humidity: this.accessories.find(accessory => accessory.UUID === element.uuid)?.getService(this.Service.HumiditySensor)?.getCharacteristic(this.Characteristic.CurrentRelativeHumidity).value ?? 0
-          })
+            humidity: this.accessories.find(accessory => accessory.UUID === element.uuid)?.getService(this.Service.HumiditySensor)?.getCharacteristic(this.Characteristic.CurrentRelativeHumidity).value ?? 0,
+          });
           break;
         case 'energy':
-        element.fakegatoService.addEntry({
-          time: Date.now(),
-          power: this.accessories.find(accessory => accessory.UUID === element.uuid)?.getService(this.Service.Switch)?.getCharacteristic(this.CustomCharacteristic.CurrentConsumption).value ?? 0,
-          status: (this.accessories.find(accessory => accessory.UUID === element.uuid)?.getService(this.Service.Switch)?.getCharacteristic(this.Characteristic.On).value ?? false ? 1 : 0 )
-        })
+          element.fakegatoService.addEntry({
+            time: Date.now(),
+            power: this.accessories.find(accessory => accessory.UUID === element.uuid)?.getService(this.Service.Switch)?.getCharacteristic(this.CustomCharacteristic.CurrentConsumption).value ?? 0,
+            status: (this.accessories.find(accessory => accessory.UUID === element.uuid)?.getService(this.Service.Switch)?.getCharacteristic(this.Characteristic.On).value ?? false ? 1 : 0 ),
+          });
           break;
       }
     });

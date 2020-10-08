@@ -51,7 +51,7 @@ export class tasmotaSensorService {
             maxValue: 100,
           });
 
-        this.fakegato = "weather";
+        this.fakegato = 'weather';
         this.characteristic = this.service.getCharacteristic(this.platform.Characteristic.CurrentTemperature);
 
         break;
@@ -112,7 +112,7 @@ export class tasmotaSensorService {
 
             this.characteristic = this.service.getCharacteristic(this.deviceClassToHKCharacteristic(this.uniq_id.replace(accessory.context.identifier, '').toLowerCase()));
             if (this.uniq_id.replace(accessory.context.identifier, '').toLowerCase() === '_energy_current') {
-              this.fakegato = "energy";
+              this.fakegato = 'energy';
             }
             break;
           default:
@@ -152,7 +152,7 @@ export class tasmotaSensorService {
     this.refresh();
   }
 
-  deviceClassToHKCharacteristic(device_class: String) {
+  deviceClassToHKCharacteristic(device_class: string) {
     switch (device_class) {
       case '_energy_current': // Amps
         return (this.CustomCharacteristic.ElectricCurrent);
