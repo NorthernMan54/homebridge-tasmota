@@ -24,6 +24,7 @@ export class tasmotaSensorService {
   public statusSubscribe: Subscription;
   public availabilitySubscribe: Subscription;
   private CustomCharacteristic;
+  public fakegato: string;
 
   constructor(
     private readonly platform: tasmotaPlatform,
@@ -49,6 +50,8 @@ export class tasmotaSensorService {
             minValue: -100,
             maxValue: 100,
           });
+
+        this.fakegato = "weather";
         this.characteristic = this.service.getCharacteristic(this.platform.Characteristic.CurrentTemperature);
 
         break;
@@ -108,7 +111,9 @@ export class tasmotaSensorService {
             // debug('this.service', this.service);
 
             this.characteristic = this.service.getCharacteristic(this.deviceClassToHKCharacteristic(this.uniq_id.replace(accessory.context.identifier, '').toLowerCase()));
-
+            if (this.uniq_id.replace(accessory.context.identifier, '').toLowerCase() === '_energy_current') {
+              this.fakegato = "energy";
+            }
             break;
           default:
             this.platform.log.warn('Warning: Unhandled Tasmota power sensor type', this.uniq_id.replace(accessory.context.identifier, '').toLowerCase());

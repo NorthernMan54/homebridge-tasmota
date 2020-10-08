@@ -22,6 +22,7 @@ export class tasmotaLightService {
   private update: ChangeHSB;
   public statusSubscribe: Subscription;
   public availabilitySubscribe: Subscription;
+  public fakegato: string;
 
   constructor(
     private readonly platform: tasmotaPlatform,

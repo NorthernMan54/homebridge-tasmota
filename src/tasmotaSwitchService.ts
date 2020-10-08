@@ -21,6 +21,7 @@ export class tasmotaSwitchService {
   private characteristic: Characteristic;
   public statusSubscribe: Subscription;
   public availabilitySubscribe: Subscription;
+  public fakegato: string;
 
   constructor(
     private readonly platform: tasmotaPlatform,

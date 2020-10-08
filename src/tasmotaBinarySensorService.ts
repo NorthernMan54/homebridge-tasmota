@@ -24,6 +24,7 @@ export class tasmotaBinarySensorService {
   private device_class: string;
   public statusSubscribe: Subscription;
   public availabilitySubscribe: Subscription;
+  public fakegato: string;
 
   constructor(
     private readonly platform: tasmotaPlatform,

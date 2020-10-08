@@ -9,6 +9,7 @@ import { tasmotaBinarySensorService } from './tasmotaBinarySensorService';
 import { Mqtt } from './lib/Mqtt';
 import createDebug from 'debug';
 import debugEnable from 'debug';
+import fakegato from 'fakegato-history';
 
 const debug = createDebug('Tasmota:platform');
 
@@ -28,6 +29,7 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
   public readonly accessories: PlatformAccessory[] = [];
   public readonly services: tasmotaSwitchService[] | tasmotaLightService[] | tasmotaSensorService[] | tasmotaBinarySensorService[] = [];
   private discoveryTopicMap: DiscoveryTopicMap[] = [];
+  private CustomCharacteristic;
 
   // Auto removal of non responding devices
 
@@ -35,7 +37,8 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
   private timeouts = {};
   private timeoutCounter = 1;
   private debug: any;
-  // public statusEvent = {};
+  private fakegatoAccessories: any = [];
+  private FakeGatoHistoryService;
 
   constructor(
     public readonly log: Logger,
@@ -61,6 +64,8 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
       debugEnable.enable(namespaces);
     }
 
+    this.CustomCharacteristic = require('./lib/CustomCharacteristics')(this.Service, this.Characteristic);
+
     // When this event is fired it means Homebridge has restored all cached accessories from disk.
     // Dynamic Platform plugins should only register new accessories after this event was fired,
     // in order to ensure they weren't added to homebridge already. This event can also be used
@@ -69,6 +74,11 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
       log.debug('Executed didFinishLaunching callback');
       // run the method to discover / register your devices as accessories
       this.discoverDevices();
+
+      this.FakeGatoHistoryService = fakegato(this.api);
+      // this.initializeFakegato();
+
+      setInterval(this.updateFakegato.bind(this), 15 * 1000);
     });
   }
 
@@ -186,7 +196,10 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
                 } else {
                   this.discoveryTopicMap[topic] = { topic: topic, type: 'Service', uniq_id: uniq_id, uuid: uuid };
                 }
-                // debug('discoveryTopicMap', this.discoveryTopicMap[topic]);
+
+                if (this.services[uniq_id].fakegato) {
+                  this.fakegatoAccessories.push({ uuid: uuid, uniq_id: uniq_id, type: this.services[uniq_id].fakegato });
+                }
                 break;
               case 'light':
                 this.services[uniq_id] = new tasmotaLightService(this, existingAccessory, uniq_id);
@@ -239,6 +252,11 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
               } else {
                 this.discoveryTopicMap[topic] = { topic: topic, type: 'Service', uniq_id: uniq_id, uuid: uuid };
               }
+
+              if (this.services[uniq_id].fakegato) {
+                this.fakegatoAccessories.push({ uuid: uuid, uniq_id: uniq_id, type: this.services[uniq_id].fakegato });
+              }
+
               break;
             case 'binary_sensor':
               this.services[uniq_id] = new tasmotaBinarySensorService(this, accessory, uniq_id);
@@ -249,7 +267,6 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
           }
           this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
           this.accessories.push(accessory);
-
         }
 
       } else {
@@ -344,6 +361,44 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
     this.api.unregisterPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
     // callback();
   }
+
+  initializeFakegato() {
+    //
+  }
+
+  updateFakegato() {
+    // debug(this);
+
+    this.fakegatoAccessories.forEach(element => {
+      // debug('that', this.accessories.find(accessory => accessory.UUID === element.uuid));
+      if (!element.fakegatoService) {
+        element.fakegatoService = new this.FakeGatoHistoryService(element.type, this.accessories.find(accessory => accessory.UUID === element.uuid), {
+          storage: "fs",
+          minutes: .5
+        });
+        element.fakegatoService.log = this.log;
+      }
+      switch (element.type) {
+        case 'weather':
+          element.fakegatoService.addEntry({
+            time: Date.now(),
+            temp: this.accessories.find(accessory => accessory.UUID === element.uuid)?.getService(this.Service.TemperatureSensor)?.getCharacteristic(this.Characteristic.CurrentTemperature).value ?? 0,
+            pressure: this.accessories.find(accessory => accessory.UUID === element.uuid)?.getService(this.CustomCharacteristic.AtmosphericPressureSensor)?.getCharacteristic(this.CustomCharacteristic.AtmosphericPressureLevel).value ?? 0,
+            humidity: this.accessories.find(accessory => accessory.UUID === element.uuid)?.getService(this.Service.HumiditySensor)?.getCharacteristic(this.Characteristic.CurrentRelativeHumidity).value ?? 0
+          })
+          break;
+        case 'energy':
+        element.fakegatoService.addEntry({
+          time: Date.now(),
+          power: this.accessories.find(accessory => accessory.UUID === element.uuid)?.getService(this.Service.Switch)?.getCharacteristic(this.CustomCharacteristic.CurrentConsumption).value ?? 0,
+          switch: (this.accessories.find(accessory => accessory.UUID === element.uuid)?.getService(this.Service.Switch)?.getCharacteristic(this.Characteristic.On).value ?? false ? 1 : 0 )
+        })
+          break;
+      }
+    });
+
+  }
+
 }
 
 /* The various Tasmota firmware's have a slightly different flavors of the message. */
