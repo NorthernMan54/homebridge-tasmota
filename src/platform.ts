@@ -4,6 +4,7 @@ import { PLATFORM_NAME, PLUGIN_NAME } from './settings';
 // import { tasmotaAccessory } from './platformAccessory';
 import { tasmotaSwitchService } from './tasmotaSwitchService';
 import { tasmotaLightService } from './tasmotaLightService';
+import { tasmotaFanService } from './tasmotaFanService';
 import { tasmotaSensorService } from './tasmotaSensorService';
 import { tasmotaBinarySensorService } from './tasmotaBinarySensorService';
 import { Mqtt } from './lib/Mqtt';
@@ -27,7 +28,7 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
 
   // this is used to track restored cached accessories
   public readonly accessories: PlatformAccessory[] = [];
-  public readonly services: tasmotaSwitchService[] | tasmotaLightService[] | tasmotaSensorService[] | tasmotaBinarySensorService[] = [];
+  public readonly services: tasmotaSwitchService[] | tasmotaLightService[] | tasmotaSensorService[] | tasmotaBinarySensorService[] | tasmotaFanService[] = [];
   private discoveryTopicMap: DiscoveryTopicMap[] = [];
   private CustomCharacteristic;
 
@@ -42,7 +43,7 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
 
   constructor(
     public readonly log: Logger,
-    public readonly config: PlatformConfig,
+    public readonly config: any,
     public readonly api: API,
   ) {
     this.log.debug('Finished initializing platform:', this.config.name);
@@ -143,11 +144,13 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
       // generate a unique id for the accessory this should be generated from
       // something globally unique, but constant, for example, the device serial
       // number or MAC address
-      const message = normalizeMessage(config);
+      let message = normalizeMessage(config);
       // debug('normalizeMessage ->', message);
       if (message.dev && message.dev.ids[0]) {
         const identifier = message.dev.ids[0];      // Unique per accessory
         const uniq_id = message.uniq_id;            // Unique per service
+
+        message = this.discoveryOveride(uniq_id, message);
 
         const uuid = this.api.hap.uuid.generate(identifier);
 
@@ -206,6 +209,10 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
                 this.services[uniq_id] = new tasmotaLightService(this, existingAccessory, uniq_id);
                 this.discoveryTopicMap[topic] = { topic: topic, type: 'Service', uniq_id: uniq_id, uuid: uuid };
                 break;
+              case 'fan':
+                this.services[uniq_id] = new tasmotaFanService(this, existingAccessory, uniq_id);
+                this.discoveryTopicMap[topic] = { topic: topic, type: 'Service', uniq_id: uniq_id, uuid: uuid };
+                break;
               case 'switch':
                 this.services[uniq_id] = new tasmotaSwitchService(this, existingAccessory, uniq_id);
                 this.discoveryTopicMap[topic] = { topic: topic, type: 'Service', uniq_id: uniq_id, uuid: uuid };
@@ -247,6 +254,10 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
               this.services[uniq_id] = new tasmotaLightService(this, accessory, uniq_id);
               this.discoveryTopicMap[topic] = { topic: topic, type: 'Service', uniq_id: uniq_id, uuid: uuid };
               break;
+            case 'fan':
+              this.services[uniq_id] = new tasmotaFanService(this, accessory, uniq_id);
+              this.discoveryTopicMap[topic] = { topic: topic, type: 'Service', uniq_id: uniq_id, uuid: uuid };
+              break;
             case 'sensor':
               this.services[uniq_id] = new tasmotaSensorService(this, accessory, uniq_id);
               if (!message.dev_cla) { // This is the device status topic
@@ -276,6 +287,26 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
         this.log.warn('Warning: Malformed HASS Discovery message', topic, config.name);
       }
     });
+  }
+
+  discoveryOveride(uniq_id: string, message: any) {
+    /* eslint-disable */
+
+    if (this.config.override) {
+      // debug('override', this.config.override);
+      var overrides = [];
+      for (const [key, value] of Object.entries(this.config.override)) {
+        console.log(`${key}: ${value}`);
+        overrides[key] = value;
+      }
+      if (overrides[uniq_id]) {
+        // debug('Merging', this.config.override[uniq_id]);
+        let merged = { ...message, ...this.config.override[uniq_id] };
+        // debug('Merged', merged);
+        return merged;
+      }
+    }
+    return message;
   }
 
   serviceCleanup(uniq_id: string, existingAccessory: PlatformAccessory) {
@@ -388,16 +419,16 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
         case 'weather':
           element.fakegatoService.addEntry({
             time: Date.now(),
-            temp: this.accessories.find(accessory => accessory.UUID === element.uuid)?.getService(this.Service.TemperatureSensor)?.getCharacteristic(this.Characteristic.CurrentTemperature).value ?? 0,
-            pressure: this.accessories.find(accessory => accessory.UUID === element.uuid)?.getService(this.CustomCharacteristic.AtmosphericPressureSensor)?.getCharacteristic(this.CustomCharacteristic.AtmosphericPressureLevel).value ?? 0,
-            humidity: this.accessories.find(accessory => accessory.UUID === element.uuid)?.getService(this.Service.HumiditySensor)?.getCharacteristic(this.Characteristic.CurrentRelativeHumidity).value ?? 0,
+            temp: this.accessories.find(accessory => accessory.UUID === element.uuid) ?.getService(this.Service.TemperatureSensor) ?.getCharacteristic(this.Characteristic.CurrentTemperature).value ?? 0,
+            pressure: this.accessories.find(accessory => accessory.UUID === element.uuid) ?.getService(this.CustomCharacteristic.AtmosphericPressureSensor) ?.getCharacteristic(this.CustomCharacteristic.AtmosphericPressureLevel).value ?? 0,
+            humidity: this.accessories.find(accessory => accessory.UUID === element.uuid) ?.getService(this.Service.HumiditySensor) ?.getCharacteristic(this.Characteristic.CurrentRelativeHumidity).value ?? 0,
           });
           break;
         case 'energy':
           element.fakegatoService.addEntry({
             time: Date.now(),
-            power: this.accessories.find(accessory => accessory.UUID === element.uuid)?.getService(this.Service.Switch)?.getCharacteristic(this.CustomCharacteristic.CurrentConsumption).value ?? 0,
-            status: (this.accessories.find(accessory => accessory.UUID === element.uuid)?.getService(this.Service.Switch)?.getCharacteristic(this.Characteristic.On).value ?? false ? 1 : 0 ),
+            power: this.accessories.find(accessory => accessory.UUID === element.uuid) ?.getService(this.Service.Switch) ?.getCharacteristic(this.CustomCharacteristic.CurrentConsumption).value ?? 0,
+            status: (this.accessories.find(accessory => accessory.UUID === element.uuid) ?.getService(this.Service.Switch) ?.getCharacteristic(this.Characteristic.On).value ?? false ? 1 : 0 ),
           });
           break;
       }

@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file. This projec
 
 ## 0.0.35 (2020-10-05)
 
-## [Version 0.0.29](https://github.com/northernman54/homebridge-tasmota/compare/v0.0.22...v0.0.35)
+## [Version 0.0.35](https://github.com/northernman54/homebridge-tasmota/compare/v0.0.22...v0.0.35)
 
 #### Changes
 
@@ -13,6 +13,8 @@ All notable changes to this project will be documented in this file. This projec
 - Support for Pressure sensor on BME280 and other others ( Only visible from HomeKit apps that support pressure )
 - Support for ZMAi-90 Current Sensor / Switch
 - Support for Fakegato history for Temperature, Humidity and Pressure sensors.
+- Added support for overriding the discovery response
+- Added tasmota device type fan, to allow control of Fan ( Based on a dimmable device )
 
 ## 0.0.32 (2020-09-30)
 
