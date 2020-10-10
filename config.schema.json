@@ -49,6 +49,13 @@
         "required": false,
         "default": false,
         "description": "Enable verbose DEBUG logging."
+      },
+      "fakegato": {
+        "title": "Fakegato historical sensor logging",
+        "type": "boolean",
+        "required": false,
+        "default": false,
+        "description": "Enable logging of historical sensor information using fakegato."
       }
     }
   }

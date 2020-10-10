@@ -77,10 +77,12 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
       // run the method to discover / register your devices as accessories
       this.discoverDevices();
 
-      this.FakeGatoHistoryService = fakegato(this.api);
-      // this.initializeFakegato();
+      if (this.config.fakegato) {
+        this.FakeGatoHistoryService = fakegato(this.api);
+        // this.initializeFakegato();
 
-      setInterval(this.updateFakegato.bind(this), 15 * 1000);
+        setInterval(this.updateFakegato.bind(this), 15 * 1000);
+      }
     });
   }
 
@@ -296,7 +298,7 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
       // debug('override', this.config.override);
       var overrides = [];
       for (const [key, value] of Object.entries(this.config.override)) {
-        console.log(`${key}: ${value}`);
+        // debug(`${key}: ${value}`);
         overrides[key] = value;
       }
       if (overrides[uniq_id]) {
@@ -310,31 +312,37 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
   }
 
   serviceCleanup(uniq_id: string, existingAccessory: PlatformAccessory) {
+    // debug('service array', this.services);
     debug('serviceCleanup', uniq_id);
-    if (this.services[uniq_id] && this.services[uniq_id].service) {
-      this.log.info('Removing Service', this.services[uniq_id].service.displayName);
+    if (this.services[uniq_id]) {
+      if (this.services[uniq_id].service) {
+        this.log.info('Removing Service', this.services[uniq_id].service.displayName);
 
-      if (this.services[uniq_id].statusSubscribe) {
-        // debug("Cleaned up listeners", mqttHost);
-        // debug(this.services[uniq_id].statusSubscribe.event);
-        if (this.services[uniq_id].statusSubscribe.event) {
-          existingAccessory.context.mqttHost.removeAllListeners(this.services[uniq_id].statusSubscribe.event);
+        if (this.services[uniq_id].statusSubscribe) {
+          // debug("Cleaned up listeners", mqttHost);
+          // debug(this.services[uniq_id].statusSubscribe.event);
+          if (this.services[uniq_id].statusSubscribe.event) {
+            existingAccessory.context.mqttHost.removeAllListeners(this.services[uniq_id].statusSubscribe.event);
 
-        } else {
-          this.log.error('statusSubscribe.event missing', this.services[uniq_id].service.displayName);
+          } else {
+            this.log.error('statusSubscribe.event missing', this.services[uniq_id].service.displayName);
+          }
+          if (this.services[uniq_id].availabilitySubscribe) {
+            existingAccessory.context.mqttHost.removeAllListeners(this.services[uniq_id].availabilitySubscribe.event);
+          } else {
+            this.log.error('availabilitySubscribe missing', this.services[uniq_id].service.displayName);
+          }
+          // debug("Cleaned up listeners", existingAccessory.context.mqttHost);
         }
-        if (this.services[uniq_id].availabilitySubscribe) {
-          existingAccessory.context.mqttHost.removeAllListeners(this.services[uniq_id].availabilitySubscribe.event);
-        } else {
-          this.log.error('availabilitySubscribe missing', this.services[uniq_id].service.displayName);
-        }
-        // debug("Cleaned up listeners", existingAccessory.context.mqttHost);
+
+        existingAccessory.removeService(this.services[uniq_id].service);
+        delete this.services[uniq_id];
+        debug('serviceCleanup - this.api.updatePlatformAccessories');
+        this.api.updatePlatformAccessories([existingAccessory]);
+      } else {
+        debug('serviceCleanup - object');
+        delete this.services[uniq_id];
       }
-
-      existingAccessory.removeService(this.services[uniq_id].service);
-      delete this.services[uniq_id];
-      debug('serviceCleanup - this.api.updatePlatformAccessories');
-      this.api.updatePlatformAccessories([existingAccessory]);
     } else {
       debug('No service', uniq_id);
     }

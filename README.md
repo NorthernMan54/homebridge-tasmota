@@ -7,6 +7,7 @@ Homebridge Plugin for Tasmota Devices that leverage's the Home Assistant Auto Di
 * Automatic discovery and configuration of supported Tasmota devices in Homebridge/Homekit.
 * Cleanup and removal of disconnected devices after 24 hours.
 * Support for these types of devices Outlets, Dimmers, Sensors and Lightbulbs with Colour Temperature.
+* Graphing of historical sensor information using fakegato.  ( Temperature, Humidity, Air Pressure and Current sensors ).
 
 ## Tasmota Device's Tested YMMV for other devices
 
@@ -70,6 +71,20 @@ SetOption19 0
 ## Usefull Tasmota Device Options
 
 ### [setoption30 - Enforce Home Assistant auto-discovery relay as light](https://tasmota.github.io/docs/Commands/#setoption30)
+
+## Discovery Overrides
+
+### Fan
+
+If you override the tasmotaType with the value of `fan` a fan device will be created.  Tested with a Tuya Dimmer.  The first field `EF159D_LI_1` is the unique_id of the device.
+
+```
+"override": {
+  "EF159D_LI_1": {
+    "tasmotaType": "fan"
+  }
+}
+```
 
 ## Technical Details
 
