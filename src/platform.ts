@@ -435,8 +435,11 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
         case 'energy':
           element.fakegatoService.addEntry({
             time: Date.now(),
-            power: this.accessories.find(accessory => accessory.UUID === element.uuid) ?.getService(this.Service.Switch) ?.getCharacteristic(this.CustomCharacteristic.CurrentConsumption).value ?? 0,
             status: (this.accessories.find(accessory => accessory.UUID === element.uuid) ?.getService(this.Service.Switch) ?.getCharacteristic(this.Characteristic.On).value ?? false ? 1 : 0 ),
+          });
+          element.fakegatoService.addEntry({
+            time: Date.now(),
+            power: this.accessories.find(accessory => accessory.UUID === element.uuid) ?.getService(this.Service.Switch) ?.getCharacteristic(this.CustomCharacteristic.CurrentConsumption).value ?? 0,
           });
           break;
       }

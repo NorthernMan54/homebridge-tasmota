@@ -24,7 +24,7 @@ export class tasmotaSensorService {
   public statusSubscribe: Subscription;
   public availabilitySubscribe: Subscription;
   private CustomCharacteristic;
-  public fakegato: string;
+  public fakegato: string; 
 
   constructor(
     private readonly platform: tasmotaPlatform,

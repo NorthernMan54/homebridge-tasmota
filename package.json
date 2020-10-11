@@ -18,7 +18,8 @@
   "main": "dist/index.js",
   "scripts": {
     "lint": "eslint --fix src/**.ts",
-    "watch": "npm run build && npm link && nodemon",
+    "oldWatch": "npm run build && npm link && nodemon",
+    "watch": "nodemon",
     "build": "rimraf ./dist && tsc",
     "prepublishOnly": "npm run lint && npm run build"
   },
