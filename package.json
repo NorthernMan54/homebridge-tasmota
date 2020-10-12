@@ -1,7 +1,7 @@
 {
   "displayName": "Homebridge Tasmota",
   "name": "homebridge-tasmota",
-  "version": "0.0.41",
+  "version": "0.0.42",
   "description": "Homebridge plugin for Tasmota devices leveraging home assistant auto discovery.",
   "license": "Apache-2.0",
   "repository": {
@@ -31,7 +31,7 @@
     "debug": "4.1.x",
     "mqtt": "4.2.x",
     "nunjucks": "3.2.x",
-    "fakegato-history": "0.5.x"
+    "fakegato-history": "simont77/fakegato-history#Updated-Energy"
   },
   "devDependencies": {
     "@types/node": "^14.0.27",
