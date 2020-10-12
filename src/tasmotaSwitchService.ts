@@ -28,7 +28,7 @@ export class tasmotaSwitchService {
     public readonly accessory: PlatformAccessory,
     private readonly uniq_id: string,
   ) {
-    const uuid = this.platform.api.hap.uuid.generate(accessory.context.device[this.uniq_id].uniq_id);
+    const uuid = this.platform.api.hap.uuid.generate(this.accessory.context.device[this.uniq_id].uniq_id);
 
     this.service = this.accessory.getService(uuid) || this.accessory.addService(this.platform.Service.Switch, accessory.context.device[this.uniq_id].name, uuid);
 
@@ -40,6 +40,16 @@ export class tasmotaSwitchService {
     // see https://developers.homebridge.io/#/service/Lightbulb
 
     this.characteristic = this.service.getCharacteristic(this.platform.Characteristic.On);
+
+    if (this.platform.config.history && !this.accessory.context.fakegatoService ?.addEntry) {
+      this.accessory.context.fakegatoService = new this.platform.FakeGatoHistoryService('energy', this.accessory, {
+        storage: 'fs',
+        minutes: this.platform.config.historyInterval ?? 10,
+        log: this.platform.log,
+      });
+    } else {
+      debug('fakegatoService exists');
+    }
 
     // register handlers for the On/Off Characteristic
 
@@ -99,7 +109,19 @@ export class tasmotaSwitchService {
       }
 
       this.characteristic.updateValue((nunjucks.renderString(this.accessory.context.device[this.uniq_id].val_tpl, interim) === this.accessory.context.device[this.uniq_id].pl_on ? true : false));
+
+      if (this.platform.config.history && this.accessory.context.fakegatoService ?.addEntry) {
+        debug('Updating fakegato', this.service.displayName);
+        this.accessory.context.fakegatoService.addEntry({
+          time: Date.now(),
+          status: (this.characteristic.value ? 1 : 0),
+        });
+      } else {
+        debug('Not updating fakegato', this.service.displayName);
+      }
+
     } catch (err) {
+      debug('ERROR:', err.message);
       this.platform.log.error('ERROR: message parsing error', this.service.displayName, topic, message.toString());
     }
   }

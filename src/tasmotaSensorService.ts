@@ -24,7 +24,7 @@ export class tasmotaSensorService {
   public statusSubscribe: Subscription;
   public availabilitySubscribe: Subscription;
   private CustomCharacteristic;
-  public fakegato: string; 
+  public fakegato: string;
 
   constructor(
     private readonly platform: tasmotaPlatform,
@@ -105,6 +105,7 @@ export class tasmotaSensorService {
       case 'power':
         switch (this.uniq_id.replace(accessory.context.identifier, '').toLowerCase()) {
           case '_energy_current': // Amps
+            this.fakegato = 'energy';
           case '_energy_voltage': // Voltage
           case '_energy_power': // Watts
           case '_energy_total': // Total Kilowatts
@@ -112,9 +113,6 @@ export class tasmotaSensorService {
             // debug('this.service', this.service);
 
             this.characteristic = this.service.getCharacteristic(this.deviceClassToHKCharacteristic(this.uniq_id.replace(accessory.context.identifier, '').toLowerCase()));
-            if (this.uniq_id.replace(accessory.context.identifier, '').toLowerCase() === '_energy_current') {
-              this.fakegato = 'energy';
-            }
             break;
           default:
             this.platform.log.warn('Warning: Unhandled Tasmota power sensor type', this.uniq_id.replace(accessory.context.identifier, '').toLowerCase());
@@ -133,6 +131,18 @@ export class tasmotaSensorService {
         break;
       default:
         this.platform.log.warn('Warning: Unhandled Tasmota sensor type', accessory.context.device[this.uniq_id].dev_cla);
+    }
+
+    // Enable historical logging
+
+    if (this.platform.config.history && this.fakegato && !this.accessory.context.fakegatoService ?.addEntry) {
+      this.accessory.context.fakegatoService = new this.platform.FakeGatoHistoryService(this.fakegato, this.accessory, {
+        storage: 'fs',
+        minutes: this.platform.config.historyInterval ?? 10,
+        log: this.platform.log,
+      });
+    } else {
+      debug('fakegatoService exists');
     }
 
     // setup event listeners for services / characteristics
@@ -204,13 +214,32 @@ export class tasmotaSensorService {
       // Error has already been handled
     } else {
       if (this.characteristic.value != value && this.delta(this.characteristic.value, value)) {
-        this.platform.log.info('Updating \'%s\' to %s', this.service.displayName, value);
+        this.platform.log.info('Updating \'%s:%s\' to %s', this.service.displayName, this.characteristic.displayName ?? '', value);
       } else {
-        this.platform.log.debug('Updating \'%s\' to %s', this.service.displayName, value);
+        this.platform.log.debug('Updating \'%s:%s\' to %s', this.service.displayName, this.characteristic.displayName ?? '', value);
       }
     }
 
     this.characteristic.updateValue(value);
+
+    switch (this.fakegato) {
+      case 'weather':
+        this.accessory.context.fakegatoService.addEntry({
+          time: Date.now(),
+          temp: value,
+          pressure: this.accessory.getService(this.CustomCharacteristic.AtmosphericPressureSensor) ?.getCharacteristic(this.CustomCharacteristic.AtmosphericPressureLevel).value ?? 0,
+          humidity: this.accessory.getService(this.platform.Service.HumiditySensor) ?.getCharacteristic(this.platform.Characteristic.CurrentRelativeHumidity).value ?? 0,
+        });
+        break;
+      case 'energy':
+        this.accessory.context.fakegatoService.addEntry({
+          time: Date.now(),
+          power: value,
+        });
+        break;
+      default:
+        this.platform.log.warn('Unknown fakegato type', this.fakegato);
+    }
   }
 
 

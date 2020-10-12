@@ -12,7 +12,7 @@ All notable changes to this project will be documented in this file. This projec
 - Fix for color flip flops
 - Support for Pressure sensor on BME280 and other others ( Only visible from HomeKit apps that support pressure )
 - Support for ZMAi-90 Current Sensor / Switch
-- Support for Fakegato history for Temperature, Humidity and Pressure sensors.
+- Support for Fakegato history for Temperature, Humidity, Current and Pressure sensors.
 - Added support for overriding the discovery response
 - Added tasmota device type fan, to allow control of Fan ( Based on a dimmable device )
 

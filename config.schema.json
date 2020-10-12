@@ -50,12 +50,26 @@
         "default": false,
         "description": "Enable verbose DEBUG logging."
       },
-      "fakegato": {
-        "title": "Fakegato historical sensor logging",
+      "history": {
+        "title": "History logging of sensor and other data.",
         "type": "boolean",
         "required": false,
         "default": false,
-        "description": "Enable logging of historical sensor information using fakegato."
+        "description": "Enable logging of historical sensor information."
+      },
+      "historyInterval": {
+        "title": "Update interval for historical data.",
+        "type": "number",
+        "required": false,
+        "default": 10,
+        "description": "Update interval for the logging of history data.  No requirement to change."
+      },
+      "filter": {
+        "title": "Filter device discovery topic",
+        "type": "string",
+        "required": false,
+        "default": "",
+        "description": "Regular expression to filter discovery topic messages against. ie \"F52066|00F861\" limit discovery to these two devices."
       }
     }
   }
