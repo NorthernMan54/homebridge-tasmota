@@ -145,7 +145,7 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
 
       // debug('filter', this.config.filter);
       if (topic.match(this.config.filter)) {
-        debug('Discovered ->', topic, config.name, config);
+
         let message = normalizeMessage(config);
         // debug('normalizeMessage ->', message);
         if (message.dev && message.dev.ids[0]) {
@@ -153,7 +153,7 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
           const uniq_id = message.uniq_id;            // Unique per service
 
           message = this.discoveryOveride(uniq_id, message);
-
+          debug('Discovered ->', topic, config.name, message);
           const uuid = this.api.hap.uuid.generate(identifier);
 
           // see if an accessory with the same uuid has already been registered and restored from
@@ -299,10 +299,10 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
         // debug('Merging', this.config.override[uniq_id]);
         let merged = { ...message, ...this.config.override[uniq_id] };
         // debug('Merged', merged);
-        return merged;
+        return normalizeMessage(merged);
       }
     }
-    return message;
+    return normalizeMessage(message);
   }
 
   serviceCleanup(uniq_id: string, existingAccessory: PlatformAccessory) {
@@ -418,6 +418,7 @@ function normalizeMessage(message) {
     sw_version: 'sw',
     manufacturer: 'mf',
     identifiers: 'ids',
+    value_template: 'val_tpl',
   };
 
   message = renameKeys(message, translation);

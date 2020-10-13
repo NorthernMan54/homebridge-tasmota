@@ -127,6 +127,44 @@ Rule1 1
 
 As a side effect the rule resets the `teleperiod` to 300 seconds similar to restarting the plugin.
 
+## Advanced configurations
+
+### Motion + BME280 Temperature Sensor
+
+* Tasmota Configuration
+
+```
+Template: {"NAME":"BME280 + Motion","GPIO":[255,255,157,255,9,255,255,255,6,255,5,255,255],"FLAG":15,"BASE":18}
+Console: SwitchMode 1
+```
+
+* homerbidge-tasmota config.json
+
+```
+"override":
+  "869815_SW_1": {
+    "device_class": "motion"
+ }
+ ```
+
+### Tuya Dimmer Module as a FAN
+
+* Tasmota configuration
+
+```
+TuyaMCU 21,3
+DimmerRange xx,xx
+```
+
+* homerbidge-tasmota config.json
+
+```
+"override": {
+   "EF159D_LI_1": {
+   "tasmotaType": "fan"
+  }
+```
+
 ## Discord Server
 
 A channel #tasmota has been created on the Homebridge Discord Server.
