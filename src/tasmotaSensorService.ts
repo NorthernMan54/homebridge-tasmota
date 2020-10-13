@@ -52,7 +52,7 @@ export class tasmotaSensorService {
             maxValue: 100,
           });
 
-        this.fakegato = 'weather';
+        if (this.platform.config.history) this.fakegato = 'weather';
         this.characteristic = this.service.getCharacteristic(this.platform.Characteristic.CurrentTemperature);
 
         break;
@@ -104,10 +104,10 @@ export class tasmotaSensorService {
         break;
       case 'power':
         switch (this.uniq_id.replace(accessory.context.identifier, '').toLowerCase()) {
-          case '_energy_current': // Amps
-            this.fakegato = 'energy';
-          case '_energy_voltage': // Voltage
           case '_energy_power': // Watts
+            if (this.platform.config.history) this.fakegato = 'energy';
+          case '_energy_voltage': // Voltage
+          case '_energy_current': // Amps
           case '_energy_total': // Total Kilowatts
             this.service = this.accessory.getService(this.platform.Service.Switch) || this.accessory.addService(this.platform.Service.Switch, accessory.context.device[this.uniq_id].name, uuid);
             // debug('this.service', this.service);
@@ -127,7 +127,7 @@ export class tasmotaSensorService {
           .setCharacteristic(this.platform.Characteristic.Model, accessory.context.device[this.uniq_id].dev.mdl)
           .setCharacteristic(this.platform.Characteristic.FirmwareRevision, accessory.context.device[this.uniq_id].dev.sw)
           .setCharacteristic(this.platform.Characteristic.SerialNumber, accessory.context.device[this.uniq_id].dev.ids[0]);
-          // debug('AccessoryInformation', this.accessory.getService(this.platform.Service.AccessoryInformation));
+        // debug('AccessoryInformation', this.accessory.getService(this.platform.Service.AccessoryInformation));
         break;
       default:
         this.platform.log.warn('Warning: Unhandled Tasmota sensor type', accessory.context.device[this.uniq_id].dev_cla);
@@ -142,7 +142,7 @@ export class tasmotaSensorService {
         log: this.platform.log,
       });
     } else {
-      debug('fakegatoService exists');
+      debug('fakegatoService exists', accessory.context.device[this.uniq_id].name);
     }
 
     // setup event listeners for services / characteristics
@@ -222,23 +222,27 @@ export class tasmotaSensorService {
 
     this.characteristic.updateValue(value);
 
-    switch (this.fakegato) {
-      case 'weather':
-        this.accessory.context.fakegatoService.addEntry({
-          time: Date.now(),
-          temp: value,
-          pressure: this.accessory.getService(this.CustomCharacteristic.AtmosphericPressureSensor) ?.getCharacteristic(this.CustomCharacteristic.AtmosphericPressureLevel).value ?? 0,
-          humidity: this.accessory.getService(this.platform.Service.HumiditySensor) ?.getCharacteristic(this.platform.Characteristic.CurrentRelativeHumidity).value ?? 0,
-        });
-        break;
-      case 'energy':
-        this.accessory.context.fakegatoService.addEntry({
-          time: Date.now(),
-          power: value,
-        });
-        break;
-      default:
-        this.platform.log.warn('Unknown fakegato type', this.fakegato);
+    if (this.platform.config.history) {
+      switch (this.fakegato) {
+        case 'weather':
+          this.accessory.context.fakegatoService.addEntry({
+            time: Date.now(),
+            temp: value,
+            pressure: this.accessory.getService(this.CustomCharacteristic.AtmosphericPressureSensor) ?.getCharacteristic(this.CustomCharacteristic.AtmosphericPressureLevel).value ?? 0,
+            humidity: this.accessory.getService(this.platform.Service.HumiditySensor) ?.getCharacteristic(this.platform.Characteristic.CurrentRelativeHumidity).value ?? 0,
+          });
+          break;
+        case 'energy':
+          this.accessory.context.fakegatoService.addEntry({
+            time: Date.now(),
+            power: value,
+          });
+          break;
+        case undefined:
+          break;
+        default:
+          this.platform.log.warn('Unknown fakegato type', this.fakegato);
+      }
     }
   }
 

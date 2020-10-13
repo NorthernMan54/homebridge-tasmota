@@ -103,22 +103,24 @@ export class tasmotaSwitchService {
 
         this.platform.log.info('Updating \'%s\' to %s', this.service.displayName, nunjucks.renderString(this.accessory.context.device[this.uniq_id].val_tpl, interim));
 
+        if (this.platform.config.history && this.accessory.context.fakegatoService ?.addEntry) {
+          debug('Updating fakegato', this.service.displayName);
+          this.accessory.context.fakegatoService.disableTimer = true;
+          this.accessory.context.fakegatoService.addEntry({
+            time: Date.now(),
+            status: (this.characteristic.value ? 1 : 0),
+          });
+          this.accessory.context.fakegatoService.disableTimer = false;
+        } else {
+          debug('Not updating fakegato', this.service.displayName);
+        }
+
       } else {
 
         this.platform.log.debug('Updating \'%s\' to %s', this.service.displayName, nunjucks.renderString(this.accessory.context.device[this.uniq_id].val_tpl, interim));
       }
 
       this.characteristic.updateValue((nunjucks.renderString(this.accessory.context.device[this.uniq_id].val_tpl, interim) === this.accessory.context.device[this.uniq_id].pl_on ? true : false));
-
-      if (this.platform.config.history && this.accessory.context.fakegatoService ?.addEntry) {
-        debug('Updating fakegato', this.service.displayName);
-        this.accessory.context.fakegatoService.addEntry({
-          time: Date.now(),
-          status: (this.characteristic.value ? 1 : 0),
-        });
-      } else {
-        debug('Not updating fakegato', this.service.displayName);
-      }
 
     } catch (err) {
       debug('ERROR:', err.message);
