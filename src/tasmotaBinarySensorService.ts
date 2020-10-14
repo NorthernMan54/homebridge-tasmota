@@ -31,7 +31,7 @@ export class tasmotaBinarySensorService {
     public readonly accessory: PlatformAccessory,
     private readonly uniq_id: string,
   ) {
-
+    /* eslint-disable */
     this.CustomCharacteristic = require('./lib/CustomCharacteristics')(platform.Service, platform.Characteristic);
     const uuid = this.platform.api.hap.uuid.generate(accessory.context.device[this.uniq_id].uniq_id);
     this.device_class = accessory.context.device[this.uniq_id].dev_cla;
@@ -117,10 +117,9 @@ export class tasmotaBinarySensorService {
     if (this.characteristic.value !== (nunjucks.renderString(this.accessory.context.device[this.uniq_id].val_tpl, interim) === this.accessory.context.device[this.uniq_id].pl_on ? 1 : 0)) {
 
       this.platform.log.info('Updating \'%s\' to %s', this.service.displayName, nunjucks.renderString(this.accessory.context.device[this.uniq_id].val_tpl, interim));
-
+      const timesOpened;
       switch (this.fakegato) {
         case 'door':
-          const timesOpened;
           timesOpened = timesOpened + this.service.getCharacteristic(this.CustomCharacteristic.TimesOpened).value;
           this.service.updateCharacteristic(this.CustomCharacteristic.TimesOpened, timesOpened);
         // fall thru
