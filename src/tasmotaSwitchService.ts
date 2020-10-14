@@ -28,6 +28,7 @@ export class tasmotaSwitchService {
     public readonly accessory: PlatformAccessory,
     private readonly uniq_id: string,
   ) {
+    this.platform.log.debug('Creating switch service for %s %s', accessory.context.device[this.uniq_id].stat_t, accessory.context.device[this.uniq_id].name);
     const uuid = this.platform.api.hap.uuid.generate(this.accessory.context.device[this.uniq_id].uniq_id);
 
     this.service = this.accessory.getService(uuid) || this.accessory.addService(this.platform.Service.Switch, accessory.context.device[this.uniq_id].name, uuid);
@@ -42,13 +43,14 @@ export class tasmotaSwitchService {
     this.characteristic = this.service.getCharacteristic(this.platform.Characteristic.On);
 
     if (this.platform.config.history && !this.accessory.context.fakegatoService ?.addEntry) {
-      this.accessory.context.fakegatoService = new this.platform.FakeGatoHistoryService('energy', this.accessory, {
+      this.accessory.context.fakegatoService = new this.platform.FakeGatoHistoryService('energy2', this.accessory, {
         storage: 'fs',
         minutes: this.platform.config.historyInterval ?? 10,
         log: this.platform.log,
       });
+      this.platform.log.debug('Creating fakegato service for %s %s', accessory.context.device[this.uniq_id].stat_t, accessory.context.device[this.uniq_id].name, this.accessory.context.device[this.uniq_id].uniq_id);
     } else {
-      debug('fakegatoService exists');
+      debug('fakegatoService exists', this.accessory.context.device[this.uniq_id].uniq_id);
     }
 
     // register handlers for the On/Off Characteristic
@@ -99,28 +101,31 @@ export class tasmotaSwitchService {
         value_json: JSON.parse(message.toString()),
       };
 
-      if (this.characteristic.value !== (nunjucks.renderString(this.accessory.context.device[this.uniq_id].val_tpl, interim) === this.accessory.context.device[this.uniq_id].pl_on ? true : false)) {
+      const value = (nunjucks.renderString(this.accessory.context.device[this.uniq_id].val_tpl, interim) === this.accessory.context.device[this.uniq_id].pl_on ? true : false);
 
-        this.platform.log.info('Updating \'%s\' to %s', this.service.displayName, nunjucks.renderString(this.accessory.context.device[this.uniq_id].val_tpl, interim));
+      if (this.characteristic.value !== value) {
+        this.platform.log.info('Updating \'%s:%s\' to %s', this.service.displayName, this.characteristic.displayName, value);
 
         if (this.platform.config.history && this.accessory.context.fakegatoService ?.addEntry) {
-          debug('Updating fakegato', this.service.displayName);
-          this.accessory.context.fakegatoService.disableTimer = true;
-          this.accessory.context.fakegatoService.addEntry({
-            time: Date.now(),
-            status: (this.characteristic.value ? 1 : 0),
+          debug('Updating fakegato \'%s:%s\'', this.service.displayName, this.characteristic.displayName, {
+            time: Math.round(new Date().valueOf() / 1000),
+            status: (value ? 1 : 0),
           });
-          this.accessory.context.fakegatoService.disableTimer = false;
+          this.accessory.context.fakegatoService.addEntry({
+            time: Math.round(new Date().valueOf() / 1000),
+            status: (value ? 1 : 0),
+          });
         } else {
-          debug('Not updating fakegato', this.service.displayName);
+          debug('Not updating fakegato \'%s:%s\'', this.service.displayName, this.characteristic.displayName);
         }
 
       } else {
 
+        debug('???', this.characteristic.value, (nunjucks.renderString(this.accessory.context.device[this.uniq_id].val_tpl, interim) === this.accessory.context.device[this.uniq_id].pl_on ? true : false));
         this.platform.log.debug('Updating \'%s\' to %s', this.service.displayName, nunjucks.renderString(this.accessory.context.device[this.uniq_id].val_tpl, interim));
       }
 
-      this.characteristic.updateValue((nunjucks.renderString(this.accessory.context.device[this.uniq_id].val_tpl, interim) === this.accessory.context.device[this.uniq_id].pl_on ? true : false));
+      this.characteristic.updateValue(value);
 
     } catch (err) {
       debug('ERROR:', err.message);
@@ -150,6 +155,15 @@ export class tasmotaSwitchService {
 
     this.accessory.context.mqttHost.sendMessage(this.accessory.context.device[this.uniq_id].cmd_t, (value ? this.accessory.context.device[this.uniq_id].pl_on : this.accessory.context.device[this.uniq_id].pl_off));
 
+    if (this.platform.config.history && this.accessory.context.fakegatoService ?.addEntry) {
+      debug('Updating fakegato', this.service.displayName);
+      this.accessory.context.fakegatoService.addEntry({
+        time: Math.round(new Date().valueOf() / 1000),
+        status: (value ? 1 : 0),
+      });
+    } else {
+      debug('Not updating fakegato', this.service.displayName);
+    }
     // you must call the callback function
     callback(null);
   }

@@ -1,7 +1,6 @@
-import { Service, PlatformAccessory, Characteristic } from 'homebridge';
+import { Service, PlatformAccessory, Characteristic, CharacteristicValue } from 'homebridge';
 
 import { tasmotaPlatform } from './platform';
-// import { nunjucks } from 'nunjucks';
 
 import nunjucks from 'nunjucks';
 
@@ -24,6 +23,7 @@ export class tasmotaBinarySensorService {
   private device_class: string;
   public statusSubscribe: Subscription;
   public availabilitySubscribe: Subscription;
+  private CustomCharacteristic;
   public fakegato: string;
 
   constructor(
@@ -32,6 +32,7 @@ export class tasmotaBinarySensorService {
     private readonly uniq_id: string,
   ) {
 
+    this.CustomCharacteristic = require('./lib/CustomCharacteristics')(platform.Service, platform.Characteristic);
     const uuid = this.platform.api.hap.uuid.generate(accessory.context.device[this.uniq_id].uniq_id);
     this.device_class = accessory.context.device[this.uniq_id].dev_cla;
     switch (accessory.context.device[this.uniq_id].dev_cla) {
@@ -42,7 +43,11 @@ export class tasmotaBinarySensorService {
 
         this.service.setCharacteristic(this.platform.Characteristic.Name, accessory.context.device[this.uniq_id].name);
         this.characteristic = this.service.getCharacteristic(this.platform.Characteristic.ContactSensorState);
-        this.fakegato = 'door';
+        if (this.platform.config.history) {
+          this.fakegato = 'door';
+          this.service.addOptionalCharacteristic(this.CustomCharacteristic.TimesOpened);
+          this.service.addOptionalCharacteristic(this.CustomCharacteristic.LastActivation);
+        }
         break;
       case 'motion':
         this.platform.log.debug('Creating %s binary sensor %s', accessory.context.device[this.uniq_id].dev_cla, accessory.context.device[this.uniq_id].name);
@@ -51,7 +56,11 @@ export class tasmotaBinarySensorService {
 
         this.service.setCharacteristic(this.platform.Characteristic.Name, accessory.context.device[this.uniq_id].name);
         this.characteristic = this.service.getCharacteristic(this.platform.Characteristic.MotionDetected);
-        this.fakegato = 'motion';
+        if (this.platform.config.history) {
+          this.fakegato = 'motion';
+          this.service.addOptionalCharacteristic(this.CustomCharacteristic.LastActivation);
+          debug('adding', this.fakegato );
+        }
         break;
       default:
         this.platform.log.error('Warning: Unhandled Tasmota binary sensor type', accessory.context.device[this.uniq_id].dev_cla);
@@ -77,8 +86,9 @@ export class tasmotaBinarySensorService {
         minutes: this.platform.config.historyInterval ?? 10,
         log: this.platform.log,
       });
+      this.platform.log.debug('Creating fakegato service for %s %s', accessory.context.device[this.uniq_id].stat_t, accessory.context.device[this.uniq_id].name, this.accessory.context.device[this.uniq_id].uniq_id);
     } else {
-      debug('fakegatoService exists');
+      debug('fakegatoService exists', this.accessory.context.device[this.uniq_id].uniq_id);
     }
 
     nunjucks.installJinjaCompat();
@@ -108,6 +118,19 @@ export class tasmotaBinarySensorService {
 
       this.platform.log.info('Updating \'%s\' to %s', this.service.displayName, nunjucks.renderString(this.accessory.context.device[this.uniq_id].val_tpl, interim));
 
+      switch (this.fakegato) {
+        case 'door':
+          let timesOpened;
+          timesOpened = timesOpened + this.service.getCharacteristic(this.CustomCharacteristic.TimesOpened).value;
+          this.service.updateCharacteristic(this.CustomCharacteristic.TimesOpened, timesOpened);
+        // fall thru
+        case 'motion':
+          const now = Math.round(new Date().valueOf() / 1000);
+          const lastActivation = now - this.accessory.context.fakegatoService.getInitialTime();
+          this.service.updateCharacteristic(this.CustomCharacteristic.LastActivation, lastActivation);
+          break;
+      }
+
     } else {
 
       // this.platform.log.debug('Updating \'%s\' to %s', this.service.displayName, nunjucks.renderString(this.accessory.context.device[this.uniq_id].val_tpl, interim));
@@ -118,7 +141,7 @@ export class tasmotaBinarySensorService {
     if (this.platform.config.history && this.fakegato && this.accessory.context.fakegatoService ?.addEntry) {
       debug('Updating fakegato', this.service.displayName);
       this.accessory.context.fakegatoService.addEntry({
-        time: Date.now(),
+        time: Math.round(new Date().valueOf() / 1000),
         status: (this.characteristic.value ? 1 : 0),
       });
     } else {

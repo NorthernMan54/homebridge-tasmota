@@ -124,6 +124,28 @@ module.exports = function(Service, Characteristic) {
   };
   inherits(CustomCharacteristic.ProgramData, Characteristic);
 
+  CustomCharacteristic.LastActivation = function() {
+    Characteristic.call(this, 'Last Activation', CustomCharacteristic.LastActivation.UUID);
+    this.setProps({
+      format: Characteristic.Formats.UINT32,
+      unit: Characteristic.Units.SECONDS,
+      perms: [Characteristic.Perms.READ, Characteristic.Perms.NOTIFY]
+    });
+    this.value = this.getDefaultValue();
+  };
+  CustomCharacteristic.LastActivation.UUID = 'E863F11A-079E-48FF-8F27-9C2605A29F52';
+  inherits(CustomCharacteristic.LastActivation, Characteristic);
+
+  CustomCharacteristic.TimesOpened = function() {
+    Characteristic.call(this, 'Times Opened', CustomCharacteristic.TimesOpened.UUID);
+    this.setProps({
+      format: Characteristic.Formats.UINT32,
+      perms: [Characteristic.Perms.READ, Characteristic.Perms.NOTIFY]
+    });
+    this.value = this.getDefaultValue();
+  };
+  CustomCharacteristic.TimesOpened.UUID = 'E863F129-079E-48FF-8F27-9C2605A29F52';
+  inherits(CustomCharacteristic.TimesOpened, Characteristic);
 
   return CustomCharacteristic;
 };

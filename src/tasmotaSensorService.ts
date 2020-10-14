@@ -1,10 +1,10 @@
 import { Service, PlatformAccessory, Characteristic } from 'homebridge';
-
 import { tasmotaPlatform } from './platform';
-
 import nunjucks from 'nunjucks';
+import os from 'os';
 
 import createDebug from 'debug';
+
 const debug = createDebug('Tasmota:sensor');
 
 /**
@@ -105,7 +105,7 @@ export class tasmotaSensorService {
       case 'power':
         switch (this.uniq_id.replace(accessory.context.identifier, '').toLowerCase()) {
           case '_energy_power': // Watts
-            if (this.platform.config.history) this.fakegato = 'energy';
+            if (this.platform.config.history) this.fakegato = 'energy2';
           case '_energy_voltage': // Voltage
           case '_energy_current': // Amps
           case '_energy_total': // Total Kilowatts
@@ -120,13 +120,14 @@ export class tasmotaSensorService {
         break;
       case undefined:
         // This is this Device status object
+        const hostname = os.hostname().replace(/[^a-z0-9]/gi,'');
         this.platform.log.debug('Setting accessory information', accessory.context.device[this.uniq_id].name);
         this.accessory.getService(this.platform.Service.AccessoryInformation)!
           .setCharacteristic(this.platform.Characteristic.Name, accessory.context.device[this.uniq_id].dev.name)
           .setCharacteristic(this.platform.Characteristic.Manufacturer, accessory.context.device[this.uniq_id].dev.mf)
           .setCharacteristic(this.platform.Characteristic.Model, accessory.context.device[this.uniq_id].dev.mdl)
           .setCharacteristic(this.platform.Characteristic.FirmwareRevision, accessory.context.device[this.uniq_id].dev.sw)
-          .setCharacteristic(this.platform.Characteristic.SerialNumber, accessory.context.device[this.uniq_id].dev.ids[0]);
+          .setCharacteristic(this.platform.Characteristic.SerialNumber, accessory.context.device[this.uniq_id].dev.ids[0] + '-' + hostname); // A unique fakegato ID
         // debug('AccessoryInformation', this.accessory.getService(this.platform.Service.AccessoryInformation));
         break;
       default:
@@ -141,6 +142,7 @@ export class tasmotaSensorService {
         minutes: this.platform.config.historyInterval ?? 10,
         log: this.platform.log,
       });
+      this.platform.log.debug('Creating fakegato service for %s %s', accessory.context.device[this.uniq_id].stat_t, accessory.context.device[this.uniq_id].name, this.accessory.context.device[this.uniq_id].uniq_id);
     } else {
       debug('fakegatoService exists', accessory.context.device[this.uniq_id].name);
     }
@@ -226,15 +228,25 @@ export class tasmotaSensorService {
       switch (this.fakegato) {
         case 'weather':
           this.accessory.context.fakegatoService.addEntry({
-            time: Date.now(),
+            time: Math.round(new Date().valueOf() / 1000),
+            temp: value,
+            pressure: this.accessory.getService(this.CustomCharacteristic.AtmosphericPressureSensor) ?.getCharacteristic(this.CustomCharacteristic.AtmosphericPressureLevel).value ?? 0,
+            humidity: this.accessory.getService(this.platform.Service.HumiditySensor) ?.getCharacteristic(this.platform.Characteristic.CurrentRelativeHumidity).value ?? 0,
+          });
+          debug('Updating fakegato \'%s:%s\'', this.service.displayName, this.characteristic.displayName, {
+            time: Math.round(new Date().valueOf() / 1000),
             temp: value,
             pressure: this.accessory.getService(this.CustomCharacteristic.AtmosphericPressureSensor) ?.getCharacteristic(this.CustomCharacteristic.AtmosphericPressureLevel).value ?? 0,
             humidity: this.accessory.getService(this.platform.Service.HumiditySensor) ?.getCharacteristic(this.platform.Characteristic.CurrentRelativeHumidity).value ?? 0,
           });
           break;
-        case 'energy':
+        case 'energy2':
           this.accessory.context.fakegatoService.addEntry({
-            time: Date.now(),
+            time: Math.round(new Date().valueOf() / 1000),
+            power: value,
+          });
+          debug('Updating fakegato \'%s:%s\'', this.characteristic.displayName , this.service.displayName, {
+            time: Math.round(new Date().valueOf() / 1000),
             power: value,
           });
           break;

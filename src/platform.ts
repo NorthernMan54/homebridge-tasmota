@@ -280,7 +280,7 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
           this.log.warn('Warning: Malformed HASS Discovery message', topic, config.name);
         }
       } else {
-        // debug('filtered');
+        debug('filtered', topic);
       }
     });
   }
