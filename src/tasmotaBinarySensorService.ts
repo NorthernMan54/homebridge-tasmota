@@ -117,7 +117,7 @@ export class tasmotaBinarySensorService {
     if (this.characteristic.value !== (nunjucks.renderString(this.accessory.context.device[this.uniq_id].val_tpl, interim) === this.accessory.context.device[this.uniq_id].pl_on ? 1 : 0)) {
 
       this.platform.log.info('Updating \'%s\' to %s', this.service.displayName, nunjucks.renderString(this.accessory.context.device[this.uniq_id].val_tpl, interim));
-      const timesOpened;
+      let timesOpened;
       switch (this.fakegato) {
         case 'door':
           timesOpened = timesOpened + this.service.getCharacteristic(this.CustomCharacteristic.TimesOpened).value;
