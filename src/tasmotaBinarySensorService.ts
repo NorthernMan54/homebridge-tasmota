@@ -120,10 +120,11 @@ export class tasmotaBinarySensorService {
 
       switch (this.fakegato) {
         case 'door':
-          let timesOpened;
+          const timesOpened;
           timesOpened = timesOpened + this.service.getCharacteristic(this.CustomCharacteristic.TimesOpened).value;
           this.service.updateCharacteristic(this.CustomCharacteristic.TimesOpened, timesOpened);
         // fall thru
+          /* eslint-disable */
         case 'motion':
           const now = Math.round(new Date().valueOf() / 1000);
           const lastActivation = now - this.accessory.context.fakegatoService.getInitialTime();
