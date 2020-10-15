@@ -80,6 +80,8 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
 
         this.FakeGatoHistoryService = fakegato(this.api);
 
+        // Only addEntries that match the expected profile of the function. 
+
         this.FakeGatoHistoryService.prototype.appendData = function(entry) {
           entry.time = Math.round(new Date().valueOf() / 1000);
           switch (this.accessoryType) {

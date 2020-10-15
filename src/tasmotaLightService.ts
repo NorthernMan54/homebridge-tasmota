@@ -212,7 +212,9 @@ export class tasmotaLightService {
   setHue(value: CharacteristicValue, callback: CharacteristicSetCallback) {
     this.platform.log.info('%s Set Characteristic Hue ->', this.accessory.displayName, value);
     this.update.put({
-      Hue: value,
+      oldHue: this.service.getCharacteristic(this.platform.Characteristic.Hue).value,
+      oldSaturation: this.service.getCharacteristic(this.platform.Characteristic.Saturation).value,
+      newHue: value,
     }).then(() => {
       // debug("setTargetTemperature", this, thermostat);
       callback(null);
@@ -224,7 +226,9 @@ export class tasmotaLightService {
   setSaturation(value: CharacteristicValue, callback: CharacteristicSetCallback) {
     this.platform.log.info('%s Set Characteristic Saturation ->', this.accessory.displayName, value);
     this.update.put({
-      Saturation: value,
+      oldHue: this.service.getCharacteristic(this.platform.Characteristic.Hue).value,
+      oldSaturation: this.service.getCharacteristic(this.platform.Characteristic.Saturation).value,
+      newSaturation: value,
     }).then(() => {
       // debug("setTargetTemperature", this, thermostat);
       callback(null, value);
@@ -279,10 +283,10 @@ class ChangeHSB {
 
       if (!this.timeout) {
         this.timeout = setTimeout(() => {
-          debug('put start', this.desiredState);
-          debug('HSL->RGB', hsl2rgb(this.desiredState.Hue, this.desiredState.Saturation, 50).toString());
+          debug('put start %s', this.desiredState);
+          debug('HSL->RGB', hsl2rgb(this.desiredState?.newHue ?? this.desiredState?.oldHue, this.desiredState?.newSaturation ?? this.desiredState?.oldSaturation, 50).toString());
 
-          this.accessory.context.mqttHost.sendMessage(this.accessory.context.device[this.uniq_id].rgb_cmd_t, hsl2rgb(this.desiredState.Hue, this.desiredState.Saturation, 50).toString());
+          this.accessory.context.mqttHost.sendMessage(this.accessory.context.device[this.uniq_id].rgb_cmd_t, hsl2rgb(this.desiredState?.newHue ?? this.desiredState?.oldHue, this.desiredState?.newSaturation ?? this.desiredState?.oldSaturation, 50).toString());
 
           for (const d of this.deferrals) {
             d.resolve();
