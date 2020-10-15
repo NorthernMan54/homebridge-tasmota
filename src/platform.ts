@@ -77,7 +77,39 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
       this.discoverDevices();
 
       if (this.config.history) {
+
         this.FakeGatoHistoryService = fakegato(this.api);
+
+        this.FakeGatoHistoryService.prototype.appendData = function(entry) {
+          entry.time = Math.round(new Date().valueOf() / 1000);
+          switch (this.accessoryType) {
+            case 'weather':
+              if (entry.hasOwnProperty('temp')) {
+                this.addEntry(entry);
+              }
+              break;
+            case 'door':
+            case 'motion':
+              if (entry.hasOwnProperty('status')) {
+                this.addEntry(entry);
+              }
+              break;
+            case 'energy2':
+              debug('energy2', entry);
+              if (entry.hasOwnProperty('status') || entry.hasOwnProperty('power')) {
+                this.addEntry(entry);
+              }
+              break;
+            case 'energy':
+              if (entry.hasOwnProperty('power')) {
+                this.addEntry(entry);
+              }
+              break;
+            default:
+              debug('unhandled this.accessoryType', this.accessoryType);
+          }
+
+        };
       }
     });
   }
@@ -404,7 +436,6 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
 }
 
 /* The various Tasmota firmware's have a slightly different flavors of the message. */
-
 
 function normalizeMessage(message) {
 

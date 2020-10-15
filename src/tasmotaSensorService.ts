@@ -227,26 +227,23 @@ export class tasmotaSensorService {
     if (this.platform.config.history) {
       switch (this.fakegato) {
         case 'weather':
-          this.accessory.context.fakegatoService.addEntry({
-            time: Math.round(new Date().valueOf() / 1000),
-            temp: value,
-            pressure: this.accessory.getService(this.CustomCharacteristic.AtmosphericPressureSensor) ?.getCharacteristic(this.CustomCharacteristic.AtmosphericPressureLevel).value ?? 0,
-            humidity: this.accessory.getService(this.platform.Service.HumiditySensor) ?.getCharacteristic(this.platform.Characteristic.CurrentRelativeHumidity).value ?? 0,
-          });
           debug('Updating fakegato \'%s:%s\'', this.service.displayName, this.characteristic.displayName, {
-            time: Math.round(new Date().valueOf() / 1000),
             temp: value,
             pressure: this.accessory.getService(this.CustomCharacteristic.AtmosphericPressureSensor) ?.getCharacteristic(this.CustomCharacteristic.AtmosphericPressureLevel).value ?? 0,
             humidity: this.accessory.getService(this.platform.Service.HumiditySensor) ?.getCharacteristic(this.platform.Characteristic.CurrentRelativeHumidity).value ?? 0,
           });
+          this.accessory.context.fakegatoService.appendData({
+            temp: value,
+            pressure: this.accessory.getService(this.CustomCharacteristic.AtmosphericPressureSensor) ?.getCharacteristic(this.CustomCharacteristic.AtmosphericPressureLevel).value ?? 0,
+            humidity: this.accessory.getService(this.platform.Service.HumiditySensor) ?.getCharacteristic(this.platform.Characteristic.CurrentRelativeHumidity).value ?? 0,
+          });
+
           break;
         case 'energy2':
-          this.accessory.context.fakegatoService.addEntry({
-            time: Math.round(new Date().valueOf() / 1000),
+          debug('Updating fakegato \'%s:%s\'', this.characteristic.displayName , this.service.displayName, {
             power: value,
           });
-          debug('Updating fakegato \'%s:%s\'', this.characteristic.displayName , this.service.displayName, {
-            time: Math.round(new Date().valueOf() / 1000),
+          this.accessory.context.fakegatoService.appendData({
             power: value,
           });
           break;

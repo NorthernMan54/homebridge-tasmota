@@ -108,11 +108,9 @@ export class tasmotaSwitchService {
 
         if (this.platform.config.history && this.accessory.context.fakegatoService ?.addEntry) {
           debug('Updating fakegato \'%s:%s\'', this.service.displayName, this.characteristic.displayName, {
-            time: Math.round(new Date().valueOf() / 1000),
             status: (value ? 1 : 0),
           });
-          this.accessory.context.fakegatoService.addEntry({
-            time: Math.round(new Date().valueOf() / 1000),
+          this.accessory.context.fakegatoService.appendData({
             status: (value ? 1 : 0),
           });
         } else {
@@ -121,7 +119,6 @@ export class tasmotaSwitchService {
 
       } else {
 
-        debug('???', this.characteristic.value, (nunjucks.renderString(this.accessory.context.device[this.uniq_id].val_tpl, interim) === this.accessory.context.device[this.uniq_id].pl_on ? true : false));
         this.platform.log.debug('Updating \'%s\' to %s', this.service.displayName, nunjucks.renderString(this.accessory.context.device[this.uniq_id].val_tpl, interim));
       }
 
@@ -156,9 +153,10 @@ export class tasmotaSwitchService {
     this.accessory.context.mqttHost.sendMessage(this.accessory.context.device[this.uniq_id].cmd_t, (value ? this.accessory.context.device[this.uniq_id].pl_on : this.accessory.context.device[this.uniq_id].pl_off));
 
     if (this.platform.config.history && this.accessory.context.fakegatoService ?.addEntry) {
-      debug('Updating fakegato', this.service.displayName);
-      this.accessory.context.fakegatoService.addEntry({
-        time: Math.round(new Date().valueOf() / 1000),
+      debug('Updating fakegato', this.service.displayName, {
+        status: (value ? 1 : 0),
+      });
+      this.accessory.context.fakegatoService.appendData({
         status: (value ? 1 : 0),
       });
     } else {

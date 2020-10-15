@@ -140,8 +140,7 @@ export class tasmotaBinarySensorService {
 
     if (this.platform.config.history && this.fakegato && this.accessory.context.fakegatoService ?.addEntry) {
       debug('Updating fakegato', this.service.displayName);
-      this.accessory.context.fakegatoService.addEntry({
-        time: Math.round(new Date().valueOf() / 1000),
+      this.accessory.context.fakegatoService.appendData({
         status: (this.characteristic.value ? 1 : 0),
       });
     } else {
