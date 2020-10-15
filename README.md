@@ -6,7 +6,7 @@ Homebridge Plugin for Tasmota Devices that leverage's the Home Assistant Auto Di
 
 * Automatic discovery and configuration of supported Tasmota devices in Homebridge/Homekit.
 * Cleanup and removal of disconnected devices after 24 hours.
-* Support for these types of devices Outlets, Dimmers, Sensors and Lightbulbs with Colour Temperature.
+* Support for these types of devices Outlets, Dimmers, Sensors and Lightbulbs with RGB and Colour Temperature.
 * Graphing of historical sensor information using fakegato.  ( Temperature, Humidity, Air Pressure and Current sensors ).
 
 ## Tasmota Device's Tested YMMV for other devices
@@ -20,15 +20,13 @@ Homebridge Plugin for Tasmota Devices that leverage's the Home Assistant Auto Di
 * ws2812 addressable RGB led light strip
 * RGB LED Light Strip
 * Support for [AZ-7798 CO2 Monitor](https://tasmota.github.io/docs/AZ-7798) - Tks Jeroen Vermeulen
+* PIR Motion sensor ( requires minor configuration )
 
 * WemosDB - Doorbell device
 
 ## Tasmota Devices that do not work or have issues
 
 For autodiscovery to work and the proper device to be created in Homebridge the device needs to include its 'device_class' as part of the discovery message.  Majority of the basic sensor types that use GPIO pins do not include this type of information, but other sensors that use I2C do.  An easy way to quickly determine if the Tasmota knows what type of device it is, is if the Tasmota page knows the type of sensor information.  Like temperature.
-
-* [Motion Sensors](https://tasmota.github.io/docs/PIR-Motion-Sensors/)
-
 
 ## Installation / Configuration
 
@@ -60,9 +58,9 @@ or
 tasmota/tele/STATE
 ```
 
-## Device Removal
+## Device Removal or Device Configuration Reset
 
-If Home Assistant Auto Discovery is disabled, the accessory will be removed from homekit.
+If Home Assistant Auto Discovery for a device is disabled, the accessory will be removed from homekit.  Useful for cleaning up devices that have wacky configurations accidentally created while configuring your device.  
 
 ```
 SetOption19 0
@@ -71,6 +69,8 @@ SetOption19 0
 ## Usefull Tasmota Device Options
 
 ### [setoption30 - Enforce Home Assistant auto-discovery relay as light](https://tasmota.github.io/docs/Commands/#setoption30)
+
+### [setoption37 - Remapping the RGBWcWw channels for lights](https://tasmota.github.io/docs/Commands/#setoption37)
 
 ## Discovery Overrides
 
@@ -142,8 +142,8 @@ Console: SwitchMode 1
 
 ```
 "override":
-  "869815_SW_1": {
-    "device_class": "motion"
+  "869815_SW_1": {            <--- This is the unique_id of the discovery message you want to override
+    "device_class": "motion"  <--- This is the key and property you want to override
  }
  ```
 
@@ -160,8 +160,8 @@ DimmerRange xx,xx
 
 ```
 "override": {
-   "EF159D_LI_1": {
-   "tasmotaType": "fan"
+   "EF159D_LI_1": {     <--- This is the unique_id of the discovery message you want to override
+   "tasmotaType": "fan" <--- This is the key and property you want to override
   }
 ```
 
@@ -176,7 +176,7 @@ A channel #tasmota has been created on the Homebridge Discord Server.
 * [x] Add support for sensors
 * [x] Add support for multiple relays
 * [x] Add support for RGB Lights
-* [ ] Phantom sensors don't go 'Not Responding' on a device with working sensors.
+* [x] Phantom sensors don't go 'Not Responding' on a device with working sensors. ( Workaround available, )
 * [x] Enable debug logging via config.json
 * [x] Clean up README
 * [x] Clean up debug and production logging
