@@ -134,7 +134,11 @@ As a side effect the rule resets the `teleperiod` to 300 seconds similar to rest
 * Tasmota Configuration
 
 ```
-{"NAME":"BME","GPIO":[255,255,157,255,255,255,255,255,6,255,5,255,255],"FLAG":15,"BASE":18}
+D5 - GPIO14 -> I2C SCL
+D6 - GPIO12 -> I2C SDA
+D4 - GPIO2 -> LedLink
+
+Template: {"NAME":"BME","GPIO":[255,255,157,255,255,255,255,255,6,255,5,255,255],"FLAG":15,"BASE":18}
 ```
 
 ### Motion + BME280 Temperature Sensor
@@ -142,6 +146,11 @@ As a side effect the rule resets the `teleperiod` to 300 seconds similar to rest
 * Tasmota Configuration
 
 ```
+D5 - GPIO14 -> I2C SCL
+D6 - GPIO12 -> I2C SDA
+D4 - GPIO2 -> LedLink
+D2 - GPIO4 -> Switch1 (9)
+
 Template: {"NAME":"BME + Motion","GPIO":[255,255,157,255,9,255,255,255,6,255,5,255,255],"FLAG":15,"BASE":18}
 Console: SwitchMode 1
 ```
@@ -161,7 +170,7 @@ Console: SwitchMode 1
 
 ```
 TuyaMCU 21,3
-DimmerRange xx,xx
+DimmerRange 100,255
 ```
 
 * homerbidge-tasmota config.json
