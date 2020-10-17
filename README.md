@@ -129,12 +129,20 @@ As a side effect the rule resets the `teleperiod` to 300 seconds similar to rest
 
 ## Advanced configurations
 
+### BME280 Temperature Sensor
+
+* Tasmota Configuration
+
+```
+{"NAME":"BME","GPIO":[255,255,157,255,255,255,255,255,6,255,5,255,255],"FLAG":15,"BASE":18}
+```
+
 ### Motion + BME280 Temperature Sensor
 
 * Tasmota Configuration
 
 ```
-Template: {"NAME":"BME280 + Motion","GPIO":[255,255,157,255,9,255,255,255,6,255,5,255,255],"FLAG":15,"BASE":18}
+Template: {"NAME":"BME + Motion","GPIO":[255,255,157,255,9,255,255,255,6,255,5,255,255],"FLAG":15,"BASE":18}
 Console: SwitchMode 1
 ```
 

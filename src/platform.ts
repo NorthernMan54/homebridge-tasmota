@@ -80,7 +80,7 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
 
         this.FakeGatoHistoryService = fakegato(this.api);
 
-        // Only addEntries that match the expected profile of the function. 
+        // Only addEntries that match the expected profile of the function.
 
         this.FakeGatoHistoryService.prototype.appendData = function(entry) {
           entry.time = Math.round(new Date().valueOf() / 1000);
@@ -90,6 +90,11 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
                 this.addEntry(entry);
               }
               break;
+              case 'weather2':
+                if (entry.hasOwnProperty('status') || entry.hasOwnProperty('temp')) {
+                  this.addEntry(entry);
+                }
+                break;
             case 'door':
             case 'motion':
               if (entry.hasOwnProperty('status')) {

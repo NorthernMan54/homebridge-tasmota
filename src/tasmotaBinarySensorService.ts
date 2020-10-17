@@ -57,7 +57,7 @@ export class tasmotaBinarySensorService {
         this.service.setCharacteristic(this.platform.Characteristic.Name, accessory.context.device[this.uniq_id].name);
         this.characteristic = this.service.getCharacteristic(this.platform.Characteristic.MotionDetected);
         if (this.platform.config.history) {
-          this.fakegato = 'motion';
+          this.fakegato = 'weather2';
           this.service.addOptionalCharacteristic(this.CustomCharacteristic.LastActivation);
           debug('adding', this.fakegato );
         }
@@ -124,7 +124,7 @@ export class tasmotaBinarySensorService {
           this.service.updateCharacteristic(this.CustomCharacteristic.TimesOpened, timesOpened);
         // fall thru
           /* eslint-disable */
-        case 'motion':
+        case 'weather2':
           const now = Math.round(new Date().valueOf() / 1000);
           const lastActivation = now - this.accessory.context.fakegatoService.getInitialTime();
           this.service.updateCharacteristic(this.CustomCharacteristic.LastActivation, lastActivation);

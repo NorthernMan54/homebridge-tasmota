@@ -52,7 +52,7 @@ export class tasmotaSensorService {
             maxValue: 100,
           });
 
-        if (this.platform.config.history) this.fakegato = 'weather';
+        if (this.platform.config.history) this.fakegato = 'weather2';
         this.characteristic = this.service.getCharacteristic(this.platform.Characteristic.CurrentTemperature);
 
         break;
@@ -226,7 +226,7 @@ export class tasmotaSensorService {
 
     if (this.platform.config.history) {
       switch (this.fakegato) {
-        case 'weather':
+        case 'weather2':
           debug('Updating fakegato \'%s:%s\'', this.service.displayName, this.characteristic.displayName, {
             temp: value,
             pressure: this.accessory.getService(this.CustomCharacteristic.AtmosphericPressureSensor) ?.getCharacteristic(this.CustomCharacteristic.AtmosphericPressureLevel).value ?? 0,
@@ -242,9 +242,11 @@ export class tasmotaSensorService {
         case 'energy2':
           debug('Updating fakegato \'%s:%s\'', this.characteristic.displayName , this.service.displayName, {
             power: value,
+            volts: this.service.getCharacteristic(this.CustomCharacteristic.Voltage).value ?? 0,
           });
           this.accessory.context.fakegatoService.appendData({
             power: value,
+            volts: this.service.getCharacteristic(this.CustomCharacteristic.Voltage).value ?? 0,
           });
           break;
         case undefined:
