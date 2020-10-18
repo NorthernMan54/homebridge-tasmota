@@ -141,6 +141,17 @@ D4 - GPIO2 -> LedLink
 Template: {"NAME":"BME","GPIO":[255,255,157,255,255,255,255,255,6,255,5,255,255],"FLAG":15,"BASE":18}
 ```
 
+### DHT11 Temperature Sensor
+
+* Tasmota Configuration
+
+```
+D2 - GPIO4 -> DHT11
+D4 - GPIO2 -> LedLinki
+
+ {"NAME":"DHT-D2/GPIO4","GPIO":[255,255,158,255,2,255,255,255,255,255,255,255,255],"FLAG":15,"BASE":18}
+```
+
 ### Motion + BME280 Temperature Sensor
 
 * Tasmota Configuration
@@ -159,8 +170,9 @@ Console: SwitchMode 1
 
 ```
 "override":
-  "869815_SW_1": {            <--- This is the unique_id of the discovery message you want to override
-    "device_class": "motion"  <--- This is the key and property you want to override
+  "869815_SW_1": {             <--- This is the unique_id of the discovery message you want to override
+    "device_class": "motion",  <--- This is the key and property you want to override
+    "name": "Motion Sensor"    <--- You can overwrite an existing value
  }
  ```
 
@@ -180,6 +192,15 @@ DimmerRange 100,255
    "EF159D_LI_1": {     <--- This is the unique_id of the discovery message you want to override
    "tasmotaType": "fan" <--- This is the key and property you want to override
   }
+```
+
+### ZMAi-90 Current Sensor Switch
+
+* Tasmota configuration
+
+```
+Backlog SetOption66 1; TuyaMCU 0,17; TuyaMCU 32,18; TuyaMCU 31,19; TuyaMCU 33,20; SetOption59 1
+Rule1 on System#Boot do RuleTimer1 5 endon on Rules#Timer=1 do backlog SerialSend5 55aa0001000000; RuleTimer1 5 endon
 ```
 
 ## Discord Server

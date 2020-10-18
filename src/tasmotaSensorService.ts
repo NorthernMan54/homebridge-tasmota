@@ -120,13 +120,13 @@ export class tasmotaSensorService {
         break;
       case undefined:
         // This is this Device status object
-        const hostname = os.hostname().replace(/[^a-z0-9]/gi,'');
+        const hostname = os.hostname().replace(/[^-_ a-zA-Z0-9]/gi,'');
         this.platform.log.debug('Setting accessory information', accessory.context.device[this.uniq_id].name);
         this.accessory.getService(this.platform.Service.AccessoryInformation)!
           .setCharacteristic(this.platform.Characteristic.Name, accessory.context.device[this.uniq_id].dev.name)
-          .setCharacteristic(this.platform.Characteristic.Manufacturer, accessory.context.device[this.uniq_id].dev.mf)
-          .setCharacteristic(this.platform.Characteristic.Model, accessory.context.device[this.uniq_id].dev.mdl)
-          .setCharacteristic(this.platform.Characteristic.FirmwareRevision, accessory.context.device[this.uniq_id].dev.sw)
+          .setCharacteristic(this.platform.Characteristic.Manufacturer, accessory.context.device[this.uniq_id].dev.mf.replace(/[^-_ a-zA-Z0-9]/gi,''))
+          .setCharacteristic(this.platform.Characteristic.Model, accessory.context.device[this.uniq_id].dev.mdl.replace(/[^-_ a-zA-Z0-9]/gi,''))
+          .setCharacteristic(this.platform.Characteristic.FirmwareRevision, accessory.context.device[this.uniq_id].dev.sw.replace(/[^-_ a-zA-Z0-9]/gi,''))
           .setCharacteristic(this.platform.Characteristic.SerialNumber, accessory.context.device[this.uniq_id].dev.ids[0] + '-' + hostname); // A unique fakegato ID
         // debug('AccessoryInformation', this.accessory.getService(this.platform.Service.AccessoryInformation));
         break;
