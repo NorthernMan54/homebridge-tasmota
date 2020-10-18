@@ -126,7 +126,7 @@ export class tasmotaSensorService {
           .setCharacteristic(this.platform.Characteristic.Name, accessory.context.device[this.uniq_id].dev.name)
           .setCharacteristic(this.platform.Characteristic.Manufacturer, accessory.context.device[this.uniq_id].dev.mf.replace(/[^-_ a-zA-Z0-9]/gi,''))
           .setCharacteristic(this.platform.Characteristic.Model, accessory.context.device[this.uniq_id].dev.mdl.replace(/[^-_ a-zA-Z0-9]/gi,''))
-          .setCharacteristic(this.platform.Characteristic.FirmwareRevision, accessory.context.device[this.uniq_id].dev.sw.replace(/[^-_ a-zA-Z0-9]/gi,''))
+          .setCharacteristic(this.platform.Characteristic.FirmwareRevision, accessory.context.device[this.uniq_id].dev.sw.replace(/[^-_. a-zA-Z0-9]/gi,''))
           .setCharacteristic(this.platform.Characteristic.SerialNumber, accessory.context.device[this.uniq_id].dev.ids[0] + '-' + hostname); // A unique fakegato ID
         // debug('AccessoryInformation', this.accessory.getService(this.platform.Service.AccessoryInformation));
         break;
