@@ -43,7 +43,7 @@ export class tasmotaSwitchService {
     this.characteristic = this.service.getCharacteristic(this.platform.Characteristic.On);
 
     if (this.platform.config.history && !this.accessory.context.fakegatoService ?.addEntry) {
-      this.accessory.context.fakegatoService = new this.platform.FakeGatoHistoryService('energy2', this.accessory, {
+      this.accessory.context.fakegatoService = new this.platform.FakeGatoHistoryService('custom', this.accessory, {
         storage: 'fs',
         minutes: this.platform.config.historyInterval ?? 10,
         log: this.platform.log,
@@ -108,10 +108,10 @@ export class tasmotaSwitchService {
 
         if (this.platform.config.history && this.accessory.context.fakegatoService ?.addEntry) {
           debug('Updating fakegato \'%s:%s\'', this.service.displayName, this.characteristic.displayName, {
-            status: (value ? 1 : 0),
+            [this.accessory.context.fakegatoService.uuid.toShortFormUUID(this.characteristic.UUID)]: (value ? 1 : 0),
           });
           this.accessory.context.fakegatoService.appendData({
-            status: (value ? 1 : 0),
+            [this.accessory.context.fakegatoService.uuid.toShortFormUUID(this.characteristic.UUID)]: (value ? 1 : 0),
           });
         } else {
           debug('Not updating fakegato \'%s:%s\'', this.service.displayName, this.characteristic.displayName);
@@ -154,10 +154,10 @@ export class tasmotaSwitchService {
 
     if (this.platform.config.history && this.accessory.context.fakegatoService ?.addEntry) {
       debug('Updating fakegato', this.service.displayName, {
-        status: (value ? 1 : 0),
+        [this.accessory.context.fakegatoService.uuid.toShortFormUUID(this.characteristic.UUID)]: (value ? 1 : 0),
       });
       this.accessory.context.fakegatoService.appendData({
-        status: (value ? 1 : 0),
+        [this.accessory.context.fakegatoService.uuid.toShortFormUUID(this.characteristic.UUID)]: (value ? 1 : 0),
       });
     } else {
       debug('Not updating fakegato', this.service.displayName);

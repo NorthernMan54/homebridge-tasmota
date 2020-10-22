@@ -44,7 +44,7 @@ export class tasmotaBinarySensorService {
         this.service.setCharacteristic(this.platform.Characteristic.Name, accessory.context.device[this.uniq_id].name);
         this.characteristic = this.service.getCharacteristic(this.platform.Characteristic.ContactSensorState);
         if (this.platform.config.history) {
-          this.fakegato = 'door';
+          this.fakegato = 'custom';
           this.service.addOptionalCharacteristic(this.CustomCharacteristic.TimesOpened);
           this.service.addOptionalCharacteristic(this.CustomCharacteristic.LastActivation);
         }
@@ -57,7 +57,7 @@ export class tasmotaBinarySensorService {
         this.service.setCharacteristic(this.platform.Characteristic.Name, accessory.context.device[this.uniq_id].name);
         this.characteristic = this.service.getCharacteristic(this.platform.Characteristic.MotionDetected);
         if (this.platform.config.history) {
-          this.fakegato = 'weather2';
+          this.fakegato = 'custom';
           this.service.addOptionalCharacteristic(this.CustomCharacteristic.LastActivation);
           debug('adding', this.fakegato );
         }
@@ -118,13 +118,13 @@ export class tasmotaBinarySensorService {
 
       this.platform.log.info('Updating \'%s\' to %s', this.service.displayName, nunjucks.renderString(this.accessory.context.device[this.uniq_id].val_tpl, interim));
       let timesOpened;
-      switch (this.fakegato) {
-        case 'door':
+      switch (this.device_class) {
+        case 'doorbell':
           timesOpened = timesOpened + this.service.getCharacteristic(this.CustomCharacteristic.TimesOpened).value;
           this.service.updateCharacteristic(this.CustomCharacteristic.TimesOpened, timesOpened);
         // fall thru
           /* eslint-disable */
-        case 'weather2':
+        case 'motion':
           const now = Math.round(new Date().valueOf() / 1000);
           const lastActivation = now - this.accessory.context.fakegatoService.getInitialTime();
           this.service.updateCharacteristic(this.CustomCharacteristic.LastActivation, lastActivation);
@@ -141,7 +141,7 @@ export class tasmotaBinarySensorService {
     if (this.platform.config.history && this.fakegato && this.accessory.context.fakegatoService ?.addEntry) {
       debug('Updating fakegato', this.service.displayName);
       this.accessory.context.fakegatoService.appendData({
-        status: (this.characteristic.value ? 1 : 0),
+        [this.accessory.context.fakegatoService.uuid.toShortFormUUID(this.characteristic.UUID)]: (this.characteristic.value ? 1 : 0),
       });
     } else {
       debug('Not updating fakegato', this.service.displayName);

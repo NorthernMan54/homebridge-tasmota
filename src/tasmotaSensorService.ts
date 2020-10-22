@@ -52,7 +52,7 @@ export class tasmotaSensorService {
             maxValue: 100,
           });
 
-        if (this.platform.config.history) this.fakegato = 'weather2';
+        if (this.platform.config.history) this.fakegato = 'custom';
         this.characteristic = this.service.getCharacteristic(this.platform.Characteristic.CurrentTemperature);
 
         break;
@@ -105,7 +105,7 @@ export class tasmotaSensorService {
       case 'power':
         switch (this.uniq_id.replace(accessory.context.identifier, '').toLowerCase()) {
           case '_energy_power': // Watts
-            if (this.platform.config.history) this.fakegato = 'energy2';
+            if (this.platform.config.history) this.fakegato = 'custom';
           case '_energy_voltage': // Voltage
           case '_energy_current': // Amps
           case '_energy_total': // Total Kilowatts
@@ -120,13 +120,13 @@ export class tasmotaSensorService {
         break;
       case undefined:
         // This is this Device status object
-        const hostname = os.hostname().replace(/[^-_ a-zA-Z0-9]/gi,'');
+        const hostname = os.hostname().replace(/[^-_ a-zA-Z0-9]/gi, '');
         this.platform.log.debug('Setting accessory information', accessory.context.device[this.uniq_id].name);
         this.accessory.getService(this.platform.Service.AccessoryInformation)!
           .setCharacteristic(this.platform.Characteristic.Name, accessory.context.device[this.uniq_id].dev.name)
-          .setCharacteristic(this.platform.Characteristic.Manufacturer, accessory.context.device[this.uniq_id].dev.mf.replace(/[^-_ a-zA-Z0-9]/gi,''))
-          .setCharacteristic(this.platform.Characteristic.Model, accessory.context.device[this.uniq_id].dev.mdl.replace(/[^-_ a-zA-Z0-9]/gi,''))
-          .setCharacteristic(this.platform.Characteristic.FirmwareRevision, accessory.context.device[this.uniq_id].dev.sw.replace(/[^-_. a-zA-Z0-9]/gi,''))
+          .setCharacteristic(this.platform.Characteristic.Manufacturer, accessory.context.device[this.uniq_id].dev.mf.replace(/[^-_ a-zA-Z0-9]/gi, ''))
+          .setCharacteristic(this.platform.Characteristic.Model, accessory.context.device[this.uniq_id].dev.mdl.replace(/[^-_ a-zA-Z0-9]/gi, ''))
+          .setCharacteristic(this.platform.Characteristic.FirmwareRevision, accessory.context.device[this.uniq_id].dev.sw.replace(/[^-_. a-zA-Z0-9]/gi, ''))
           .setCharacteristic(this.platform.Characteristic.SerialNumber, accessory.context.device[this.uniq_id].dev.ids[0] + '-' + hostname); // A unique fakegato ID
         // debug('AccessoryInformation', this.accessory.getService(this.platform.Service.AccessoryInformation));
         break;
@@ -224,40 +224,45 @@ export class tasmotaSensorService {
 
     this.characteristic.updateValue(value);
 
-    if (this.platform.config.history) {
-      switch (this.fakegato) {
-        case 'weather2':
-          debug('Updating fakegato \'%s:%s\'', this.service.displayName, this.characteristic.displayName, {
-            temp: value,
-            pressure: this.accessory.getService(this.CustomCharacteristic.AtmosphericPressureSensor) ?.getCharacteristic(this.CustomCharacteristic.AtmosphericPressureLevel).value ?? 0,
-            humidity: this.accessory.getService(this.platform.Service.HumiditySensor) ?.getCharacteristic(this.platform.Characteristic.CurrentRelativeHumidity).value ?? 0,
-          });
-          this.accessory.context.fakegatoService.appendData({
-            temp: value,
-            pressure: this.accessory.getService(this.CustomCharacteristic.AtmosphericPressureSensor) ?.getCharacteristic(this.CustomCharacteristic.AtmosphericPressureLevel).value ?? 0,
-            humidity: this.accessory.getService(this.platform.Service.HumiditySensor) ?.getCharacteristic(this.platform.Characteristic.CurrentRelativeHumidity).value ?? 0,
-          });
+    if (this.platform.config.history && this.fakegato) {
+      setTimeout(function(that) {
+        // slightly delay updates for multi characteristic devices to ensure the latest data is shared
+        switch (that.device_class) {
+          case 'temperature':
+            debug('Updating fakegato \'%s:%s\'', that.service.displayName, that.characteristic.displayName, {
+              [that.accessory.context.fakegatoService.uuid.toShortFormUUID(that.platform.Characteristic.CurrentTemperature.UUID)]: value,
+              [that.accessory.context.fakegatoService.uuid.toShortFormUUID(that.CustomCharacteristic.AtmosphericPressureLevel.UUID)]: that.accessory.getService(that.CustomCharacteristic.AtmosphericPressureSensor) ?.getCharacteristic(that.CustomCharacteristic.AtmosphericPressureLevel).value ?? 0,
+              [that.accessory.context.fakegatoService.uuid.toShortFormUUID(that.platform.Characteristic.CurrentRelativeHumidity.UUID)]: that.accessory.getService(that.platform.Service.HumiditySensor) ?.getCharacteristic(that.platform.Characteristic.CurrentRelativeHumidity).value ?? 0,
+            });
 
-          break;
-        case 'energy2':
-          debug('Updating fakegato \'%s:%s\'', this.characteristic.displayName , this.service.displayName, {
-            power: value,
-            volts: this.service.getCharacteristic(this.CustomCharacteristic.Voltage).value ?? 0,
-          });
-          this.accessory.context.fakegatoService.appendData({
-            power: value,
-            volts: this.service.getCharacteristic(this.CustomCharacteristic.Voltage).value ?? 0,
-          });
-          break;
-        case undefined:
-          break;
-        default:
-          this.platform.log.warn('Unknown fakegato type', this.fakegato);
-      }
+            that.accessory.context.fakegatoService.appendData({
+              [that.accessory.context.fakegatoService.uuid.toShortFormUUID(that.platform.Characteristic.CurrentTemperature.UUID)]: value,
+              [that.accessory.context.fakegatoService.uuid.toShortFormUUID(that.CustomCharacteristic.AtmosphericPressureLevel.UUID)]: that.accessory.getService(that.CustomCharacteristic.AtmosphericPressureSensor) ?.getCharacteristic(that.CustomCharacteristic.AtmosphericPressureLevel).value ?? 0,
+              [that.accessory.context.fakegatoService.uuid.toShortFormUUID(that.platform.Characteristic.CurrentRelativeHumidity.UUID)]: that.accessory.getService(that.platform.Service.HumiditySensor) ?.getCharacteristic(that.platform.Characteristic.CurrentRelativeHumidity).value ?? 0,
+            })
+            break;
+          case 'power':
+            debug('Updating fakegato \'%s:%s\'', that.characteristic.displayName, that.service.displayName, {
+              [that.accessory.context.fakegatoService.uuid.toShortFormUUID(that.CustomCharacteristic.CurrentConsumption.UUID)]: value,
+              [that.accessory.context.fakegatoService.uuid.toShortFormUUID(that.CustomCharacteristic.Voltage.UUID)]: that.service.getCharacteristic(that.CustomCharacteristic.Voltage).value ?? 0,
+            });
+            that.accessory.context.fakegatoService.appendData({
+              [that.accessory.context.fakegatoService.uuid.toShortFormUUID(that.CustomCharacteristic.CurrentConsumption.UUID)]: value,
+              [that.accessory.context.fakegatoService.uuid.toShortFormUUID(that.CustomCharacteristic.Voltage.UUID)]: that.service.getCharacteristic(that.CustomCharacteristic.Voltage).value ?? 0,
+            });
+            break;
+          case undefined:
+            break;
+          default:
+            that.platform.log.warn('Unknown fakegato type', that.device_class);
+        }
+      }, 1000, this);
     }
   }
 
+  update() {
 
+  }
 
   /**
    * Handle "LWT" Last Will and Testament messages from Tasmota
