@@ -184,7 +184,7 @@ export class tasmotaSensorService {
   refresh() {
     // Get current status for accessory/service on startup
     const teleperiod = this.accessory.context.device[this.uniq_id].stat_t.substr(0, this.accessory.context.device[this.uniq_id].stat_t.lastIndexOf('/') + 1).replace('tele', 'cmnd') + 'teleperiod';
-    this.accessory.context.mqttHost.sendMessage(teleperiod, '300');
+    this.accessory.context.mqttHost.sendMessage(teleperiod, this.platform.teleperiod.toString());
   }
 
   statusUpdate(topic, message) {
@@ -287,12 +287,18 @@ export class tasmotaSensorService {
 
 
   parseValue(valueTemplate, value) {
-    const result = nunjucks.renderString(valueTemplate, value);
-    if (result) {
-      return parseFloat(result);
-    } else {
-      this.platform.log.error('ERROR: Sensor %s missing data', this.service.displayName);
-      return (new Error('Missing sensor value'));
+    try {
+      const result = nunjucks.renderString(valueTemplate, value);
+      if (result) {
+        return parseFloat(result);
+      } else {
+        this.platform.log.error('ERROR: Sensor %s missing data', this.service.displayName);
+        return (new Error('Missing sensor value'));
+      }
+    }
+    catch (err) {
+      this.platform.log.error('ERROR: Parsing error', err.message);
+      return (err);
     }
   }
 }

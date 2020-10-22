@@ -136,6 +136,18 @@ module.exports = function(Service, Characteristic) {
   CustomCharacteristic.LastActivation.UUID = 'E863F11A-079E-48FF-8F27-9C2605A29F52';
   inherits(CustomCharacteristic.LastActivation, Characteristic);
 
+  CustomCharacteristic.ResetTotal = function() {
+    Characteristic.call(this, 'Reset Total', CustomCharacteristic.ResetTotal.UUID);
+    this.setProps({
+      format: Characteristic.Formats.UINT32,
+      unit: Characteristic.Units.SECONDS,
+      perms: [Characteristic.Perms.READ, Characteristic.Perms.NOTIFY]
+    });
+    this.value = this.getDefaultValue();
+  };
+  CustomCharacteristic.ResetTotal.UUID = 'E863F112-079E-48FF-8F27-9C2605A29F52';
+  inherits(CustomCharacteristic.LastActivation, Characteristic);
+
   CustomCharacteristic.TimesOpened = function() {
     Characteristic.call(this, 'Times Opened', CustomCharacteristic.TimesOpened.UUID);
     this.setProps({

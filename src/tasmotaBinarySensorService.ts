@@ -59,7 +59,7 @@ export class tasmotaBinarySensorService {
         if (this.platform.config.history) {
           this.fakegato = 'custom';
           this.service.addOptionalCharacteristic(this.CustomCharacteristic.LastActivation);
-          debug('adding', this.fakegato );
+          debug('adding', this.fakegato);
         }
         break;
       default:
@@ -101,7 +101,7 @@ export class tasmotaBinarySensorService {
   refresh() {
     // Get current status for accessory/service on startup
     const teleperiod = this.accessory.context.device[this.uniq_id].stat_t.substr(0, this.accessory.context.device[this.uniq_id].stat_t.lastIndexOf('/') + 1).replace('tele', 'cmnd') + 'teleperiod';
-    this.accessory.context.mqttHost.sendMessage(teleperiod, '300');
+    this.accessory.context.mqttHost.sendMessage(teleperiod, this.platform.teleperiod.toString());
   }
 
   statusUpdate(topic, message) {
@@ -112,7 +112,7 @@ export class tasmotaBinarySensorService {
       value_json: JSON.parse(message.toString()),
     };
 
-    debug('statusUpdate: ', this.characteristic.value, (nunjucks.renderString(this.accessory.context.device[this.uniq_id].val_tpl, interim) === this.accessory.context.device[this.uniq_id].pl_on ? 1 : 0));
+    // debug('statusUpdate: ', this.characteristic.value, (nunjucks.renderString(this.accessory.context.device[this.uniq_id].val_tpl, interim) === this.accessory.context.device[this.uniq_id].pl_on ? 1 : 0));
 
     if (this.characteristic.value !== (nunjucks.renderString(this.accessory.context.device[this.uniq_id].val_tpl, interim) === this.accessory.context.device[this.uniq_id].pl_on ? 1 : 0)) {
 
@@ -123,11 +123,13 @@ export class tasmotaBinarySensorService {
           timesOpened = timesOpened + this.service.getCharacteristic(this.CustomCharacteristic.TimesOpened).value;
           this.service.updateCharacteristic(this.CustomCharacteristic.TimesOpened, timesOpened);
         // fall thru
-          /* eslint-disable */
+        /* eslint-disable */
         case 'motion':
-          const now = Math.round(new Date().valueOf() / 1000);
-          const lastActivation = now - this.accessory.context.fakegatoService.getInitialTime();
-          this.service.updateCharacteristic(this.CustomCharacteristic.LastActivation, lastActivation);
+          if (this.platform.config.history) {
+            const now = Math.round(new Date().valueOf() / 1000);
+            const lastActivation = now - this.accessory.context.fakegatoService.getInitialTime();
+            this.service.updateCharacteristic(this.CustomCharacteristic.LastActivation, lastActivation);
+          }
           break;
       }
 

@@ -39,6 +39,7 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
   private timeoutCounter = 1;
   private debug: any;
   public FakeGatoHistoryService;
+  public teleperiod = 300;
 
   constructor(
     public readonly log: Logger,
@@ -49,6 +50,7 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
 
     this.cleanup = this.config['cleanup'] || 24; // Default removal of defunct devices after 24 hours
     this.debug = this.config['debug'] || false;
+    this.teleperiod = this.config['teleperiod'] || 300;
 
     if (this.debug) {
 
@@ -135,7 +137,7 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
               this.serviceCleanup(this.discoveryTopicMap[topic].uniq_id, existingAccessory);
               break;
             case 'Accessory':
-              this.accessoryCleanup(this.discoveryTopicMap[topic].uuid, existingAccessory);
+              this.accessoryCleanup(existingAccessory);
               break;
           }
           delete this.discoveryTopicMap[topic];
@@ -355,7 +357,24 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
     }
   }
 
-  accessoryCleanup(uuid: string, existingAccessory: PlatformAccessory) {
+  autoCleanup(accessory: PlatformAccessory) {
+    let timeoutID;
+
+    // debug("autoCleanup", accessory.displayName, accessory.context.timeout, this.timeouts);
+
+    if (accessory.context.timeout) {
+      timeoutID = accessory.context.timeout;
+      clearTimeout(this.timeouts[timeoutID]);
+      delete this.timeouts[timeoutID];
+    }
+
+    timeoutID = this.timeoutCounter++;
+    this.timeouts[timeoutID] = setTimeout(this.accessoryCleanup.bind(this), this.cleanup * 60 * 60 * 1000, accessory);
+
+    return (timeoutID);
+  }
+
+  accessoryCleanup(existingAccessory: PlatformAccessory) {
     this.log.info('Removing Accessory', existingAccessory.displayName);
     // debug('Services', this.services);
     // debug('Accessory', this.discoveryTopicMap[topic]);
@@ -364,6 +383,7 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
 
     const services = this.services;
     const output: string[] = [];
+    const uuid = existingAccessory.UUID;
 
     Object.keys(services).some((k: any) => {
       // debug(k);
@@ -374,46 +394,19 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
       }
     });
 
-    // debug('list', output);
-
     output.forEach(element => {
       this.serviceCleanup(element, existingAccessory);
     });
 
     // Remove accessory
-    this.accessories.splice(this.accessories.findIndex(accessory => accessory.UUID === uuid), 1);
-    debug('this.api.unregisterPlatformAccessories');
-    this.api.unregisterPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [existingAccessory]);
-  }
-
-  //
-
-  autoCleanup(accessory: PlatformAccessory) {
-    let timeoutID;
-
-    // debug("autoCleanup", accessory.displayName, accessory.context.timeout, this.timeouts);
-
-    if (accessory.context.timeout) {
-      timeoutID = accessory.context.timeout;
-      clearTimeout(this.timeouts[timeoutID]);
-      delete this.timeouts[timeoutID];
-
-    }
-
-    timeoutID = this.timeoutCounter++;
-    this.timeouts[timeoutID] = setTimeout(this.unregister.bind(this), this.cleanup * 60 * 60 * 1000, accessory, timeoutID);
-
-    return (timeoutID);
-  }
-
-  unregister(accessory: PlatformAccessory, timeoutID) {
-    this.log.error('Removing %s', accessory.displayName);
-    this.timeouts[timeoutID] = null;
+    this.accessories.splice(this.accessories.findIndex(accessory => accessory.UUID === existingAccessory.UUID), 1);
+    // debug('this.timeouts - before', this.timeouts);
+    clearTimeout(this.timeouts[existingAccessory.context.timeout]);
+    this.timeouts[existingAccessory.context.timeout] = null;
     debug('unregister - this.api.unregisterPlatformAccessories');
-    this.api.unregisterPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
-    // callback();
+    this.api.unregisterPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [existingAccessory]);
+    // debug('this.timeouts - after', this.timeouts);
   }
-
 }
 
 /* The various Tasmota firmware's have a slightly different flavors of the message. */

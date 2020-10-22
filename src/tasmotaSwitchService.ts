@@ -83,9 +83,8 @@ export class tasmotaSwitchService {
   refresh() {
     // Get current status for accessory/service on startup
     const telePeriod = this.accessory.context.device[this.uniq_id].cmd_t.substr(0, this.accessory.context.device[this.uniq_id].cmd_t.lastIndexOf('/') + 1) + 'teleperiod';
-    this.accessory.context.mqttHost.sendMessage(telePeriod, '300');
+    this.accessory.context.mqttHost.sendMessage(telePeriod, this.platform.teleperiod.toString());
   }
-
 
   /**
    * Handle "STATE" messages from Tasmotastat_t:
