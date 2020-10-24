@@ -153,10 +153,10 @@ export class tasmotaSwitchService {
 
     if (this.platform.config.history && this.accessory.context.fakegatoService ?.addEntry) {
       debug('Updating fakegato', this.service.displayName, {
-        [this.accessory.context.fakegatoService.uuid.toShortFormUUID(this.characteristic.UUID)]: (value ? 1 : 0),
+        status: (value ? 1 : 0),
       });
       this.accessory.context.fakegatoService.appendData({
-        [this.accessory.context.fakegatoService.uuid.toShortFormUUID(this.characteristic.UUID)]: (value ? 1 : 0),
+        status: (value ? 1 : 0),
       });
     } else {
       debug('Not updating fakegato', this.service.displayName);

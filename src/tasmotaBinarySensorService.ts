@@ -141,7 +141,9 @@ export class tasmotaBinarySensorService {
     this.characteristic.updateValue((nunjucks.renderString(this.accessory.context.device[this.uniq_id].val_tpl, interim) === this.accessory.context.device[this.uniq_id].pl_on ? 1 : 0));
 
     if (this.platform.config.history && this.fakegato && this.accessory.context.fakegatoService ?.addEntry) {
-      debug('Updating fakegato', this.service.displayName);
+      debug('Updating fakegato', this.service.displayName, {
+        [this.fakegato]: (this.characteristic.value ? 1 : 0),
+      });
       this.accessory.context.fakegatoService.appendData({
         [this.fakegato]: (this.characteristic.value ? 1 : 0),
       });
