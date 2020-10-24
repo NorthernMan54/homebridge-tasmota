@@ -135,11 +135,17 @@ export class tasmotaSensorService {
             .setCharacteristic(this.platform.Characteristic.Model, (accessory.context.device[this.uniq_id].dev.mdl ?? 'undefined').replace(/[^-_ a-zA-Z0-9]/gi, ''))
             .setCharacteristic(this.platform.Characteristic.FirmwareRevision, (accessory.context.device[this.uniq_id].dev.sw ?? 'undefined').replace(/[^-_. a-zA-Z0-9]/gi, ''))
             .setCharacteristic(this.platform.Characteristic.SerialNumber, accessory.context.device[this.uniq_id].dev.ids[0] + '-' + hostname); // A unique fakegato ID
-          }
+        }
         break;
       default:
         this.platform.log.warn('Warning: Unhandled Tasmota sensor type', accessory.context.device[this.uniq_id].dev_cla);
     }
+
+    if (this.service && this.service.getCharacteristic(this.platform.Characteristic.ConfiguredName).listenerCount('set') < 1) {
+      this.service.getCharacteristic(this.platform.Characteristic.ConfiguredName)
+        .on('set', this.setConfiguredName.bind(this));
+    }
+
 
     // Enable historical logging
 
@@ -186,6 +192,11 @@ export class tasmotaSensorService {
         return (this.CustomCharacteristic.TotalConsumption);
         break;
     }
+  }
+
+  setConfiguredName(value, callback) {
+    this.platform.log.debug('setConfiguredName', value);
+    callback();
   }
 
   refresh() {

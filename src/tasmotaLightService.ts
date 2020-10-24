@@ -90,7 +90,8 @@ export class tasmotaLightService {
   refresh() {
     // Get current status for accessory/service on startup
     const teleperiod = this.accessory.context.device[this.uniq_id].cmd_t.substr(0, this.accessory.context.device[this.uniq_id].cmd_t.lastIndexOf('/') + 1) + 'teleperiod';
-    this.accessory.context.mqttHost.sendMessage(teleperiod, this.platform.teleperiod.toString);
+    debug('refresh', this.platform.teleperiod);
+    this.accessory.context.mqttHost.sendMessage(teleperiod, this.platform.teleperiod.toString());
   }
 
 
