@@ -106,6 +106,12 @@ export class tasmotaSensorService {
         switch (this.uniq_id.replace(accessory.context.identifier, '').toLowerCase()) {
           case '_energy_power': // Watts
             if (this.platform.config.history) this.fakegato = 'custom';
+            this.service = this.accessory.getService(this.platform.Service.Switch) || this.accessory.addService(this.platform.Service.Switch, accessory.context.device[this.uniq_id].name, uuid);
+            // debug('this.service', this.service);
+
+            this.characteristic = this.service.getCharacteristic(this.deviceClassToHKCharacteristic(this.uniq_id.replace(accessory.context.identifier, '').toLowerCase()));
+            // this.characteristic = this.service.getCharacteristic(this.CustomCharacteristic.ResetTotal);
+            break;
           case '_energy_voltage': // Voltage
           case '_energy_current': // Amps
           case '_energy_total': // Total Kilowatts
@@ -137,7 +143,7 @@ export class tasmotaSensorService {
     // Enable historical logging
 
     if (this.platform.config.history && this.fakegato && !this.accessory.context.fakegatoService ?.addEntry) {
-      this.accessory.context.fakegatoService = new this.platform.FakeGatoHistoryService(this.fakegato, this.accessory, {
+      this.accessory.context.fakegatoService = new this.platform.FakeGatoHistoryService('custom', this.accessory, {
         storage: 'fs',
         minutes: this.platform.config.historyInterval ?? 10,
         log: this.platform.log,
@@ -192,77 +198,77 @@ export class tasmotaSensorService {
 
     this.accessory.context.timeout = this.platform.autoCleanup(this.accessory);
 
-    let value = this.parseValue(this.accessory.context.device[this.uniq_id].val_tpl, {
-      value_json: JSON.parse(message.toString()),
-    });
+    try {
+      let value = this.parseValue(this.accessory.context.device[this.uniq_id].val_tpl, {
+        value_json: JSON.parse(message.toString()),
+      });
 
-    // Sensor value tweaks or adjustments needed for homekit
+      // Sensor value tweaks or adjustments needed for homekit
 
-    switch (this.device_class) {
-      case 'illuminance':
-        // normalize LX in the range homebridge expects
-        value = (value < 0.0001 ? 0.0001 : (value > 100000 ? 100000 : value));
-        break;
-      case 'co2':
-        if (value > 1200) {
-          this.service.setCharacteristic(this.platform.Characteristic.CarbonDioxideDetected, this.platform.Characteristic.CarbonDioxideDetected.CO2_LEVELS_ABNORMAL);
-        } else {
-          this.service.setCharacteristic(this.platform.Characteristic.CarbonDioxideDetected, this.platform.Characteristic.CarbonDioxideDetected.CO2_LEVELS_NORMAL);
-        }
-        break;
-    }
-
-    if (value instanceof Error) {
-      // Error has already been handled
-    } else {
-      if (this.characteristic.value != value && this.delta(this.characteristic.value, value)) {
-        this.platform.log.info('Updating \'%s:%s\' to %s', this.service.displayName, this.characteristic.displayName ?? '', value);
-      } else {
-        this.platform.log.debug('Updating \'%s:%s\' to %s', this.service.displayName, this.characteristic.displayName ?? '', value);
+      switch (this.device_class) {
+        case 'illuminance':
+          // normalize LX in the range homebridge expects
+          value = (value < 0.0001 ? 0.0001 : (value > 100000 ? 100000 : value));
+          break;
+        case 'co2':
+          if (value > 1200) {
+            this.service.setCharacteristic(this.platform.Characteristic.CarbonDioxideDetected, this.platform.Characteristic.CarbonDioxideDetected.CO2_LEVELS_ABNORMAL);
+          } else {
+            this.service.setCharacteristic(this.platform.Characteristic.CarbonDioxideDetected, this.platform.Characteristic.CarbonDioxideDetected.CO2_LEVELS_NORMAL);
+          }
+          break;
       }
-    }
 
-    this.characteristic.updateValue(value);
-
-    if (this.platform.config.history && this.fakegato) {
-      setTimeout(function(that) {
-        // slightly delay updates for multi characteristic devices to ensure the latest data is shared
-        switch (that.device_class) {
-          case 'temperature':
-            debug('Updating fakegato \'%s:%s\'', that.service.displayName, that.characteristic.displayName, {
-              [that.accessory.context.fakegatoService.uuid.toShortFormUUID(that.platform.Characteristic.CurrentTemperature.UUID)]: value,
-              [that.accessory.context.fakegatoService.uuid.toShortFormUUID(that.CustomCharacteristic.AtmosphericPressureLevel.UUID)]: that.accessory.getService(that.CustomCharacteristic.AtmosphericPressureSensor) ?.getCharacteristic(that.CustomCharacteristic.AtmosphericPressureLevel).value ?? 0,
-              [that.accessory.context.fakegatoService.uuid.toShortFormUUID(that.platform.Characteristic.CurrentRelativeHumidity.UUID)]: that.accessory.getService(that.platform.Service.HumiditySensor) ?.getCharacteristic(that.platform.Characteristic.CurrentRelativeHumidity).value ?? 0,
-            });
-
-            that.accessory.context.fakegatoService.appendData({
-              [that.accessory.context.fakegatoService.uuid.toShortFormUUID(that.platform.Characteristic.CurrentTemperature.UUID)]: value,
-              [that.accessory.context.fakegatoService.uuid.toShortFormUUID(that.CustomCharacteristic.AtmosphericPressureLevel.UUID)]: that.accessory.getService(that.CustomCharacteristic.AtmosphericPressureSensor) ?.getCharacteristic(that.CustomCharacteristic.AtmosphericPressureLevel).value ?? 0,
-              [that.accessory.context.fakegatoService.uuid.toShortFormUUID(that.platform.Characteristic.CurrentRelativeHumidity.UUID)]: that.accessory.getService(that.platform.Service.HumiditySensor) ?.getCharacteristic(that.platform.Characteristic.CurrentRelativeHumidity).value ?? 0,
-            })
-            break;
-          case 'power':
-            debug('Updating fakegato \'%s:%s\'', that.characteristic.displayName, that.service.displayName, {
-              [that.accessory.context.fakegatoService.uuid.toShortFormUUID(that.CustomCharacteristic.CurrentConsumption.UUID)]: value,
-              [that.accessory.context.fakegatoService.uuid.toShortFormUUID(that.CustomCharacteristic.Voltage.UUID)]: that.service.getCharacteristic(that.CustomCharacteristic.Voltage).value ?? 0,
-            });
-            that.accessory.context.fakegatoService.appendData({
-              [that.accessory.context.fakegatoService.uuid.toShortFormUUID(that.CustomCharacteristic.CurrentConsumption.UUID)]: value,
-              [that.accessory.context.fakegatoService.uuid.toShortFormUUID(that.CustomCharacteristic.Voltage.UUID)]: that.service.getCharacteristic(that.CustomCharacteristic.Voltage).value ?? 0,
-            });
-            break;
-          case undefined:
-            break;
-          default:
-            that.platform.log.warn('Unknown fakegato type', that.device_class);
+      if (value instanceof Error) {
+        // Error has already been handled
+      } else {
+        if (this.characteristic.value != value && this.delta(this.characteristic.value, value)) {
+          this.platform.log.info('Updating \'%s:%s\' to %s', this.service.displayName, this.characteristic.displayName ?? '', value);
+        } else {
+          this.platform.log.debug('Updating \'%s:%s\' to %s', this.service.displayName, this.characteristic.displayName ?? '', value);
         }
-      }, 1000, this);
+      }
+
+      this.characteristic.updateValue(value);
+
+      // debug('fakegato', this.platform.config.history, this.fakegato, this.device_class);
+      if (this.platform.config.history && this.fakegato) {
+        setTimeout(function(that) {
+          // slightly delay updates for multi characteristic devices to ensure the latest data is shared
+          switch (that.device_class) {
+            case 'temperature':
+              debug('Updating fakegato \'%s:%s\'', that.service.displayName, that.characteristic.displayName, {
+                temp: value,
+                pressure: that.accessory.getService(that.CustomCharacteristic.AtmosphericPressureSensor) ?.getCharacteristic(that.CustomCharacteristic.AtmosphericPressureLevel).value ?? 0,
+                humidity: that.accessory.getService(that.platform.Service.HumiditySensor) ?.getCharacteristic(that.platform.Characteristic.CurrentRelativeHumidity).value ?? 0,
+              });
+
+              that.accessory.context.fakegatoService.appendData({
+                temp: value,
+                pressure: that.accessory.getService(that.CustomCharacteristic.AtmosphericPressureSensor) ?.getCharacteristic(that.CustomCharacteristic.AtmosphericPressureLevel).value ?? 0,
+                humdity: that.accessory.getService(that.platform.Service.HumiditySensor) ?.getCharacteristic(that.platform.Characteristic.CurrentRelativeHumidity).value ?? 0,
+              })
+              break;
+            case 'power':
+              debug('Updating fakegato \'%s:%s\'', that.characteristic.displayName, that.service.displayName, {
+                power: value
+              });
+              that.accessory.context.fakegatoService.appendData({
+                power: value
+              });
+              break;
+            case undefined:
+              break;
+            default:
+              that.platform.log.warn('Unknown fakegato type', that.device_class);
+          }
+        }, 1000, this);
+      }
+    } catch (err) {
+      this.platform.log.error('ERROR: Message Parse Error', topic, message.toString())
     }
   }
 
-  update() {
-
-  }
 
   /**
    * Handle "LWT" Last Will and Testament messages from Tasmota
@@ -298,6 +304,7 @@ export class tasmotaSensorService {
     }
     catch (err) {
       this.platform.log.error('ERROR: Parsing error', err.message);
+      debug('ERROR: Parsing error', valueTemplate, value);
       return (err);
     }
   }

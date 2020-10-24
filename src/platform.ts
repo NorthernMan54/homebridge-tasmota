@@ -91,7 +91,6 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
               // debug('unhandled this.accessoryType', this.accessoryType);
               this.addEntry(entry);
           }
-
         };
       }
     });

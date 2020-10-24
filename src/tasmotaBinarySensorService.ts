@@ -44,7 +44,7 @@ export class tasmotaBinarySensorService {
         this.service.setCharacteristic(this.platform.Characteristic.Name, accessory.context.device[this.uniq_id].name);
         this.characteristic = this.service.getCharacteristic(this.platform.Characteristic.ContactSensorState);
         if (this.platform.config.history) {
-          this.fakegato = 'custom';
+          this.fakegato = 'contact';
           this.service.addOptionalCharacteristic(this.CustomCharacteristic.TimesOpened);
           this.service.addOptionalCharacteristic(this.CustomCharacteristic.LastActivation);
         }
@@ -57,7 +57,7 @@ export class tasmotaBinarySensorService {
         this.service.setCharacteristic(this.platform.Characteristic.Name, accessory.context.device[this.uniq_id].name);
         this.characteristic = this.service.getCharacteristic(this.platform.Characteristic.MotionDetected);
         if (this.platform.config.history) {
-          this.fakegato = 'custom';
+          this.fakegato = 'motion';
           this.service.addOptionalCharacteristic(this.CustomCharacteristic.LastActivation);
           debug('adding', this.fakegato);
         }
@@ -81,7 +81,7 @@ export class tasmotaBinarySensorService {
     }
 
     if (this.platform.config.history && this.fakegato && !this.accessory.context.fakegatoService ?.addEntry) {
-      this.accessory.context.fakegatoService = new this.platform.FakeGatoHistoryService(this.fakegato, this.accessory, {
+      this.accessory.context.fakegatoService = new this.platform.FakeGatoHistoryService('custom', this.accessory, {
         storage: 'fs',
         minutes: this.platform.config.historyInterval ?? 10,
         log: this.platform.log,
@@ -143,7 +143,7 @@ export class tasmotaBinarySensorService {
     if (this.platform.config.history && this.fakegato && this.accessory.context.fakegatoService ?.addEntry) {
       debug('Updating fakegato', this.service.displayName);
       this.accessory.context.fakegatoService.appendData({
-        [this.accessory.context.fakegatoService.uuid.toShortFormUUID(this.characteristic.UUID)]: (this.characteristic.value ? 1 : 0),
+        [this.fakegato]: (this.characteristic.value ? 1 : 0),
       });
     } else {
       debug('Not updating fakegato', this.service.displayName);
