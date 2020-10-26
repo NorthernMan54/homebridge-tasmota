@@ -25,6 +25,7 @@ export class tasmotaSensorService {
   public availabilitySubscribe: Subscription;
   private CustomCharacteristic;
   public fakegato: string;
+  public nunjucksEnvironment;
 
   constructor(
     private readonly platform: tasmotaPlatform,
@@ -162,22 +163,39 @@ export class tasmotaSensorService {
 
     // setup event listeners for services / characteristics
 
+    this.nunjucksEnvironment = new nunjucks.Environment();
+
+    this.nunjucksEnvironment.addFilter('is_defined', function(val, cb) {
+      // console.log('is_defined', val);
+      if (val) {
+        cb(null, val);
+      } else {
+        cb(new Error('missing key'), val);
+      }
+    }, true);
+
+    // nunjucks.installJinjaCompat();
+    nunjucks.configure({
+      autoescape: true,
+    });
+    this.refresh();
+    // debug('nunjucksEnvironment', this.nunjucksEnvironment);
+
     if (this.characteristic) {
       this.platform.log.debug('Creating statusUpdate listener for %s %s', accessory.context.device[this.uniq_id].stat_t, accessory.context.device[this.uniq_id].name);
       this.statusSubscribe = { event: accessory.context.device[this.uniq_id].stat_t, callback: this.statusUpdate.bind(this) };
       accessory.context.mqttHost.on(accessory.context.device[this.uniq_id].stat_t, this.statusUpdate.bind(this));
 
-      this.availabilitySubscribe = { event: accessory.context.device[this.uniq_id].avty_t, callback: this.availabilityUpdate.bind(this) };
-      accessory.context.mqttHost.statusSubscribe(accessory.context.device[this.uniq_id].stat_t);
-      accessory.context.mqttHost.on(accessory.context.device[this.uniq_id].avty_t, this.availabilityUpdate.bind(this));
-      this.availabilitySubscribe = accessory.context.mqttHost.availabilitySubscribe(accessory.context.device[this.uniq_id].avty_t);
+      if (accessory.context.device[this.uniq_id].avty_t) {
+        this.availabilitySubscribe = { event: accessory.context.device[this.uniq_id].avty_t, callback: this.availabilityUpdate.bind(this) };
+        accessory.context.mqttHost.statusSubscribe(accessory.context.device[this.uniq_id].stat_t);
+        accessory.context.mqttHost.on(accessory.context.device[this.uniq_id].avty_t, this.availabilityUpdate.bind(this));
+        this.availabilitySubscribe = accessory.context.mqttHost.availabilitySubscribe(accessory.context.device[this.uniq_id].avty_t);
+      } else {
+        this.platform.log.warn('Warning: Availability not supported for: %s', accessory.context.device[this.uniq_id].name);
+      }
     }
 
-    nunjucks.installJinjaCompat();
-    nunjucks.configure({
-      autoescape: true,
-    });
-    this.refresh();
   }
 
   deviceClassToHKCharacteristic(device_class: string) {
@@ -306,7 +324,10 @@ export class tasmotaSensorService {
 
   parseValue(valueTemplate, value) {
     try {
-      const result = nunjucks.renderString(valueTemplate, value);
+      // debug('nunjucksEnvironment', this, this.nunjucksEnvironment);
+      var template = nunjucks.compile(valueTemplate, this.nunjucksEnvironment, 'views');
+
+      const result = template.render(value);
       if (result) {
         return parseFloat(result);
       } else {

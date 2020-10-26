@@ -147,19 +147,23 @@ export class tasmotaSwitchService {
    */
   setOn(value: CharacteristicValue, callback: CharacteristicSetCallback) {
 
-    this.platform.log.info('%s Set Characteristic On ->', this.service.displayName, value);
+    try {
+      this.platform.log.info('%s Set Characteristic On ->', this.service.displayName, value);
 
-    this.accessory.context.mqttHost.sendMessage(this.accessory.context.device[this.uniq_id].cmd_t, (value ? this.accessory.context.device[this.uniq_id].pl_on : this.accessory.context.device[this.uniq_id].pl_off));
+      this.accessory.context.mqttHost.sendMessage(this.accessory.context.device[this.uniq_id].cmd_t, (value ? this.accessory.context.device[this.uniq_id].pl_on : this.accessory.context.device[this.uniq_id].pl_off));
 
-    if (this.platform.config.history && this.accessory.context.fakegatoService ?.addEntry) {
-      debug('Updating fakegato', this.service.displayName, {
-        status: (value ? 1 : 0),
-      });
-      this.accessory.context.fakegatoService.appendData({
-        status: (value ? 1 : 0),
-      });
-    } else {
-      debug('Not updating fakegato', this.service.displayName);
+      if (this.platform.config.history && this.accessory.context.fakegatoService ?.addEntry) {
+        debug('Updating fakegato', this.service.displayName, {
+          status: (value ? 1 : 0),
+        });
+        this.accessory.context.fakegatoService.appendData({
+          status: (value ? 1 : 0),
+        });
+      } else {
+        // debug('Not updating fakegato', this.service.displayName);
+      }
+    } catch (err) {
+      this.platform.log.error('ERROR:', err.message);
     }
     // you must call the callback function
     callback(null);
