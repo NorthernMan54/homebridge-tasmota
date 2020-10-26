@@ -1,12 +1,7 @@
 import { Service, PlatformAccessory, Characteristic } from 'homebridge';
 import { tasmotaPlatform } from './platform';
-import { TasmotaService } from './TasmotaService'
 import nunjucks from 'nunjucks';
 import os from 'os';
-
-import createDebug from 'debug';
-
-const debug = createDebug('Tasmota:sensor');
 
 /**
  * Platform Accessory
