@@ -21,6 +21,7 @@ export class tasmotaSensorService extends TasmotaService {
   ) {
     super(platform, accessory, uniq_id);
 
+    let hostname;
     switch (accessory.context.device[this.uniq_id].dev_cla) {
       case 'temperature':
         this.platform.log.debug('Creating %s sensor %s', accessory.context.device[this.uniq_id].dev_cla, accessory.context.device[this.uniq_id].name);
@@ -123,7 +124,7 @@ export class tasmotaSensorService extends TasmotaService {
         break;
       case undefined:
         // This is this Device status object
-        const hostname = os.hostname().replace(/[^-_ a-zA-Z0-9]/gi, '');
+        hostname = os.hostname().replace(/[^-_ a-zA-Z0-9]/gi, '');
         this.platform.log.debug('Setting accessory information', accessory.context.device[this.uniq_id].name);
         if (accessory.context.device[this.uniq_id].dev.mf && accessory.context.device[this.uniq_id].dev.mdl && accessory.context.device[this.uniq_id].dev.sw) {
           this.accessory.getService(this.platform.Service.AccessoryInformation)!
