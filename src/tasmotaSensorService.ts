@@ -1,9 +1,7 @@
 import { Service, PlatformAccessory, Characteristic } from 'homebridge';
 import { tasmotaPlatform } from './platform';
-import { TasmotaService } from './TasmotaService'
-import nunjucks from 'nunjucks';
+import { TasmotaService } from './TasmotaService';
 import os from 'os';
-
 import createDebug from 'debug';
 
 const debug = createDebug('Tasmota:sensor');
@@ -14,35 +12,20 @@ const debug = createDebug('Tasmota:sensor');
  * Each accessory may expose multiple services of different service types.
  */
 
-interface Subscription {
-  event: string, callback: any
-}
 
 export class tasmotaSensorService extends TasmotaService {
-  public service: Service;
-  private characteristic: Characteristic;
-  private device_class: string;
-  public statusSubscribe: Subscription;
-  public availabilitySubscribe: Subscription;
-  private CustomCharacteristic;
-  public fakegato: string;
-  public nunjucksEnvironment;
-
   constructor(
     public readonly platform: tasmotaPlatform,
     public readonly accessory: PlatformAccessory,
-    private readonly uniq_id: string,
+    protected readonly uniq_id: string,
   ) {
-    /* eslint-disable */
-    this.CustomCharacteristic = require('./lib/CustomCharacteristics')(platform.Service, platform.Characteristic);
-    const uuid = this.platform.api.hap.uuid.generate(accessory.context.device[this.uniq_id].uniq_id);
+    super(platform, accessory, uniq_id);
 
-    this.device_class = accessory.context.device[this.uniq_id].dev_cla;
     switch (accessory.context.device[this.uniq_id].dev_cla) {
       case 'temperature':
         this.platform.log.debug('Creating %s sensor %s', accessory.context.device[this.uniq_id].dev_cla, accessory.context.device[this.uniq_id].name);
 
-        this.service = this.accessory.getService(uuid) || this.accessory.addService(this.platform.Service.TemperatureSensor, accessory.context.device[this.uniq_id].name, uuid);
+        this.service = this.accessory.getService(this.uuid) || this.accessory.addService(this.platform.Service.TemperatureSensor, accessory.context.device[this.uniq_id].name, this.uuid);
         // debug('displayName', this.service.displayName);
         if (!this.service.displayName) {
           this.service.setCharacteristic(this.platform.Characteristic.Name, accessory.context.device[this.uniq_id].name);
@@ -63,7 +46,7 @@ export class tasmotaSensorService extends TasmotaService {
       case 'humidity':
         this.platform.log.debug('Creating %s sensor %s', accessory.context.device[this.uniq_id].dev_cla, accessory.context.device[this.uniq_id].name);
 
-        this.service = this.accessory.getService(uuid) || this.accessory.addService(this.platform.Service.HumiditySensor, accessory.context.device[this.uniq_id].name, uuid);
+        this.service = this.accessory.getService(this.uuid) || this.accessory.addService(this.platform.Service.HumiditySensor, accessory.context.device[this.uniq_id].name, this.uuid);
 
         if (!this.service.displayName) {
           this.service.setCharacteristic(this.platform.Characteristic.Name, accessory.context.device[this.uniq_id].name);
@@ -74,7 +57,7 @@ export class tasmotaSensorService extends TasmotaService {
       case 'pressure':
         this.platform.log.debug('Creating %s sensor %s', accessory.context.device[this.uniq_id].dev_cla, accessory.context.device[this.uniq_id].name);
 
-        this.service = this.accessory.getService(uuid) || this.accessory.addService(this.CustomCharacteristic.AtmosphericPressureSensor, accessory.context.device[this.uniq_id].name, uuid);
+        this.service = this.accessory.getService(this.uuid) || this.accessory.addService(this.CustomCharacteristic.AtmosphericPressureSensor, accessory.context.device[this.uniq_id].name, this.uuid);
 
         if (!this.service.displayName) {
           this.service.setCharacteristic(this.platform.Characteristic.Name, accessory.context.device[this.uniq_id].name);
@@ -85,7 +68,7 @@ export class tasmotaSensorService extends TasmotaService {
       case 'illuminance':
         this.platform.log.debug('Creating %s sensor %s', accessory.context.device[this.uniq_id].dev_cla, accessory.context.device[this.uniq_id].name);
 
-        this.service = this.accessory.getService(uuid) || this.accessory.addService(this.platform.Service.LightSensor, accessory.context.device[this.uniq_id].name, uuid);
+        this.service = this.accessory.getService(this.uuid) || this.accessory.addService(this.platform.Service.LightSensor, accessory.context.device[this.uniq_id].name, this.uuid);
 
         if (!this.service.displayName) {
           this.service.setCharacteristic(this.platform.Characteristic.Name, accessory.context.device[this.uniq_id].name);
@@ -96,7 +79,7 @@ export class tasmotaSensorService extends TasmotaService {
       case 'co2':
         this.platform.log.debug('Creating %s sensor %s', accessory.context.device[this.uniq_id].dev_cla, accessory.context.device[this.uniq_id].name);
 
-        this.service = this.accessory.getService(uuid) || this.accessory.addService(this.platform.Service.CarbonDioxideSensor, accessory.context.device[this.uniq_id].name, uuid);
+        this.service = this.accessory.getService(this.uuid) || this.accessory.addService(this.platform.Service.CarbonDioxideSensor, accessory.context.device[this.uniq_id].name, this.uuid);
 
         if (!this.service.displayName) {
           this.service.setCharacteristic(this.platform.Characteristic.Name, accessory.context.device[this.uniq_id].name);
@@ -107,7 +90,7 @@ export class tasmotaSensorService extends TasmotaService {
       case 'pm25':
         this.platform.log.debug('Creating %s sensor %s', accessory.context.device[this.uniq_id].dev_cla, accessory.context.device[this.uniq_id].name);
 
-        this.service = this.accessory.getService(uuid) || this.accessory.addService(this.platform.Service.AirQualitySensor, accessory.context.device[this.uniq_id].name, uuid);
+        this.service = this.accessory.getService(this.uuid) || this.accessory.addService(this.platform.Service.AirQualitySensor, accessory.context.device[this.uniq_id].name, this.uuid);
 
         if (!this.service.displayName) {
           this.service.setCharacteristic(this.platform.Characteristic.Name, accessory.context.device[this.uniq_id].name);
@@ -120,7 +103,7 @@ export class tasmotaSensorService extends TasmotaService {
         switch (this.uniq_id.replace(accessory.context.identifier, '').toLowerCase()) {
           case '_energy_power': // Watts
             if (this.platform.config.history) this.fakegato = 'custom';
-            this.service = this.accessory.getService(this.platform.Service.Switch) || this.accessory.addService(this.platform.Service.Switch, accessory.context.device[this.uniq_id].name, uuid);
+            this.service = this.accessory.getService(this.platform.Service.Switch) || this.accessory.addService(this.platform.Service.Switch, accessory.context.device[this.uniq_id].name, this.uuid);
             // debug('this.service', this.service);
 
             this.characteristic = this.service.getCharacteristic(this.deviceClassToHKCharacteristic(this.uniq_id.replace(accessory.context.identifier, '').toLowerCase()));
@@ -129,7 +112,7 @@ export class tasmotaSensorService extends TasmotaService {
           case '_energy_voltage': // Voltage
           case '_energy_current': // Amps
           case '_energy_total': // Total Kilowatts
-            this.service = this.accessory.getService(this.platform.Service.Switch) || this.accessory.addService(this.platform.Service.Switch, accessory.context.device[this.uniq_id].name, uuid);
+            this.service = this.accessory.getService(this.platform.Service.Switch) || this.accessory.addService(this.platform.Service.Switch, accessory.context.device[this.uniq_id].name, this.uuid);
             // debug('this.service', this.service);
 
             this.characteristic = this.service.getCharacteristic(this.deviceClassToHKCharacteristic(this.uniq_id.replace(accessory.context.identifier, '').toLowerCase()));
@@ -144,7 +127,7 @@ export class tasmotaSensorService extends TasmotaService {
         this.platform.log.debug('Setting accessory information', accessory.context.device[this.uniq_id].name);
         if (accessory.context.device[this.uniq_id].dev.mf && accessory.context.device[this.uniq_id].dev.mdl && accessory.context.device[this.uniq_id].dev.sw) {
           this.accessory.getService(this.platform.Service.AccessoryInformation)!
-            .setCharacteristic(this.platform.Characteristic.Name, this.service.displayName ?? accessory.context.device[this.uniq_id].dev.name)
+            .setCharacteristic(this.platform.Characteristic.Name, accessory.context.device[this.uniq_id].dev.name)
             .setCharacteristic(this.platform.Characteristic.Manufacturer, (accessory.context.device[this.uniq_id].dev.mf ?? 'undefined').replace(/[^-_ a-zA-Z0-9]/gi, ''))
             .setCharacteristic(this.platform.Characteristic.Model, (accessory.context.device[this.uniq_id].dev.mdl ?? 'undefined').replace(/[^-_ a-zA-Z0-9]/gi, ''))
             .setCharacteristic(this.platform.Characteristic.FirmwareRevision, (accessory.context.device[this.uniq_id].dev.sw ?? 'undefined').replace(/[^-_. a-zA-Z0-9]/gi, ''))
@@ -157,74 +140,13 @@ export class tasmotaSensorService extends TasmotaService {
 
     // Enable historical logging
 
-    if (this.platform.config.history && this.fakegato && !this.accessory.context.fakegatoService ?.addEntry) {
-      this.accessory.context.fakegatoService = new this.platform.FakeGatoHistoryService('custom', this.accessory, {
-        storage: 'fs',
-        minutes: this.platform.config.historyInterval ?? 10,
-        log: this.platform.log,
-      });
-      this.platform.log.debug('Creating fakegato service for %s %s', accessory.context.device[this.uniq_id].stat_t, accessory.context.device[this.uniq_id].name, this.accessory.context.device[this.uniq_id].uniq_id);
-    } else {
-      debug('fakegatoService exists', accessory.context.device[this.uniq_id].name);
-    }
+    this.enableFakegato();
 
-    // setup event listeners for services / characteristics
-
-    this.nunjucksEnvironment = new nunjucks.Environment();
-
-    this.nunjucksEnvironment.addFilter('is_defined', function(val, cb) {
-      // console.log('is_defined', val);
-      if (val) {
-        cb(null, val);
-      } else {
-        cb(new Error('missing key'), val);
-      }
-    }, true);
-
-    this.nunjucksEnvironment.addGlobal('float', float);
-
-    // nunjucks.installJinjaCompat();
-    nunjucks.configure({
-      autoescape: true,
-    });
-    this.refresh();
-    // debug('nunjucksEnvironment', this.nunjucksEnvironment);
-
-    if (this.characteristic) {
-      this.platform.log.debug('Creating statusUpdate listener for %s %s', accessory.context.device[this.uniq_id].stat_t, accessory.context.device[this.uniq_id].name);
-      this.statusSubscribe = { event: accessory.context.device[this.uniq_id].stat_t, callback: this.statusUpdate.bind(this) };
-      accessory.context.mqttHost.on(accessory.context.device[this.uniq_id].stat_t, this.statusUpdate.bind(this));
-      accessory.context.mqttHost.statusSubscribe(accessory.context.device[this.uniq_id].stat_t);
-      if (accessory.context.device[this.uniq_id].avty_t) {
-        this.availabilitySubscribe = { event: accessory.context.device[this.uniq_id].avty_t, callback: this.availabilityUpdate.bind(this) };
-        accessory.context.mqttHost.on(accessory.context.device[this.uniq_id].avty_t, this.availabilityUpdate.bind(this));
-        this.availabilitySubscribe = accessory.context.mqttHost.availabilitySubscribe(accessory.context.device[this.uniq_id].avty_t);
-      } else {
-        this.platform.log.warn('Warning: Availability not supported for: %s', accessory.context.device[this.uniq_id].name);
-      }
-    }
+    this.enableStatus();
 
   }
 
-  deviceClassToHKCharacteristic(device_class: string) {
-    switch (device_class) {
-      case '_energy_current': // Amps
-        return (this.CustomCharacteristic.ElectricCurrent);
-      case '_energy_voltage': // Voltage
-        return (this.CustomCharacteristic.Voltage);
-      case '_energy_power': // Watts
-        return (this.CustomCharacteristic.CurrentConsumption);
-      case '_energy_total': // Total Kilowatts
-        return (this.CustomCharacteristic.TotalConsumption);
-        break;
-    }
-  }
-
-  refresh() {
-    // Get current status for accessory/service on startup
-    const teleperiod = this.accessory.context.device[this.uniq_id].stat_t.substr(0, this.accessory.context.device[this.uniq_id].stat_t.lastIndexOf('/') + 1).replace('tele', 'cmnd') + 'teleperiod';
-    this.accessory.context.mqttHost.sendMessage(teleperiod, this.platform.teleperiod.toString());
-  }
+  // Override base statusUpdate
 
   statusUpdate(topic, message) {
     debug('statusUpdate', this.service.displayName, topic, message.toString());
@@ -307,52 +229,6 @@ export class tasmotaSensorService extends TasmotaService {
     }
   }
 
-
-  /**
-   * Handle "LWT" Last Will and Testament messages from Tasmota
-   * These are sent when the device is no longer available from the MQTT server.
-   */
-
-  availabilityUpdate(topic, message) {
-    // debug("availabilityUpdate", this, topic, message.toString());
-    this.platform.log.info('Marking sensor accessory \'%s\' to %s', this.service.displayName, message);
-
-    const availability = (message.toString() === this.accessory.context.device[this.uniq_id].pl_not_avail ? new Error(this.accessory.displayName + ' ' + message.toString()) : 0);
-
-    this.characteristic.updateValue(availability);
-  }
-
-  // Utility functions for status update
-
-  delta(value1, value2) {
-    // debug("delta", (parseInt(value1) !== parseInt(value2)));
-    return (parseInt(value1) !== parseInt(value2));
-  }
-
-
-  parseValue(valueTemplate, value) {
-    try {
-      // debug('nunjucksEnvironment', this, this.nunjucksEnvironment);
-      var template = nunjucks.compile(valueTemplate, this.nunjucksEnvironment);
-
-      const result = template.render(value);
-      if (result) {
-        return parseFloat(result);
-      } else {
-        this.platform.log.error('ERROR: Sensor %s missing data', this.service.displayName);
-        return (new Error('Missing sensor value'));
-      }
-    }
-    catch (err) {
-      this.platform.log.error('ERROR: Parsing error', err.message);
-      debug('ERROR: Parsing error', valueTemplate, value);
-      return (err);
-    }
-  }
-}
-
-function float(val) {
-  return (parseFloat(val));
 }
 /*
 

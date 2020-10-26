@@ -1,7 +1,6 @@
 import { Service, PlatformAccessory, CharacteristicValue, CharacteristicSetCallback, Characteristic } from 'homebridge';
-
+import { TasmotaService } from './TasmotaService';
 import { tasmotaPlatform } from './platform';
-import nunjucks from 'nunjucks';
 
 import createDebug from 'debug';
 const debug = createDebug('Tasmota:switch');
@@ -12,26 +11,16 @@ const debug = createDebug('Tasmota:switch');
  * Each accessory may expose multiple services of different service types.
  */
 
-interface Subscription {
-  event: string, callback: any
-}
-
-export class tasmotaSwitchService {
-  public service: Service;
-  private characteristic: Characteristic;
-  public statusSubscribe: Subscription;
-  public availabilitySubscribe: Subscription;
-  public fakegato: string;
+export class tasmotaSwitchService extends TasmotaService {
 
   constructor(
     public readonly platform: tasmotaPlatform,
     public readonly accessory: PlatformAccessory,
-    private readonly uniq_id: string,
+    protected readonly uniq_id: string,
   ) {
-    this.platform.log.debug('Creating switch service for %s %s', accessory.context.device[this.uniq_id].stat_t, accessory.context.device[this.uniq_id].name);
-    const uuid = this.platform.api.hap.uuid.generate(this.accessory.context.device[this.uniq_id].uniq_id);
+    super(platform, accessory, uniq_id);
 
-    this.service = this.accessory.getService(uuid) || this.accessory.addService(this.platform.Service.Switch, accessory.context.device[this.uniq_id].name, uuid);
+    this.service = this.accessory.getService(this.uuid) || this.accessory.addService(this.platform.Service.Switch, accessory.context.device[this.uniq_id].name, this.uuid);
 
     // set the service name, this is what is displayed as the default name on the Home app
     // in this example we are using the name we stored in the `accessory.context` in the `discoverDevices` method.
@@ -44,16 +33,7 @@ export class tasmotaSwitchService {
 
     this.characteristic = this.service.getCharacteristic(this.platform.Characteristic.On);
 
-    if (this.platform.config.history && !this.accessory.context.fakegatoService ?.addEntry) {
-      this.accessory.context.fakegatoService = new this.platform.FakeGatoHistoryService('custom', this.accessory, {
-        storage: 'fs',
-        minutes: this.platform.config.historyInterval ?? 10,
-        log: this.platform.log,
-      });
-      this.platform.log.debug('Creating fakegato service for %s %s', accessory.context.device[this.uniq_id].stat_t, accessory.context.device[this.uniq_id].name, this.accessory.context.device[this.uniq_id].uniq_id);
-    } else {
-      debug('fakegatoService exists', this.accessory.context.device[this.uniq_id].uniq_id);
-    }
+    this.enableFakegato();
 
     // register handlers for the On/Off Characteristic
 
@@ -61,32 +41,10 @@ export class tasmotaSwitchService {
       this.service.getCharacteristic(this.platform.Characteristic.On)
         .on('set', this.setOn.bind(this));                // SET - bind to the `setOn` method below
       // .on('get', this.getOn.bind(this));               // GET - bind to the `getOn` method below
-
-      debug('Creating statusUpdate listener for', accessory.context.device[this.uniq_id].stat_t);
-      this.statusSubscribe = { event: accessory.context.device[this.uniq_id].stat_t, callback: this.statusUpdate.bind(this) };
-      accessory.context.mqttHost.on(accessory.context.device[this.uniq_id].stat_t, this.statusUpdate.bind(this));
-      accessory.context.mqttHost.statusSubscribe(accessory.context.device[this.uniq_id].stat_t);
-
-      // Fix for OpenMQTTGateway device
-      if (accessory.context.device[this.uniq_id].avty_t) {
-        this.availabilitySubscribe = { event: accessory.context.device[this.uniq_id].avty_t, callback: this.availabilityUpdate.bind(this) };
-        accessory.context.mqttHost.on(accessory.context.device[this.uniq_id].avty_t, this.availabilityUpdate.bind(this));
-        accessory.context.mqttHost.availabilitySubscribe(accessory.context.device[this.uniq_id].avty_t);
-      }
     }
-    nunjucks.installJinjaCompat();
-    nunjucks.configure({
-      autoescape: true,
-    });
-
-    this.refresh();
+    this.enableStatus();
   }
 
-  refresh() {
-    // Get current status for accessory/service on startup
-    const telePeriod = this.accessory.context.device[this.uniq_id].cmd_t.substr(0, this.accessory.context.device[this.uniq_id].cmd_t.lastIndexOf('/') + 1) + 'teleperiod';
-    this.accessory.context.mqttHost.sendMessage(telePeriod, this.platform.teleperiod.toString());
-  }
 
   /**
    * Handle "STATE" messages from Tasmotastat_t:
@@ -102,7 +60,7 @@ export class tasmotaSwitchService {
         value_json: JSON.parse(message.toString()),
       };
 
-      const value = (nunjucks.renderString(this.accessory.context.device[this.uniq_id].val_tpl, interim) === this.accessory.context.device[this.uniq_id].pl_on ? true : false);
+      const value = (this.parseValue(this.accessory.context.device[this.uniq_id].val_tpl, interim) === this.accessory.context.device[this.uniq_id].pl_on ? true : false);
 
       if (this.characteristic.value !== value) {
         this.platform.log.info('Updating \'%s:%s\' to %s', this.service.displayName, this.characteristic.displayName, value);
@@ -120,7 +78,7 @@ export class tasmotaSwitchService {
 
       } else {
 
-        this.platform.log.debug('Updating \'%s\' to %s', this.service.displayName, nunjucks.renderString(this.accessory.context.device[this.uniq_id].val_tpl, interim));
+        this.platform.log.debug('Updating \'%s\' to %s', this.service.displayName, value);
       }
 
       this.characteristic.updateValue(value);
@@ -129,18 +87,6 @@ export class tasmotaSwitchService {
       debug('ERROR:', err.message);
       this.platform.log.error('ERROR: message parsing error', this.service.displayName, topic, message.toString());
     }
-  }
-
-  /**
-   * Handle "LWT" Last Will and Testament messages from Tasmota
-   * These are sent when the device is no longer available from the MQTT server.
-   */
-
-  availabilityUpdate(topic, message) {
-    this.platform.log.info('Marking switch accessory \'%s\' to %s', this.service.displayName, message);
-
-    const availability = (message.toString() === this.accessory.context.device[this.uniq_id].pl_not_avail ? new Error(this.accessory.displayName + ' ' + message.toString()) : 0);
-    this.service.getCharacteristic(this.platform.Characteristic.On).updateValue(availability);
   }
 
   /**

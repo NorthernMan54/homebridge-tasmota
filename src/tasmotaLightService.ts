@@ -1,7 +1,6 @@
 import { Service, PlatformAccessory, CharacteristicValue, CharacteristicSetCallback, Characteristic } from 'homebridge';
-
+import { TasmotaService } from './TasmotaService';
 import { tasmotaPlatform } from './platform';
-import nunjucks from 'nunjucks';
 
 import createDebug from 'debug';
 const debug = createDebug('Tasmota:light');
@@ -12,45 +11,34 @@ const debug = createDebug('Tasmota:light');
  * Each accessory may expose multiple services of different service types.
  */
 
- interface Subscription {
-   event: string, callback: any
- }
-
-export class tasmotaLightService {
-  public service: Service;
-  private characteristic: Characteristic;
+export class tasmotaLightService extends TasmotaService {
   private update: ChangeHSB;
-  public statusSubscribe: Subscription;
-  public availabilitySubscribe: Subscription;
-  public fakegato: string;
 
   constructor(
     public readonly platform: tasmotaPlatform,
     public readonly accessory: PlatformAccessory,
-    private readonly uniq_id: string,
+    protected readonly uniq_id: string,
   ) {
 
-    // get the LightBulb service if it exists, otherwise create a new LightBulb service
-    // you can create multiple services for each accessory
+    super(platform, accessory, uniq_id);
 
-    const uuid = this.platform.api.hap.uuid.generate(accessory.context.device[this.uniq_id].uniq_id);
-    this.service = this.accessory.getService(uuid) || this.accessory.addService(this.platform.Service.Lightbulb, accessory.context.device[this.uniq_id].name, uuid);
+    this.service = this.accessory.getService(this.uuid) || this.accessory.addService(this.platform.Service.Lightbulb, accessory.context.device[this.uniq_id].name, this.uuid);
 
     if (!this.service.displayName) {
       this.service.setCharacteristic(this.platform.Characteristic.Name, accessory.context.device[this.uniq_id].name);
     }
 
     if (this.service.getCharacteristic(this.platform.Characteristic.On).listenerCount('set') < 1) {
-      this.service.getCharacteristic(this.platform.Characteristic.On)
+      this.characteristic = this.service.getCharacteristic(this.platform.Characteristic.On)
         .on('set', this.setOn.bind(this));                // SET - bind to the `setOn` method below
       // .on('get', this.getOn.bind(this));               // GET - bind to the `getOn` method below
 
       debug('Creating statusUpdate listener for', accessory.context.device[this.uniq_id].stat_t);
-      this.statusSubscribe = { event: accessory.context.device[this.uniq_id].stat_t, callback: this.statusUpdate.bind(this)};
+      this.statusSubscribe = { event: accessory.context.device[this.uniq_id].stat_t, callback: this.statusUpdate.bind(this) };
       accessory.context.mqttHost.on(accessory.context.device[this.uniq_id].stat_t, this.statusUpdate.bind(this));
       accessory.context.mqttHost.statusSubscribe(accessory.context.device[this.uniq_id].stat_t);
 
-      this.availabilitySubscribe = { event: accessory.context.device[this.uniq_id].avty_t, callback: this.availabilityUpdate.bind(this)};
+      this.availabilitySubscribe = { event: accessory.context.device[this.uniq_id].avty_t, callback: this.availabilityUpdate.bind(this) };
       accessory.context.mqttHost.on(accessory.context.device[this.uniq_id].avty_t, this.availabilityUpdate.bind(this));
       accessory.context.mqttHost.availabilitySubscribe(accessory.context.device[this.uniq_id].avty_t);
     }
@@ -81,19 +69,7 @@ export class tasmotaLightService {
         .on('set', this.setColorTemperature.bind(this));
     }
 
-    nunjucks.installJinjaCompat();
-    nunjucks.configure({
-      autoescape: true,
-    });
-
-    this.refresh();
-  }
-
-  refresh() {
-    // Get current status for accessory/service on startup
-    const teleperiod = this.accessory.context.device[this.uniq_id].cmd_t.substr(0, this.accessory.context.device[this.uniq_id].cmd_t.lastIndexOf('/') + 1) + 'teleperiod';
-    debug('refresh', this.platform.teleperiod);
-    this.accessory.context.mqttHost.sendMessage(teleperiod, this.platform.teleperiod.toString());
+    this.enableStatus();
   }
 
 
@@ -111,92 +87,90 @@ export class tasmotaLightService {
       value_json: JSON.parse(message.toString()),
     };
 
-    // Update On / Off status
+    try {
+      let value = this.parseValue(this.accessory.context.device[this.uniq_id].val_tpl, {
+        value_json: JSON.parse(message.toString()),
+      });
 
-    if (this.service.getCharacteristic(this.platform.Characteristic.On).value !== (nunjucks.renderString(this.accessory.context.device[this.uniq_id].val_tpl, interim) === this.accessory.context.device[this.uniq_id].pl_on ? true : false)) {
+      if (this.service.getCharacteristic(this.platform.Characteristic.On).value !== (value === this.accessory.context.device[this.uniq_id].pl_on ? true : false)) {
 
-      // Use debug logging for no change updates, and info when a change occurred
+        // Use debug logging for no change updates, and info when a change occurred
 
-      this.platform.log.info('Updating \'%s\' to %s', this.accessory.displayName, nunjucks.renderString(this.accessory.context.device[this.uniq_id].val_tpl, interim));
+        this.platform.log.info('Updating \'%s\' to %s', this.accessory.displayName, value);
 
-    } else {
-      this.platform.log.debug('Updating \'%s\' to %s', this.accessory.displayName, nunjucks.renderString(this.accessory.context.device[this.uniq_id].val_tpl, interim));
-    }
-    this.service.getCharacteristic(this.platform.Characteristic.On).updateValue((nunjucks.renderString(this.accessory.context.device[this.uniq_id].val_tpl, interim) === this.accessory.context.device[this.uniq_id].pl_on ? true : false));
-
-    // Update brightness if supported
-
-    if (this.accessory.context.device[this.uniq_id].bri_val_tpl) {
-
-      // Use debug logging for no change updates, and info when a change occurred
-
-      if (this.service.getCharacteristic(this.platform.Characteristic.Brightness).value != nunjucks.renderString(this.accessory.context.device[this.uniq_id].bri_val_tpl, interim)) {
-        this.platform.log.info('Updating \'%s\' Brightness to %s', this.accessory.displayName, nunjucks.renderString(this.accessory.context.device[this.uniq_id].bri_val_tpl, interim));
       } else {
-        this.platform.log.debug('Updating \'%s\' Brightness to %s', this.accessory.displayName, nunjucks.renderString(this.accessory.context.device[this.uniq_id].bri_val_tpl, interim));
+        this.platform.log.debug('Updating \'%s\' to %s', this.accessory.displayName, value);
+      }
+      this.service.getCharacteristic(this.platform.Characteristic.On).updateValue((value === this.accessory.context.device[this.uniq_id].pl_on ? true : false));
+
+      // Update brightness if supported
+
+      if (this.accessory.context.device[this.uniq_id].bri_val_tpl) {
+
+        // Use debug logging for no change updates, and info when a change occurred
+        let bri_val = this.parseValue(this.accessory.context.device[this.uniq_id].bri_val_tpl, {
+          value_json: JSON.parse(message.toString()),
+        });
+
+        if (this.service.getCharacteristic(this.platform.Characteristic.Brightness).value != bri_val) {
+          this.platform.log.info('Updating \'%s\' Brightness to %s', this.accessory.displayName, bri_val);
+        } else {
+          this.platform.log.debug('Updating \'%s\' Brightness to %s', this.accessory.displayName, bri_val);
+        }
+
+        this.service.getCharacteristic(this.platform.Characteristic.Brightness).updateValue(bri_val);
       }
 
-      this.service.getCharacteristic(this.platform.Characteristic.Brightness).updateValue(nunjucks.renderString(this.accessory.context.device[this.uniq_id].bri_val_tpl, interim));
-    }
+      // Update color settings
 
-    // Update color settings
-
-    if (this.accessory.context.device[this.uniq_id].rgb_stat_t) {
+      if (this.accessory.context.device[this.uniq_id].rgb_stat_t) {
 
 
-      debug('RGB->HSL RGB(%s,%s,%s) HSB(%s) From Tasmota HSB(%s)', nunjucks.renderString(this.accessory.context.device[this.uniq_id].rgb_val_tpl, interim).split(',')[0], nunjucks.renderString(this.accessory.context.device[this.uniq_id].rgb_val_tpl, interim).split(',')[1], nunjucks.renderString(this.accessory.context.device[this.uniq_id].rgb_val_tpl, interim).split(',')[2], rgb2hsv(nunjucks.renderString(this.accessory.context.device[this.uniq_id].rgb_val_tpl, interim).split(',')[0], nunjucks.renderString(this.accessory.context.device[this.uniq_id].rgb_val_tpl, interim).split(',')[1], nunjucks.renderString(this.accessory.context.device[this.uniq_id].rgb_val_tpl, interim).split(',')[2]), JSON.parse(message.toString()).HSBColor);
+        debug('RGB->HSL RGB(%s,%s,%s) HSB(%s) From Tasmota HSB(%s)', this.parseValue(this.accessory.context.device[this.uniq_id].rgb_val_tpl, interim).split(',')[0], this.parseValue(this.accessory.context.device[this.uniq_id].rgb_val_tpl, interim).split(',')[1], this.parseValue(this.accessory.context.device[this.uniq_id].rgb_val_tpl, interim).split(',')[2], rgb2hsv(this.parseValue(this.accessory.context.device[this.uniq_id].rgb_val_tpl, interim).split(',')[0], this.parseValue(this.accessory.context.device[this.uniq_id].rgb_val_tpl, interim).split(',')[1], this.parseValue(this.accessory.context.device[this.uniq_id].rgb_val_tpl, interim).split(',')[2]), JSON.parse(message.toString()).HSBColor);
 
-      const hsb = rgb2hsv(nunjucks.renderString(this.accessory.context.device[this.uniq_id].rgb_val_tpl, interim).split(',')[0], nunjucks.renderString(this.accessory.context.device[this.uniq_id].rgb_val_tpl, interim).split(',')[1], nunjucks.renderString(this.accessory.context.device[this.uniq_id].rgb_val_tpl, interim).split(',')[2]);
+        const hsb = rgb2hsv(this.parseValue(this.accessory.context.device[this.uniq_id].rgb_val_tpl, interim).split(',')[0], this.parseValue(this.accessory.context.device[this.uniq_id].rgb_val_tpl, interim).split(',')[1], this.parseValue(this.accessory.context.device[this.uniq_id].rgb_val_tpl, interim).split(',')[2]);
 
 
-      // Use debug logging for no change updates, and info when a change occurred
+        // Use debug logging for no change updates, and info when a change occurred
 
-      if (this.service.getCharacteristic(this.platform.Characteristic.Hue).value != hsb.h) {
-        this.platform.log.info('Updating \'%s\' Hue to %s', this.accessory.displayName, hsb.h);
-      } else {
-        this.platform.log.debug('Updating \'%s\' Hue to %s', this.accessory.displayName, hsb.h);
+        if (this.service.getCharacteristic(this.platform.Characteristic.Hue).value != hsb.h) {
+          this.platform.log.info('Updating \'%s\' Hue to %s', this.accessory.displayName, hsb.h);
+        } else {
+          this.platform.log.debug('Updating \'%s\' Hue to %s', this.accessory.displayName, hsb.h);
+        }
+
+        if (this.service.getCharacteristic(this.platform.Characteristic.Saturation).value != hsb.s) {
+          this.platform.log.info('Updating \'%s\' Saturation to %s', this.accessory.displayName, hsb.s);
+        } else {
+          this.platform.log.debug('Updating \'%s\' Saturation to %s', this.accessory.displayName, hsb.s);
+        }
+
+        this.service.getCharacteristic(this.platform.Characteristic.Hue).updateValue(hsb.h);
+        this.service.getCharacteristic(this.platform.Characteristic.Saturation).updateValue(hsb.s);
+
       }
 
-      if (this.service.getCharacteristic(this.platform.Characteristic.Saturation).value != hsb.s) {
-        this.platform.log.info('Updating \'%s\' Saturation to %s', this.accessory.displayName, hsb.s);
-      } else {
-        this.platform.log.debug('Updating \'%s\' Saturation to %s', this.accessory.displayName, hsb.s);
+      // Update color temperature if supported
+
+      if (this.accessory.context.device[this.uniq_id].clr_temp_cmd_t) {
+
+        // Use debug logging for no change updates, and info when a change occurred
+        let clr_temp = this.parseValue(this.accessory.context.device[this.uniq_id].clr_temp_tpl, {
+          value_json: JSON.parse(message.toString()),
+        });
+
+        if (this.service.getCharacteristic(this.platform.Characteristic.ColorTemperature).value != clr_temp) {
+
+          this.platform.log.info('Updating \'%s\' ColorTemperature to %s', this.accessory.displayName, clr_temp);
+        } else {
+          this.platform.log.debug('Updating \'%s\' ColorTemperature to %s', this.accessory.displayName, clr_temp);
+        }
+
+        this.service.getCharacteristic(this.platform.Characteristic.ColorTemperature).updateValue(clr_temp);
       }
-
-      this.service.getCharacteristic(this.platform.Characteristic.Hue).updateValue(hsb.h);
-      this.service.getCharacteristic(this.platform.Characteristic.Saturation).updateValue(hsb.s);
-
+    } catch (err) {
+      this.platform.log.error('ERROR: Message Parse Error', topic, message.toString())
     }
-
-    // Update color temperature if supported
-
-    if (this.accessory.context.device[this.uniq_id].clr_temp_cmd_t) {
-
-      // Use debug logging for no change updates, and info when a change occurred
-
-      if (this.service.getCharacteristic(this.platform.Characteristic.ColorTemperature).value != nunjucks.renderString(this.accessory.context.device[this.uniq_id].clr_temp_val_tpl, interim)) {
-
-        this.platform.log.info('Updating \'%s\' ColorTemperature to %s', this.accessory.displayName, nunjucks.renderString(this.accessory.context.device[this.uniq_id].clr_temp_val_tpl, interim));
-      } else {
-        this.platform.log.debug('Updating \'%s\' ColorTemperature to %s', this.accessory.displayName, nunjucks.renderString(this.accessory.context.device[this.uniq_id].clr_temp_val_tpl, interim));
-      }
-
-      this.service.getCharacteristic(this.platform.Characteristic.ColorTemperature).updateValue(nunjucks.renderString(this.accessory.context.device[this.uniq_id].clr_temp_val_tpl, interim));
-    }
-
-
-  }
-
-  /**
-   * Handle "LWT" Last Will and Testament messages from Tasmota
-   * These are sent when the device is no longer available from the MQTT server.
-   */
-
-  availabilityUpdate(topic, message) {
-    this.platform.log.info('Marking light accessory \'%s\' to %s', this.service.displayName, message);
-    const availability = (message.toString() === this.accessory.context.device[this.uniq_id].pl_not_avail ? new Error(this.accessory.displayName + ' ' + message.toString()) : 0);
-
-    this.service.getCharacteristic(this.platform.Characteristic.On).updateValue(availability);
   }
 
   setOn(value: CharacteristicValue, callback: CharacteristicSetCallback) {
@@ -256,7 +230,7 @@ class ChangeHSB {
   private desiredState: Record<string, unknown>;
   private deferrals;
   private waitTimeUpdate: number;
-  private timeout: NodeJS.Timeout | null ;
+  private timeout: NodeJS.Timeout | null;
   private accessory: PlatformAccessory;
   private readonly uniq_id: string;
 
@@ -287,9 +261,9 @@ class ChangeHSB {
       if (!this.timeout) {
         this.timeout = setTimeout(() => {
           debug('put start %s', this.desiredState);
-          debug('HSL->RGB', hsl2rgb(this.desiredState?.newHue ?? this.desiredState?.oldHue, this.desiredState?.newSaturation ?? this.desiredState?.oldSaturation, 50).toString());
+          debug('HSL->RGB', hsl2rgb(this.desiredState ?.newHue ?? this.desiredState ?.oldHue, this.desiredState ?.newSaturation ?? this.desiredState ?.oldSaturation, 50).toString());
 
-          this.accessory.context.mqttHost.sendMessage(this.accessory.context.device[this.uniq_id].rgb_cmd_t, hsl2rgb(this.desiredState?.newHue ?? this.desiredState?.oldHue, this.desiredState?.newSaturation ?? this.desiredState?.oldSaturation, 50).toString());
+          this.accessory.context.mqttHost.sendMessage(this.accessory.context.device[this.uniq_id].rgb_cmd_t, hsl2rgb(this.desiredState ?.newHue ?? this.desiredState ?.oldHue, this.desiredState ?.newSaturation ?? this.desiredState ?.oldSaturation, 50).toString());
 
           for (const d of this.deferrals) {
             d.resolve();
@@ -308,13 +282,13 @@ class ChangeHSB {
 
 // Color conversion functions
 
-function rgb2hsv (r, g, b) {
+function rgb2hsv(r, g, b) {
   let rr, gg, bb, h, s, v, diff;
   const rabs = r / 255;
   const gabs = g / 255;
   const babs = b / 255;
   v = Math.max(rabs, gabs, babs),
-  diff = v - Math.min(rabs, gabs, babs);
+    diff = v - Math.min(rabs, gabs, babs);
   const diffc = c => (v - c) / 6 / diff + 1 / 2;
   //    percentRoundFn = num => Math.round(num * 100) / 100;
   const percentRoundFn = num => Math.round(num);
@@ -335,7 +309,7 @@ function rgb2hsv (r, g, b) {
     }
     if (h < 0) {
       h += 1;
-    }else if (h > 1) {
+    } else if (h > 1) {
       h -= 1;
     }
   }
@@ -393,93 +367,3 @@ function hsl2rgb(h1, s1, l1) {
 
   return rgb;
 }
-
-/*
-
-// RGB Led Strip
-
-{ "name": "Tasmota",
-  "cmd_t": "~cmnd/POWER",
-  "stat_t": "~tele/STATE",
-  "val_tpl": "{{value_json.POWER}}",
-  "pl_off": "OFF",
-  "pl_on": "ON",
-  "avty_t": "~tele/LWT",
-  "pl_avail": "Online",
-  "pl_not_avail": "Offline",
-  "uniq_id": "DC4492_LI_1",
-  "device": { "identifiers": ["DC4492"], "connections": [["mac", "5C:CF:7F:DC:44:92"]] },
-  "~": "tasmota/",
-
-  "bri_cmd_t": "~cmnd/Dimmer",
-  "bri_stat_t": "~tele/STATE",
-  "bri_scl": 100,
-  "on_cmd_type": "brightness",
-  "bri_val_tpl": "{{value_json.Dimmer}}",
-
-  "rgb_cmd_t": "~cmnd/Color2",
-  "rgb_stat_t": "~tele/STATE",
-  "rgb_val_tpl": "{{value_json.Color.split(',')[0:3]|join(',')}}",
-
-  "fx_cmd_t": "~cmnd/Scheme",
-  "fx_stat_t": "~tele/STATE",
-  "fx_val_tpl": "{{value_json.Scheme}}",
-  "fx_list": ["0", "1", "2", "3", "4"]
-}
-
-*/
-
-
-
-
-
-/*
-
-Tuya Dimmer HA Discover message
-
-{
-  name: 'Kitchen Sink Kitchen Sink',
-  stat_t: 'tele/tasmota_284CCF/STATE',
-  avty_t: 'tele/tasmota_284CCF/LWT',
-  pl_avail: 'Online',
-  pl_not_avail: 'Offline',
-  cmd_t: 'cmnd/tasmota_284CCF/POWER',
-  val_tpl: '{{value_json.POWER}}',
-  pl_off: 'OFF',
-  pl_on: 'ON',
-  uniq_id: '284CCF_LI_1',
-  dev: { ids: [ '284CCF' ] },
-  bri_cmd_t: 'cmnd/tasmota_284CCF/Dimmer',
-  bri_stat_t: 'tele/tasmota_284CCF/STATE',
-  bri_scl: 100,
-  on_cmd_type: 'brightness',
-  bri_val_tpl: '{{value_json.Dimmer}}',
-  tasmotaType: 'light'
-}
-*/
-
-/* stat_t: 'tele/tasmota_00F861/STATE',
- * pl_off: 'OFF',
-   pl_on: 'ON',
- */
-/*
-{  Arilux LC06 in
-  "Time": "2020-09-04T01:09:41",
-  "Uptime": "0T05:40:51",
-  "UptimeSec": 20451,
-  "Heap": 24,
-  "SleepMode": "Dynamic",
-  "Sleep": 10,
-  "LoadAvg": 99, "MqttCount": 1,
-  "POWER": "ON",
-  "Dimmer": 74,
-  "Color": "189,189",
-  "HSBColor": "0,0,0",
-  "Channel": [74, 74],
-  "CT": 327,
-  "Fade": "OFF",
-  "Speed": 1,
-  "LedTable": "ON",
-  "Wifi": { "AP": 1, "SSId": "The_Beach", "BSSId": "34:12:98:08:9D:2A", "Channel": 11, "RSSI": 88, "Signal": -56, "LinkCount": 1, "Downtime": "0T00:00:06" }
-};
- */

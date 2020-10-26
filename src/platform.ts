@@ -1,4 +1,4 @@
-import { API, DynamicPlatformPlugin, Logger, PlatformAccessory, PlatformConfig, Service, Characteristic } from 'homebridge';
+import { API, DynamicPlatformPlugin, Logger, PlatformAccessory, PlatformConfig, Service, Characteristic, CharacteristicValue, CharacteristicSetCallback } from 'homebridge';
 
 import { PLATFORM_NAME, PLUGIN_NAME } from './settings';
 // import { tasmotaAccessory } from './platformAccessory';
@@ -413,7 +413,7 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
   }
 }
 
-function setConfiguredName(this: tasmotaSwitchService | tasmotaLightService | tasmotaFanService | tasmotaSensorService | tasmotaBinarySensorService, value, callback) {
+function setConfiguredName(this: tasmotaSwitchService | tasmotaLightService | tasmotaFanService | tasmotaSensorService | tasmotaBinarySensorService, value, callback: CharacteristicSetCallback) {
   // debug('this', this.service.displayName);
   // this.platform.log.debug('setConfiguredName', value, this.service.displayName);
   this.service.displayName = value;
