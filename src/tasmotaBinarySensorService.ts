@@ -27,7 +27,7 @@ export class tasmotaBinarySensorService {
   public fakegato: string;
 
   constructor(
-    private readonly platform: tasmotaPlatform,
+    public readonly platform: tasmotaPlatform,
     public readonly accessory: PlatformAccessory,
     private readonly uniq_id: string,
   ) {
@@ -41,7 +41,9 @@ export class tasmotaBinarySensorService {
 
         this.service = this.accessory.getService(uuid) || this.accessory.addService(this.platform.Service.ContactSensor, accessory.context.device[this.uniq_id].name, uuid);
 
-        this.service.setCharacteristic(this.platform.Characteristic.Name, accessory.context.device[this.uniq_id].name);
+        if (!this.service.displayName) {
+          this.service.setCharacteristic(this.platform.Characteristic.Name, accessory.context.device[this.uniq_id].name);
+        }
         this.characteristic = this.service.getCharacteristic(this.platform.Characteristic.ContactSensorState);
         if (this.platform.config.history) {
           this.fakegato = 'contact';
@@ -54,7 +56,9 @@ export class tasmotaBinarySensorService {
 
         this.service = this.accessory.getService(uuid) || this.accessory.addService(this.platform.Service.MotionSensor, accessory.context.device[this.uniq_id].name, uuid);
 
-        this.service.setCharacteristic(this.platform.Characteristic.Name, accessory.context.device[this.uniq_id].name);
+        if (!this.service.displayName) {
+          this.service.setCharacteristic(this.platform.Characteristic.Name, accessory.context.device[this.uniq_id].name);
+        }
         this.characteristic = this.service.getCharacteristic(this.platform.Characteristic.MotionDetected);
         if (this.platform.config.history) {
           this.fakegato = 'motion';

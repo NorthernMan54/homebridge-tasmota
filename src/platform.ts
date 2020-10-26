@@ -290,6 +290,11 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
             this.accessories.push(accessory);
           }
 
+          if (this.services[uniq_id].service && this.services[uniq_id].service.getCharacteristic(this.Characteristic.ConfiguredName).listenerCount('set') < 1) {
+            this.services[uniq_id].service.getCharacteristic(this.Characteristic.ConfiguredName)
+              .on('set', setConfiguredName.bind(this.services[uniq_id]));
+          }
+
         } else {
           this.log.warn('Warning: Malformed HASS Discovery message', topic, config.name);
         }
@@ -408,11 +413,21 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
   }
 }
 
+function setConfiguredName(this: tasmotaSwitchService | tasmotaLightService | tasmotaFanService | tasmotaSensorService | tasmotaBinarySensorService, value, callback) {
+  // debug('this', this.service.displayName);
+  // this.platform.log.debug('setConfiguredName', value, this.service.displayName);
+  this.service.displayName = value;
+  this.service.setCharacteristic(this.platform.Characteristic.Name, this.service.displayName);
+  this.platform.api.updatePlatformAccessories([this.accessory]);
+  callback();
+}
+
 /* The various Tasmota firmware's have a slightly different flavors of the message. */
 
 function normalizeMessage(message) {
 
   const translation = {
+    // from: --> 'to'
     unique_id: 'uniq_id',
     device_class: 'dev_cla',
     payload_on: 'pl_on',
@@ -423,6 +438,7 @@ function normalizeMessage(message) {
     manufacturer: 'mf',
     identifiers: 'ids',
     value_template: 'val_tpl',
+    unit_of_measurement: 'unit_of_meas'
   };
 
   message = renameKeys(message, translation);

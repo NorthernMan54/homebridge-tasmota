@@ -28,7 +28,7 @@ export class tasmotaSensorService {
   public nunjucksEnvironment;
 
   constructor(
-    private readonly platform: tasmotaPlatform,
+    public readonly platform: tasmotaPlatform,
     public readonly accessory: PlatformAccessory,
     private readonly uniq_id: string,
   ) {
@@ -42,8 +42,10 @@ export class tasmotaSensorService {
         this.platform.log.debug('Creating %s sensor %s', accessory.context.device[this.uniq_id].dev_cla, accessory.context.device[this.uniq_id].name);
 
         this.service = this.accessory.getService(uuid) || this.accessory.addService(this.platform.Service.TemperatureSensor, accessory.context.device[this.uniq_id].name, uuid);
-
-        this.service.setCharacteristic(this.platform.Characteristic.Name, accessory.context.device[this.uniq_id].name);
+        // debug('displayName', this.service.displayName);
+        if (!this.service.displayName) {
+          this.service.setCharacteristic(this.platform.Characteristic.Name, accessory.context.device[this.uniq_id].name);
+        }
 
         // Burr winter is coming
 
@@ -62,7 +64,9 @@ export class tasmotaSensorService {
 
         this.service = this.accessory.getService(uuid) || this.accessory.addService(this.platform.Service.HumiditySensor, accessory.context.device[this.uniq_id].name, uuid);
 
-        this.service.setCharacteristic(this.platform.Characteristic.Name, accessory.context.device[this.uniq_id].name);
+        if (!this.service.displayName) {
+          this.service.setCharacteristic(this.platform.Characteristic.Name, accessory.context.device[this.uniq_id].name);
+        }
         this.characteristic = this.service.getCharacteristic(this.platform.Characteristic.CurrentRelativeHumidity);
 
         break;
@@ -71,7 +75,9 @@ export class tasmotaSensorService {
 
         this.service = this.accessory.getService(uuid) || this.accessory.addService(this.CustomCharacteristic.AtmosphericPressureSensor, accessory.context.device[this.uniq_id].name, uuid);
 
-        this.service.setCharacteristic(this.platform.Characteristic.Name, accessory.context.device[this.uniq_id].name);
+        if (!this.service.displayName) {
+          this.service.setCharacteristic(this.platform.Characteristic.Name, accessory.context.device[this.uniq_id].name);
+        }
         this.characteristic = this.service.getCharacteristic(this.CustomCharacteristic.AtmosphericPressureLevel);
 
         break;
@@ -80,7 +86,9 @@ export class tasmotaSensorService {
 
         this.service = this.accessory.getService(uuid) || this.accessory.addService(this.platform.Service.LightSensor, accessory.context.device[this.uniq_id].name, uuid);
 
-        this.service.setCharacteristic(this.platform.Characteristic.Name, accessory.context.device[this.uniq_id].name);
+        if (!this.service.displayName) {
+          this.service.setCharacteristic(this.platform.Characteristic.Name, accessory.context.device[this.uniq_id].name);
+        }
         this.characteristic = this.service.getCharacteristic(this.platform.Characteristic.CurrentAmbientLightLevel);
 
         break;
@@ -89,7 +97,9 @@ export class tasmotaSensorService {
 
         this.service = this.accessory.getService(uuid) || this.accessory.addService(this.platform.Service.CarbonDioxideSensor, accessory.context.device[this.uniq_id].name, uuid);
 
-        this.service.setCharacteristic(this.platform.Characteristic.Name, accessory.context.device[this.uniq_id].name);
+        if (!this.service.displayName) {
+          this.service.setCharacteristic(this.platform.Characteristic.Name, accessory.context.device[this.uniq_id].name);
+        }
         this.characteristic = this.service.getCharacteristic(this.platform.Characteristic.CarbonDioxideLevel);
 
         break;
@@ -98,7 +108,9 @@ export class tasmotaSensorService {
 
         this.service = this.accessory.getService(uuid) || this.accessory.addService(this.platform.Service.AirQualitySensor, accessory.context.device[this.uniq_id].name, uuid);
 
-        this.service.setCharacteristic(this.platform.Characteristic.Name, accessory.context.device[this.uniq_id].name);
+        if (!this.service.displayName) {
+          this.service.setCharacteristic(this.platform.Characteristic.Name, accessory.context.device[this.uniq_id].name);
+        }
         this.characteristic = this.service.getCharacteristic(this.platform.Characteristic.AirParticulateDensity);
         this.service.setCharacteristic(this.platform.Characteristic.AirParticulateSize, this.platform.Characteristic.AirParticulateSize._2_5_M);
 
@@ -131,7 +143,7 @@ export class tasmotaSensorService {
         this.platform.log.debug('Setting accessory information', accessory.context.device[this.uniq_id].name);
         if (accessory.context.device[this.uniq_id].dev.mf && accessory.context.device[this.uniq_id].dev.mdl && accessory.context.device[this.uniq_id].dev.sw) {
           this.accessory.getService(this.platform.Service.AccessoryInformation)!
-            .setCharacteristic(this.platform.Characteristic.Name, accessory.context.device[this.uniq_id].dev.name)
+            .setCharacteristic(this.platform.Characteristic.Name, this.service.displayName ?? accessory.context.device[this.uniq_id].dev.name)
             .setCharacteristic(this.platform.Characteristic.Manufacturer, (accessory.context.device[this.uniq_id].dev.mf ?? 'undefined').replace(/[^-_ a-zA-Z0-9]/gi, ''))
             .setCharacteristic(this.platform.Characteristic.Model, (accessory.context.device[this.uniq_id].dev.mdl ?? 'undefined').replace(/[^-_ a-zA-Z0-9]/gi, ''))
             .setCharacteristic(this.platform.Characteristic.FirmwareRevision, (accessory.context.device[this.uniq_id].dev.sw ?? 'undefined').replace(/[^-_. a-zA-Z0-9]/gi, ''))
@@ -141,12 +153,6 @@ export class tasmotaSensorService {
       default:
         this.platform.log.warn('Warning: Unhandled Tasmota sensor type', accessory.context.device[this.uniq_id].dev_cla);
     }
-
-    if (this.service && this.service.getCharacteristic(this.platform.Characteristic.ConfiguredName).listenerCount('set') < 1) {
-      this.service.getCharacteristic(this.platform.Characteristic.ConfiguredName)
-        .on('set', this.setConfiguredName.bind(this));
-    }
-
 
     // Enable historical logging
 
@@ -185,10 +191,9 @@ export class tasmotaSensorService {
       this.platform.log.debug('Creating statusUpdate listener for %s %s', accessory.context.device[this.uniq_id].stat_t, accessory.context.device[this.uniq_id].name);
       this.statusSubscribe = { event: accessory.context.device[this.uniq_id].stat_t, callback: this.statusUpdate.bind(this) };
       accessory.context.mqttHost.on(accessory.context.device[this.uniq_id].stat_t, this.statusUpdate.bind(this));
-
+      accessory.context.mqttHost.statusSubscribe(accessory.context.device[this.uniq_id].stat_t);
       if (accessory.context.device[this.uniq_id].avty_t) {
         this.availabilitySubscribe = { event: accessory.context.device[this.uniq_id].avty_t, callback: this.availabilityUpdate.bind(this) };
-        accessory.context.mqttHost.statusSubscribe(accessory.context.device[this.uniq_id].stat_t);
         accessory.context.mqttHost.on(accessory.context.device[this.uniq_id].avty_t, this.availabilityUpdate.bind(this));
         this.availabilitySubscribe = accessory.context.mqttHost.availabilitySubscribe(accessory.context.device[this.uniq_id].avty_t);
       } else {
@@ -212,11 +217,6 @@ export class tasmotaSensorService {
     }
   }
 
-  setConfiguredName(value, callback) {
-    this.platform.log.debug('setConfiguredName', value);
-    callback();
-  }
-
   refresh() {
     // Get current status for accessory/service on startup
     const teleperiod = this.accessory.context.device[this.uniq_id].stat_t.substr(0, this.accessory.context.device[this.uniq_id].stat_t.lastIndexOf('/') + 1).replace('tele', 'cmnd') + 'teleperiod';
@@ -236,6 +236,11 @@ export class tasmotaSensorService {
       // Sensor value tweaks or adjustments needed for homekit
 
       switch (this.device_class) {
+        case 'temperature':
+          if (this.accessory.context.device[this.uniq_id].unit_of_meas.toUpperCase() === 'F') {
+            value = Math.round((value - 32) * 5 / 9 * 10) / 10;
+          }
+          break;
         case 'illuminance':
           // normalize LX in the range homebridge expects
           value = (value < 0.0001 ? 0.0001 : (value > 100000 ? 100000 : value));

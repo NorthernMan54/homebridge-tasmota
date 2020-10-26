@@ -24,7 +24,7 @@ export class tasmotaFanService {
   public fakegato: string;
 
   constructor(
-    private readonly platform: tasmotaPlatform,
+    public readonly platform: tasmotaPlatform,
     public readonly accessory: PlatformAccessory,
     private readonly uniq_id: string,
   ) {
@@ -35,7 +35,9 @@ export class tasmotaFanService {
     const uuid = this.platform.api.hap.uuid.generate(accessory.context.device[this.uniq_id].uniq_id);
     this.service = this.accessory.getService(uuid) || this.accessory.addService(this.platform.Service.Fan, accessory.context.device[this.uniq_id].name, uuid);
 
-    this.service.setCharacteristic(this.platform.Characteristic.Name, accessory.context.device[this.uniq_id].name);
+    if (!this.service.displayName) {
+      this.service.setCharacteristic(this.platform.Characteristic.Name, accessory.context.device[this.uniq_id].name);
+    }
 
     if (this.service.getCharacteristic(this.platform.Characteristic.On).listenerCount('set') < 1) {
       this.service.getCharacteristic(this.platform.Characteristic.On)
