@@ -125,10 +125,9 @@ export class tasmotaLightService extends TasmotaService {
 
       if (this.accessory.context.device[this.uniq_id].rgb_stat_t) {
 
+        debug('RGB->HSL RGB(%s,%s,%s) HSB(%s) From Tasmota HSB(%s)', this.parseValue(this.accessory.context.device[this.uniq_id].rgb_val_tpl, interim).split(',')[0], this.parseValue(this.accessory.context.device[this.uniq_id].rgb_val_tpl, interim).split(',')[1], this.parseValue(this.accessory.context.device[this.uniq_id].rgb_val_tpl, interim).split(',')[2], RGBtoScaledHSV(this.parseValue(this.accessory.context.device[this.uniq_id].rgb_val_tpl, interim).split(',')[0], this.parseValue(this.accessory.context.device[this.uniq_id].rgb_val_tpl, interim).split(',')[1], this.parseValue(this.accessory.context.device[this.uniq_id].rgb_val_tpl, interim).split(',')[2]), JSON.parse(message.toString()).HSBColor);
 
-        debug('RGB->HSL RGB(%s,%s,%s) HSB(%s) From Tasmota HSB(%s)', this.parseValue(this.accessory.context.device[this.uniq_id].rgb_val_tpl, interim).split(',')[0], this.parseValue(this.accessory.context.device[this.uniq_id].rgb_val_tpl, interim).split(',')[1], this.parseValue(this.accessory.context.device[this.uniq_id].rgb_val_tpl, interim).split(',')[2], rgb2hsv(this.parseValue(this.accessory.context.device[this.uniq_id].rgb_val_tpl, interim).split(',')[0], this.parseValue(this.accessory.context.device[this.uniq_id].rgb_val_tpl, interim).split(',')[1], this.parseValue(this.accessory.context.device[this.uniq_id].rgb_val_tpl, interim).split(',')[2]), JSON.parse(message.toString()).HSBColor);
-
-        const hsb = rgb2hsv(this.parseValue(this.accessory.context.device[this.uniq_id].rgb_val_tpl, interim).split(',')[0], this.parseValue(this.accessory.context.device[this.uniq_id].rgb_val_tpl, interim).split(',')[1], this.parseValue(this.accessory.context.device[this.uniq_id].rgb_val_tpl, interim).split(',')[2]);
+        const hsb = RGBtoScaledHSV(this.parseValue(this.accessory.context.device[this.uniq_id].rgb_val_tpl, interim).split(',')[0], this.parseValue(this.accessory.context.device[this.uniq_id].rgb_val_tpl, interim).split(',')[1], this.parseValue(this.accessory.context.device[this.uniq_id].rgb_val_tpl, interim).split(',')[2]);
 
 
         // Use debug logging for no change updates, and info when a change occurred
@@ -169,7 +168,7 @@ export class tasmotaLightService extends TasmotaService {
         this.service.getCharacteristic(this.platform.Characteristic.ColorTemperature).updateValue(clr_temp);
       }
     } catch (err) {
-      this.platform.log.error('ERROR: Message Parse Error', topic, message.toString())
+      this.platform.log.error('ERROR: Message Parse Error', topic, message.toString(), err.message)
     }
   }
 
@@ -261,9 +260,9 @@ class ChangeHSB {
       if (!this.timeout) {
         this.timeout = setTimeout(() => {
           debug('put start %s', this.desiredState);
-          debug('HSL->RGB', hsl2rgb(this.desiredState ?.newHue ?? this.desiredState ?.oldHue, this.desiredState ?.newSaturation ?? this.desiredState ?.oldSaturation, 50).toString());
+          debug('HSL->RGB', ScaledHSVtoRGB(this.desiredState ?.newHue ?? this.desiredState ?.oldHue, this.desiredState ?.newSaturation ?? this.desiredState ?.oldSaturation, 50).toString());
 
-          this.accessory.context.mqttHost.sendMessage(this.accessory.context.device[this.uniq_id].rgb_cmd_t, hsl2rgb(this.desiredState ?.newHue ?? this.desiredState ?.oldHue, this.desiredState ?.newSaturation ?? this.desiredState ?.oldSaturation, 50).toString());
+          this.accessory.context.mqttHost.sendMessage(this.accessory.context.device[this.uniq_id].rgb_cmd_t, ScaledHSVtoRGB(this.desiredState ?.newHue ?? this.desiredState ?.oldHue, this.desiredState ?.newSaturation ?? this.desiredState ?.oldSaturation, 50).toString());
 
           for (const d of this.deferrals) {
             d.resolve();
@@ -279,6 +278,82 @@ class ChangeHSB {
     });
   }
 }
+
+/*
+    * HSV to RGB conversion from https://stackoverflow.com/questions/17242144/javascript-convert-hsb-hsv-color-to-rgb-accurately
+    * accepts parameters
+    * h  Object = {h:x, s:y, v:z}
+    * OR
+    * h, s, v
+    */
+   function HSVtoRGB( h, s, v ) {
+       var r, g, b, i, f, p, q, t;
+       if( arguments.length === 1 ) {
+           s = h.s, v = h.v, h = h.h;
+       }
+       i = Math.floor( h * 6 );
+       f = h * 6 - i;
+       p = v * ( 1 - s );
+       q = v * ( 1 - f * s );
+       t = v * ( 1 - ( 1 - f ) * s );
+       switch( i % 6 ) {
+           case 0: r = v, g = t, b = p; break;
+           case 1: r = q, g = v, b = p; break;
+           case 2: r = p, g = v, b = t; break;
+           case 3: r = p, g = q, b = v; break;
+           case 4: r = t, g = p, b = v; break;
+           case 5: r = v, g = p, b = q; break;
+       }
+
+       var rgb = [0,0,0];
+       rgb[0] = Math.round( r * 255 );
+       rgb[1] = Math.round( g * 255 );
+       rgb[2] = Math.round( b * 255 );
+       return (
+           rgb
+       );
+   }
+
+   function ScaledHSVtoRGB( h, s, v ) {
+       return HSVtoRGB( h / 360, s / 100, v / 100 );
+   }
+
+   /* accepts parameters
+    * r  Object = {r:x, g:y, b:z}
+    * OR
+    * r, g, b
+    */
+   function RGBtoHSV( r, g, b ) {
+       // debug('from', r, g, b);
+       var max = Math.max( r, g, b ), min = Math.min( r, g, b ),
+           d = max - min,
+           h,
+           s = ( max === 0 ? 0 : d / max ),
+           v = max / 255;
+       // debug('max', )
+       switch( max ) {
+           case min: h = 0; break;
+           case r: h = ( g - b ) + d * ( g < b ? 6 : 0 ); h /= 6 * d; break;
+           case g: h = ( b - r ) + d * 2; h /= 6 * d; break;
+           case b: h = ( r - g ) + d * 4; h /= 6 * d; break;
+       }
+
+       return {
+           h: h,
+           s: s,
+           v: v
+       };
+   }
+
+   function RGBtoScaledHSV( r, g, b ) {
+       var hsv = RGBtoHSV( parseFloat(r), parseFloat(g), parseFloat(b) );
+       // debug('to', hsv);
+       return {
+           h: Math.round(hsv.h * 360),
+           s: Math.round(hsv.s * 100),
+           v: Math.round(hsv.v * 100)
+       };
+   }
 
 // Color conversion functions
 

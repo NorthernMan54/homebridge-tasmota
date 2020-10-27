@@ -52,6 +52,7 @@ export class TasmotaService {
 
     this.nunjucksEnvironment.addGlobal('float', float);
 
+    nunjucks.installJinjaCompat();
     nunjucks.configure({
       autoescape: true,
     });
@@ -188,19 +189,15 @@ export class TasmotaService {
 
       const result = template.render(value);
       if (result) {
-        if (parseFloat(result)) {
-          return parseFloat(result);
-        } else {
-          return result;
-        }
+        return result;
       } else {
-        this.platform.log.error('ERROR: Sensor %s missing data', this.service.displayName);
+        this.platform.log.error('ERROR: Template %s missing data', this.service.displayName, valueTemplate, value);
         return (new Error('Missing sensor value'));
       }
     }
     catch (err) {
-      this.platform.log.error('ERROR: Parsing error', err.message);
-      debug('ERROR: Parsing error', valueTemplate, value);
+      this.platform.log.error('ERROR: Template Parsing error', err.message);
+      debug('ERROR: Template Parsing error', valueTemplate, value);
       return (err);
     }
   }
