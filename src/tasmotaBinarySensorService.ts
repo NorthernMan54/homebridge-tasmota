@@ -90,7 +90,7 @@ export class tasmotaBinarySensorService extends TasmotaService {
       });
 
       if ( this.characteristic.props.format === this.platform.Characteristic.Formats.BOOL ) {
-
+        // value = value;
       } else {
         value = (value ? 1 : 0);
       }
