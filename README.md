@@ -218,7 +218,7 @@ gpio14 - Moisture Sensor Switch
 ```
 Template:  {"NAME":"DHT-Water","GPIO":[0,0,158,0,2,0,0,0,0,255,21,0,0],"FLAG":6,"BASE":18}
 
-Rule1 ON System#Boot DO publish2 homeassistant/binary_sensor/18A6B3_SNS_1/config {"name":"Water_Meter_Leak","stat_t":"~stat/Moisture","avty_t":"~tele/LWT","pl_avail":"Online","pl_not_avail":"Offline","uniq_id":"18A6B3_SNS_1","device":{"identifiers":["18A6B3"]},"~":"tasmota_18A6B3/","val_tpl":"{{value_json.Leak}}","pl_off":"OFF","pl_on":"ON","dev_cla":"moisture"} ; endon ON System#Boot DO RuleTimer1 150 endon on Rules#Timer=1 do backlog power on; RuleTimer1 150 endon
+Rule1 ON System#Boot DO publish2 homeassistant/binary_sensor/18A6B3_SNS_1/config {"name":"WaterMeterLeak","stat_t":"~stat/Moisture","avty_t":"~tele/LWT","pl_avail":"Online","pl_not_avail":"Offline","uniq_id":"18A6B3_SNS_1","device":{"identifiers":["18A6B3"]},"~":"tasmota_18A6B3/","val_tpl":"{{value_json.Leak}}","pl_off":"OFF","pl_on":"ON","dev_cla":"moisture"} ; endon ON System#Boot DO power on; RuleTimer1 150 endon on Rules#Timer=1 do backlog power on; RuleTimer1 150 endon
 
 Rule2 on Power1#state=1 do backlog delay 50 ; teleperiod 300; backlog delay 50; publish tasmota_18A6B3/stat/Moisture {"Leak":"%Var1%"} ; delay 5; power off endon
 

@@ -15,6 +15,7 @@ All notable changes to this project will be documented in this file. This projec
 - Support for Fakegato history for Temperature, Humidity, Current and Pressure sensors.
 - Added support for overriding the discovery response
 - Added tasmota device type fan, to allow control of Fan ( Based on a dimmable device )
+- Added tasmota binary sensor device moisture as a water leak device
 
 ## 0.0.32 (2020-09-30)
 

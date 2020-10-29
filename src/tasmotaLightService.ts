@@ -88,7 +88,7 @@ export class tasmotaLightService extends TasmotaService {
     };
 
     try {
-      let value = this.parseValue(this.accessory.context.device[this.uniq_id].val_tpl, {
+      const value = this.parseValue(this.accessory.context.device[this.uniq_id].val_tpl, {
         value_json: JSON.parse(message.toString()),
       });
 
@@ -108,7 +108,7 @@ export class tasmotaLightService extends TasmotaService {
       if (this.accessory.context.device[this.uniq_id].bri_val_tpl) {
 
         // Use debug logging for no change updates, and info when a change occurred
-        let bri_val = this.parseValue(this.accessory.context.device[this.uniq_id].bri_val_tpl, {
+        const bri_val = this.parseValue(this.accessory.context.device[this.uniq_id].bri_val_tpl, {
           value_json: JSON.parse(message.toString()),
         });
 
@@ -154,7 +154,7 @@ export class tasmotaLightService extends TasmotaService {
       if (this.accessory.context.device[this.uniq_id].clr_temp_cmd_t) {
 
         // Use debug logging for no change updates, and info when a change occurred
-        let clr_temp = this.parseValue(this.accessory.context.device[this.uniq_id].clr_temp_tpl, {
+        const clr_temp = this.parseValue(this.accessory.context.device[this.uniq_id].clr_temp_tpl, {
           value_json: JSON.parse(message.toString()),
         });
 
@@ -168,7 +168,7 @@ export class tasmotaLightService extends TasmotaService {
         this.service.getCharacteristic(this.platform.Characteristic.ColorTemperature).updateValue(clr_temp);
       }
     } catch (err) {
-      this.platform.log.error('ERROR: Message Parse Error', topic, message.toString(), err.message)
+      this.platform.log.error('ERROR: Message Parse Error', topic, message.toString(), err.message);
     }
   }
 
@@ -287,7 +287,7 @@ class ChangeHSB {
     * h, s, v
     */
 function HSVtoRGB(h, s, v) {
-  var r, g, b;
+  let r, g, b;
   if (arguments.length === 1) {
     s = h.s, v = h.v, h = h.h;
   }
@@ -305,7 +305,7 @@ function HSVtoRGB(h, s, v) {
     case 5: r = v, g = p, b = q; break;
   }
 
-  var rgb = [0, 0, 0];
+  const rgb = [0, 0, 0];
   rgb[0] = Math.round(r * 255);
   rgb[1] = Math.round(g * 255);
   rgb[2] = Math.round(b * 255);
@@ -342,17 +342,17 @@ function RGBtoHSV(r, g, b) {
   return {
     h: h,
     s: s,
-    v: v
+    v: v,
   };
 }
 
 function RGBtoScaledHSV(r, g, b) {
-  var hsv = RGBtoHSV(parseFloat(r), parseFloat(g), parseFloat(b));
+  const hsv = RGBtoHSV(parseFloat(r), parseFloat(g), parseFloat(b));
   // debug('to', hsv);
   return {
     h: Math.round(hsv.h * 360),
     s: Math.round(hsv.s * 100),
-    v: Math.round(hsv.v * 100)
+    v: Math.round(hsv.v * 100),
   };
 }
 
@@ -364,7 +364,7 @@ function rgb2hsv(r, g, b) {
   const gabs = g / 255;
   const babs = b / 255;
   v = Math.max(rabs, gabs, babs),
-    diff = v - Math.min(rabs, gabs, babs);
+  diff = v - Math.min(rabs, gabs, babs);
   const diffc = c => (v - c) / 6 / diff + 1 / 2;
   //    percentRoundFn = num => Math.round(num * 100) / 100;
   const percentRoundFn = num => Math.round(num);

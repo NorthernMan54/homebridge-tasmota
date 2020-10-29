@@ -59,7 +59,7 @@ export class tasmotaFanService extends TasmotaService {
 
 
     try {
-      let value = this.parseValue(this.accessory.context.device[this.uniq_id].val_tpl, {
+      const value = this.parseValue(this.accessory.context.device[this.uniq_id].val_tpl, {
         value_json: JSON.parse(message.toString()),
       });
 
@@ -79,7 +79,7 @@ export class tasmotaFanService extends TasmotaService {
       if (this.accessory.context.device[this.uniq_id].bri_val_tpl) {
 
         // Use debug logging for no change updates, and info when a change occurred
-        let bri_val = this.parseValue(this.accessory.context.device[this.uniq_id].val_tpl, {
+        const bri_val = this.parseValue(this.accessory.context.device[this.uniq_id].val_tpl, {
           value_json: JSON.parse(message.toString()),
         });
 
@@ -91,7 +91,7 @@ export class tasmotaFanService extends TasmotaService {
         this.service.getCharacteristic(this.platform.Characteristic.RotationSpeed).updateValue(bri_val);
       }
     } catch (err) {
-      this.platform.log.error('ERROR: Message Parse Error', topic, message.toString())
+      this.platform.log.error('ERROR: Message Parse Error', topic, message.toString());
     }
   }
 

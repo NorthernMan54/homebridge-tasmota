@@ -40,7 +40,9 @@ export class tasmotaSensorService extends TasmotaService {
             maxValue: 100,
           });
 
-        if (this.platform.config.history) this.fakegato = 'custom';
+        if (this.platform.config.history) {
+          this.fakegato = 'custom';
+        }
         this.characteristic = this.service.getCharacteristic(this.platform.Characteristic.CurrentTemperature);
 
         break;
@@ -103,7 +105,9 @@ export class tasmotaSensorService extends TasmotaService {
       case 'power':
         switch (this.uniq_id.replace(accessory.context.identifier, '').toLowerCase()) {
           case '_energy_power': // Watts
-            if (this.platform.config.history) this.fakegato = 'custom';
+            if (this.platform.config.history) {
+              this.fakegato = 'custom';
+            }
             this.service = this.accessory.getService(this.platform.Service.Switch) || this.accessory.addService(this.platform.Service.Switch, accessory.context.device[this.uniq_id].name, this.uuid);
             // debug('this.service', this.service);
 
@@ -194,7 +198,7 @@ export class tasmotaSensorService extends TasmotaService {
 
       // debug('fakegato', this.platform.config.history, this.fakegato, this.device_class);
       if (this.platform.config.history && this.fakegato) {
-        setTimeout(function(that) {
+        setTimeout((that) => {
           // slightly delay updates for multi characteristic devices to ensure the latest data is shared
           switch (that.device_class) {
             case 'temperature':
@@ -208,14 +212,14 @@ export class tasmotaSensorService extends TasmotaService {
                 temp: value,
                 pressure: that.accessory.getService(that.CustomCharacteristic.AtmosphericPressureSensor) ?.getCharacteristic(that.CustomCharacteristic.AtmosphericPressureLevel).value ?? 0,
                 humidity: that.accessory.getService(that.platform.Service.HumiditySensor) ?.getCharacteristic(that.platform.Characteristic.CurrentRelativeHumidity).value ?? 0,
-              })
+              });
               break;
             case 'power':
               debug('Updating fakegato \'%s:%s\'', that.characteristic.displayName, that.service.displayName, {
-                power: value
+                power: value,
               });
               that.accessory.context.fakegatoService.appendData({
-                power: value
+                power: value,
               });
               break;
             case undefined:
@@ -226,7 +230,7 @@ export class tasmotaSensorService extends TasmotaService {
         }, 1000, this);
       }
     } catch (err) {
-      this.platform.log.error('ERROR: Message Parse Error', topic, message.toString())
+      this.platform.log.error('ERROR: Message Parse Error', topic, message.toString());
     }
   }
 

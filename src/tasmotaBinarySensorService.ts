@@ -51,6 +51,21 @@ export class tasmotaBinarySensorService extends TasmotaService {
           debug('adding', this.fakegato);
         }
         break;
+      case 'moisture':
+        this.platform.log.debug('Creating %s binary sensor %s', accessory.context.device[this.uniq_id].dev_cla, accessory.context.device[this.uniq_id].name);
+
+        this.service = this.accessory.getService(this.uuid) || this.accessory.addService(this.platform.Service.LeakSensor, accessory.context.device[this.uniq_id].name, this.uuid);
+
+        if (!this.service.displayName) {
+          this.service.setCharacteristic(this.platform.Characteristic.Name, accessory.context.device[this.uniq_id].name);
+        }
+        this.characteristic = this.service.getCharacteristic(this.platform.Characteristic.LeakDetected);
+        if (this.platform.config.history) {
+          // this.fakegato = 'motion';
+          this.service.addOptionalCharacteristic(this.CustomCharacteristic.LastActivation);
+          // debug('adding', this.fakegato);
+        }
+        break;
       default:
         this.platform.log.error('Warning: Unhandled Tasmota binary sensor type', accessory.context.device[this.uniq_id].dev_cla);
     }
@@ -74,9 +89,15 @@ export class tasmotaBinarySensorService extends TasmotaService {
         value_json: JSON.parse(message.toString()),
       });
 
+      if ( this.characteristic.props.format === this.platform.Characteristic.Formats.BOOL ) {
+
+      } else {
+        value = (value ? 1 : 0);
+      }
+
       if (this.characteristic.value !== value) {
 
-        this.platform.log.info('Updating \'%s\' to %s', this.service.displayName, value);
+        this.platform.log.info('Updating \'%s\' binary sensor to %s', this.service.displayName, value);
         let timesOpened;
         switch (this.device_class) {
           case 'doorbell':
@@ -84,6 +105,7 @@ export class tasmotaBinarySensorService extends TasmotaService {
             this.service.updateCharacteristic(this.CustomCharacteristic.TimesOpened, timesOpened);
           // fall thru
           /* eslint-disable */
+          case 'moisture':
           case 'motion':
             if (this.platform.config.history) {
               const now = Math.round(new Date().valueOf() / 1000);
@@ -94,8 +116,7 @@ export class tasmotaBinarySensorService extends TasmotaService {
         }
 
       } else {
-
-        // this.platform.log.debug('Updating \'%s\' to %s', this.service.displayName, nunjucks.renderString(this.accessory.context.device[this.uniq_id].val_tpl, interim));
+        this.platform.log.debug('Updating \'%s\' binary sensor to %s', this.service.displayName, value);
       }
 
       this.characteristic.updateValue(value);
