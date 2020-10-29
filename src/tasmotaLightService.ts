@@ -286,74 +286,75 @@ class ChangeHSB {
     * OR
     * h, s, v
     */
-   function HSVtoRGB( h, s, v ) {
-       var r, g, b, i, f, p, q, t;
-       if( arguments.length === 1 ) {
-           s = h.s, v = h.v, h = h.h;
-       }
-       i = Math.floor( h * 6 );
-       f = h * 6 - i;
-       p = v * ( 1 - s );
-       q = v * ( 1 - f * s );
-       t = v * ( 1 - ( 1 - f ) * s );
-       switch( i % 6 ) {
-           case 0: r = v, g = t, b = p; break;
-           case 1: r = q, g = v, b = p; break;
-           case 2: r = p, g = v, b = t; break;
-           case 3: r = p, g = q, b = v; break;
-           case 4: r = t, g = p, b = v; break;
-           case 5: r = v, g = p, b = q; break;
-       }
+function HSVtoRGB(h, s, v) {
+  var r, g, b;
+  if (arguments.length === 1) {
+    s = h.s, v = h.v, h = h.h;
+  }
+  const i = Math.floor(h * 6);
+  const f = h * 6 - i;
+  const p = v * (1 - s);
+  const q = v * (1 - f * s);
+  const t = v * (1 - (1 - f) * s);
+  switch (i % 6) {
+    case 0: r = v, g = t, b = p; break;
+    case 1: r = q, g = v, b = p; break;
+    case 2: r = p, g = v, b = t; break;
+    case 3: r = p, g = q, b = v; break;
+    case 4: r = t, g = p, b = v; break;
+    case 5: r = v, g = p, b = q; break;
+  }
 
-       var rgb = [0,0,0];
-       rgb[0] = Math.round( r * 255 );
-       rgb[1] = Math.round( g * 255 );
-       rgb[2] = Math.round( b * 255 );
-       return (
-           rgb
-       );
-   }
+  var rgb = [0, 0, 0];
+  rgb[0] = Math.round(r * 255);
+  rgb[1] = Math.round(g * 255);
+  rgb[2] = Math.round(b * 255);
+  return (
+    rgb
+  );
+}
 
-   function ScaledHSVtoRGB( h, s, v ) {
-       return HSVtoRGB( h / 360, s / 100, v / 100 );
-   }
+function ScaledHSVtoRGB(h, s, v) {
+  return HSVtoRGB(h / 360, s / 100, v / 100);
+}
 
-   /* accepts parameters
-    * r  Object = {r:x, g:y, b:z}
-    * OR
-    * r, g, b
-    */
-   function RGBtoHSV( r, g, b ) {
-       // debug('from', r, g, b);
-       var max = Math.max( r, g, b ), min = Math.min( r, g, b ),
-           d = max - min,
-           h,
-           s = ( max === 0 ? 0 : d / max ),
-           v = max / 255;
-       // debug('max', )
-       switch( max ) {
-           case min: h = 0; break;
-           case r: h = ( g - b ) + d * ( g < b ? 6 : 0 ); h /= 6 * d; break;
-           case g: h = ( b - r ) + d * 2; h /= 6 * d; break;
-           case b: h = ( r - g ) + d * 4; h /= 6 * d; break;
-       }
+/* accepts parameters
+ * r  Object = {r:x, g:y, b:z}
+ * OR
+ * r, g, b
+ */
+function RGBtoHSV(r, g, b) {
+  // debug('from', r, g, b);
+  const max = Math.max(r, g, b);
+  const min = Math.min(r, g, b);
+  const d = max - min;
+  let h;
+  const s = (max === 0 ? 0 : d / max);
+  const v = max / 255;
+  // debug('max', )
+  switch (max) {
+    case min: h = 0; break;
+    case r: h = (g - b) + d * (g < b ? 6 : 0); h /= 6 * d; break;
+    case g: h = (b - r) + d * 2; h /= 6 * d; break;
+    case b: h = (r - g) + d * 4; h /= 6 * d; break;
+  }
 
-       return {
-           h: h,
-           s: s,
-           v: v
-       };
-   }
+  return {
+    h: h,
+    s: s,
+    v: v
+  };
+}
 
-   function RGBtoScaledHSV( r, g, b ) {
-       var hsv = RGBtoHSV( parseFloat(r), parseFloat(g), parseFloat(b) );
-       // debug('to', hsv);
-       return {
-           h: Math.round(hsv.h * 360),
-           s: Math.round(hsv.s * 100),
-           v: Math.round(hsv.v * 100)
-       };
-   }
+function RGBtoScaledHSV(r, g, b) {
+  var hsv = RGBtoHSV(parseFloat(r), parseFloat(g), parseFloat(b));
+  // debug('to', hsv);
+  return {
+    h: Math.round(hsv.h * 360),
+    s: Math.round(hsv.s * 100),
+    v: Math.round(hsv.v * 100)
+  };
+}
 
 // Color conversion functions
 
