@@ -82,7 +82,7 @@ export class Mqtt extends EventEmitter {
   }
 
   sendMessage(topic, message) {
-    if (message) {
+    if (message && topic) {
       connection.publish(topic, message);
       debug("sendMessage", topic, message);
     } else {
