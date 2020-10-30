@@ -80,9 +80,6 @@ export class tasmotaBinarySensorService extends TasmotaService {
     debug('MQTT', topic, message.toString());
 
     this.accessory.context.timeout = this.platform.autoCleanup(this.accessory);
-    const interim = {
-      value_json: JSON.parse(message.toString()),
-    };
 
     try {
       let value = this.parseValue(this.accessory.context.device[this.uniq_id].val_tpl, {

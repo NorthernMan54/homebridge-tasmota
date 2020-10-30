@@ -203,11 +203,10 @@ Backlog SetOption66 1; TuyaMCU 0,17; TuyaMCU 32,18; TuyaMCU 31,19; TuyaMCU 33,20
 Rule1 on System#Boot do RuleTimer1 5 endon on Rules#Timer=1 do backlog SerialSend5 55aa0001000000; RuleTimer1 5 endon
 ```
 
-### DHT11 Water Leak Sensor with On/Off control
+### Water Leak Sensor with On/Off control
 
-* Tasmota configuration
+* DHT11 Tasmota configuration
 
-Config Var2 to be the last 6 letters of topic
 
 ```
 gpio2 - ledlinki
@@ -218,15 +217,49 @@ gpio14 - Moisture Sensor Switch
 ```
 Template:  {"NAME":"DHT-Water","GPIO":[0,0,158,0,2,0,0,0,0,255,21,0,0],"FLAG":6,"BASE":18}
 
-Rule1 ON System#Boot DO publish2 homeassistant/binary_sensor/18A6B3_SNS_1/config {"name":"WaterMeterLeak","stat_t":"~stat/Moisture","avty_t":"~tele/LWT","pl_avail":"Online","pl_not_avail":"Offline","uniq_id":"18A6B3_SNS_1","device":{"identifiers":["18A6B3"]},"~":"tasmota_18A6B3/","val_tpl":"{{value_json.Leak}}","pl_off":"OFF","pl_on":"ON","dev_cla":"moisture"} ; endon ON System#Boot DO power on; RuleTimer1 150 endon on Rules#Timer=1 do backlog power on; RuleTimer1 150 endon
+Rule1 ON System#Boot DO RuleTimer1 150; publish2 homeassistant/binary_sensor/18A6B3_SNS_1/config {"name":"WaterMeterLeak","stat_t":"~stat/Moisture","avty_t":"~tele/LWT","pl_avail":"Online","pl_not_avail":"Offline","uniq_id":"18A6B3_SNS_1","device":{"identifiers":["18A6B3"]},"~":"tasmota_18A6B3/","val_tpl":"{{value_json.Leak}}","pl_off":"OFF","pl_on":"ON","dev_cla":"moisture"} ; endon on Rules#Timer=1 do backlog power on; RuleTimer1 150 endon
 
-Rule2 on Power1#state=1 do backlog delay 50 ; teleperiod 300; backlog delay 50; publish tasmota_18A6B3/stat/Moisture {"Leak":"%Var1%"} ; delay 5; power off endon
+Rule2 on Power1#state=1 do backlog delay 25 ; teleperiod 300 endon
 
-Rule3 on Tele-ANALOG#Moisture>=10 DO Var1 ON endon on Tele-ANALOG#Moisture<10 do Var1 OFF endon
+Rule3 on Tele-ANALOG#Moisture>=10 DO backlog publish tasmota_18A6B3/stat/Moisture {"Leak":"ON"} ; power off endon
+on Tele-ANALOG#Moisture<10 do backlog publish tasmota_18A6B3/stat/Moisture {"Leak":"OFF"} ; power off endon
 ```
 
+* BME280 Tasmota configuration
 
+```
+gpio2 - ledlinki
+D5 - GPIO14 -> I2C SCL
+D6 - GPIO12 -> I2C SDA
+gpio14 - Moisture Sensor Switch
+```
 
+```
+Template:
+
+Rule1 ON System#Boot DO RuleTimer1 150; publish2 homeassistant/binary_sensor/18A6B3_SNS_1/config {"name":"WaterMeterLeak","stat_t":"~stat/Moisture","avty_t":"~tele/LWT","pl_avail":"Online","pl_not_avail":"Offline","uniq_id":"18A6B3_SNS_1","device":{"identifiers":["18A6B3"]},"~":"tasmota_18A6B3/","val_tpl":"{{value_json.Leak}}","pl_off":"OFF","pl_on":"ON","dev_cla":"moisture"} ; endon on Rules#Timer=1 do backlog power on; RuleTimer1 150 endon
+
+Rule2 on Power1#state=1 do backlog delay 25 ; teleperiod 300 endon
+
+Rule3 on Tele-ANALOG#Moisture>=10 DO backlog publish tasmota_18A6B3/stat/Moisture {"Leak":"ON"} ; power off endon
+on Tele-ANALOG#Moisture<10 do backlog publish tasmota_18A6B3/stat/Moisture {"Leak":"OFF"} ; power off endon
+```
+
+### MCULED Device with RGB+W Strip
+
+```
+
+D4 - GPIO 2 - ledlinki ( Blue LED )
+D1 - GPIO 5 - Button 1 - Red Button
+D2 - GPIO 4 - Button 2 - Black Button
+D5 - GPIO 14 - PWM 1 - White LED PWM Control
+D6 - GPIO 12 - ws28128 - WS2812 RGB Data Line
+D0 - GPIO 16 - ( Red LED )
+
+Template - White/PWM: {"NAME":"PWM Mode","GPIO":[0,0,157,0,18,17,0,0,0,0,40,0,0],"FLAG":0,"BASE":18}
+Template - RGBWS2812: {"NAME":"RGB Mode","GPIO":[0,0,157,0,18,17,0,0,7,0,40,0,0],"FLAG":0,"BASE":18}
+
+```
 
 ## Discord Server
 

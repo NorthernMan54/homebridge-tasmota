@@ -29,7 +29,7 @@
   ],
   "dependencies": {
     "debug": "4.1.x",
-    "fakegato-history": "simont77/fakegato-history#Updated-Energy",
+    "fakegato-history": "0.6.x",
     "mqtt": "4.2.x",
     "nunjucks": "3.2.x"
   },

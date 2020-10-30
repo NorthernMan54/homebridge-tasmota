@@ -53,11 +53,6 @@ export class tasmotaFanService extends TasmotaService {
 
     this.accessory.context.timeout = this.platform.autoCleanup(this.accessory);
 
-    const interim = {
-      value_json: JSON.parse(message.toString()),
-    };
-
-
     try {
       const value = this.parseValue(this.accessory.context.device[this.uniq_id].val_tpl, {
         value_json: JSON.parse(message.toString()),

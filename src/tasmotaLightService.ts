@@ -83,10 +83,6 @@ export class tasmotaLightService extends TasmotaService {
 
     this.accessory.context.timeout = this.platform.autoCleanup(this.accessory);
 
-    const interim = {
-      value_json: JSON.parse(message.toString()),
-    };
-
     try {
       const value = this.parseValue(this.accessory.context.device[this.uniq_id].val_tpl, {
         value_json: JSON.parse(message.toString()),
@@ -125,9 +121,9 @@ export class tasmotaLightService extends TasmotaService {
 
       if (this.accessory.context.device[this.uniq_id].rgb_stat_t) {
 
-        debug('RGB->HSL RGB(%s,%s,%s) HSB(%s) From Tasmota HSB(%s)', this.parseValue(this.accessory.context.device[this.uniq_id].rgb_val_tpl, interim).split(',')[0], this.parseValue(this.accessory.context.device[this.uniq_id].rgb_val_tpl, interim).split(',')[1], this.parseValue(this.accessory.context.device[this.uniq_id].rgb_val_tpl, interim).split(',')[2], RGBtoScaledHSV(this.parseValue(this.accessory.context.device[this.uniq_id].rgb_val_tpl, interim).split(',')[0], this.parseValue(this.accessory.context.device[this.uniq_id].rgb_val_tpl, interim).split(',')[1], this.parseValue(this.accessory.context.device[this.uniq_id].rgb_val_tpl, interim).split(',')[2]), JSON.parse(message.toString()).HSBColor);
+        debug('RGB->HSL RGB(%s,%s,%s) HSB(%s) From Tasmota HSB(%s)', this.parseValue(this.accessory.context.device[this.uniq_id].rgb_val_tpl, {value_json: JSON.parse(message.toString())}).split(',')[0], this.parseValue(this.accessory.context.device[this.uniq_id].rgb_val_tpl, {value_json: JSON.parse(message.toString())}).split(',')[1], this.parseValue(this.accessory.context.device[this.uniq_id].rgb_val_tpl, {value_json: JSON.parse(message.toString())}).split(',')[2], RGBtoScaledHSV(this.parseValue(this.accessory.context.device[this.uniq_id].rgb_val_tpl, {value_json: JSON.parse(message.toString())}).split(',')[0], this.parseValue(this.accessory.context.device[this.uniq_id].rgb_val_tpl, {value_json: JSON.parse(message.toString())}).split(',')[1], this.parseValue(this.accessory.context.device[this.uniq_id].rgb_val_tpl, {value_json: JSON.parse(message.toString())}).split(',')[2]), JSON.parse(message.toString()).HSBColor);
 
-        const hsb = RGBtoScaledHSV(this.parseValue(this.accessory.context.device[this.uniq_id].rgb_val_tpl, interim).split(',')[0], this.parseValue(this.accessory.context.device[this.uniq_id].rgb_val_tpl, interim).split(',')[1], this.parseValue(this.accessory.context.device[this.uniq_id].rgb_val_tpl, interim).split(',')[2]);
+        const hsb = RGBtoScaledHSV(this.parseValue(this.accessory.context.device[this.uniq_id].rgb_val_tpl, {value_json: JSON.parse(message.toString())}).split(',')[0], this.parseValue(this.accessory.context.device[this.uniq_id].rgb_val_tpl, {value_json: JSON.parse(message.toString())}).split(',')[1], this.parseValue(this.accessory.context.device[this.uniq_id].rgb_val_tpl, {value_json: JSON.parse(message.toString())}).split(',')[2]);
 
 
         // Use debug logging for no change updates, and info when a change occurred
