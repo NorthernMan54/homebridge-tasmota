@@ -1,9 +1,6 @@
-import { Service, PlatformAccessory, Characteristic } from 'homebridge';
-
+import { Service, PlatformAccessory, Characteristic, CharacteristicValue } from 'homebridge';
+import { TasmotaService } from './TasmotaService';
 import { tasmotaPlatform } from './platform';
-// import { nunjucks } from 'nunjucks';
-
-import nunjucks from 'nunjucks';
 
 import createDebug from 'debug';
 const debug = createDebug('Tasmota:binarySensor');
@@ -14,120 +11,135 @@ const debug = createDebug('Tasmota:binarySensor');
  * Each accessory may expose multiple services of different service types.
  */
 
-interface Subscription {
-  event: string, callback: any
-}
-
-export class tasmotaBinarySensorService {
-  public service: Service;
-  private characteristic: Characteristic;
-  private device_class: string;
-  public statusSubscribe: Subscription;
-  public availabilitySubscribe: Subscription;
+export class tasmotaBinarySensorService extends TasmotaService {
 
   constructor(
-    private readonly platform: tasmotaPlatform,
+    public readonly platform: tasmotaPlatform,
     public readonly accessory: PlatformAccessory,
-    private readonly uniq_id: string,
+    protected readonly uniq_id: string,
   ) {
 
-    const uuid = this.platform.api.hap.uuid.generate(accessory.context.device[this.uniq_id].uniq_id);
-    this.device_class = accessory.context.device[this.uniq_id].dev_cla;
+    super(platform, accessory, uniq_id);
     switch (accessory.context.device[this.uniq_id].dev_cla) {
       case 'doorbell':
         this.platform.log.debug('Creating %s binary sensor %s', accessory.context.device[this.uniq_id].dev_cla, accessory.context.device[this.uniq_id].name);
 
-        this.service = this.accessory.getService(uuid) || this.accessory.addService(this.platform.Service.ContactSensor, accessory.context.device[this.uniq_id].name, uuid);
+        this.service = this.accessory.getService(this.uuid) || this.accessory.addService(this.platform.Service.ContactSensor, accessory.context.device[this.uniq_id].name, this.uuid);
 
-        this.service.setCharacteristic(this.platform.Characteristic.Name, accessory.context.device[this.uniq_id].name);
+        if (!this.service.displayName) {
+          this.service.setCharacteristic(this.platform.Characteristic.Name, accessory.context.device[this.uniq_id].name);
+        }
         this.characteristic = this.service.getCharacteristic(this.platform.Characteristic.ContactSensorState);
-
+        if (this.platform.config.history) {
+          this.fakegato = 'contact';
+          this.service.addOptionalCharacteristic(this.CustomCharacteristic.TimesOpened);
+          this.service.addOptionalCharacteristic(this.CustomCharacteristic.LastActivation);
+        }
         break;
+      case 'motion':
+        this.platform.log.debug('Creating %s binary sensor %s', accessory.context.device[this.uniq_id].dev_cla, accessory.context.device[this.uniq_id].name);
 
+        this.service = this.accessory.getService(this.uuid) || this.accessory.addService(this.platform.Service.MotionSensor, accessory.context.device[this.uniq_id].name, this.uuid);
+
+        if (!this.service.displayName) {
+          this.service.setCharacteristic(this.platform.Characteristic.Name, accessory.context.device[this.uniq_id].name);
+        }
+        this.characteristic = this.service.getCharacteristic(this.platform.Characteristic.MotionDetected);
+        if (this.platform.config.history) {
+          this.fakegato = 'motion';
+          this.service.addOptionalCharacteristic(this.CustomCharacteristic.LastActivation);
+          debug('adding', this.fakegato);
+        }
+        break;
+      case 'moisture':
+        this.platform.log.debug('Creating %s binary sensor %s', accessory.context.device[this.uniq_id].dev_cla, accessory.context.device[this.uniq_id].name);
+
+        this.service = this.accessory.getService(this.uuid) || this.accessory.addService(this.platform.Service.LeakSensor, accessory.context.device[this.uniq_id].name, this.uuid);
+
+        if (!this.service.displayName) {
+          this.service.setCharacteristic(this.platform.Characteristic.Name, accessory.context.device[this.uniq_id].name);
+        }
+        this.characteristic = this.service.getCharacteristic(this.platform.Characteristic.LeakDetected);
+        if (this.platform.config.history) {
+          // this.fakegato = 'motion';
+          this.service.addOptionalCharacteristic(this.CustomCharacteristic.LastActivation);
+          // debug('adding', this.fakegato);
+        }
+        break;
       default:
         this.platform.log.error('Warning: Unhandled Tasmota binary sensor type', accessory.context.device[this.uniq_id].dev_cla);
     }
 
-    // setup event listeners for services / characteristics
+    this.enableFakegato();
 
-    if (this.characteristic) {
-      this.platform.log.debug('Creating statusUpdate listener for %s %s', accessory.context.device[this.uniq_id].stat_t, accessory.context.device[this.uniq_id].name);
-      // platform.statusEvent[this.uniq_id] = accessory.context.mqttHost.on(accessory.context.device[this.uniq_id].stat_t, this.statusUpdate.bind(this));
-      this.statusSubscribe = { event: accessory.context.device[this.uniq_id].stat_t, callback: this.statusUpdate.bind(this)};
-      accessory.context.mqttHost.on(accessory.context.device[this.uniq_id].stat_t, this.statusUpdate.bind(this));
-      accessory.context.mqttHost.statusSubscribe(accessory.context.device[this.uniq_id].stat_t);
+    this.enableStatus();
 
-      this.availabilitySubscribe = { event: accessory.context.device[this.uniq_id].avty_t, callback: this.availabilityUpdate.bind(this)};
-      accessory.context.mqttHost.on(accessory.context.device[this.uniq_id].avty_t, this.availabilityUpdate.bind(this));
-      accessory.context.mqttHost.availabilitySubscribe(accessory.context.device[this.uniq_id].avty_t);
-    }
-
-    nunjucks.installJinjaCompat();
-    nunjucks.configure({
-      autoescape: true,
-    });
-    this.refresh();
-  }
-
-  refresh() {
-    // Get current status for accessory/service on startup
-    const teleperiod = this.accessory.context.device[this.uniq_id].stat_t.substr(0, this.accessory.context.device[this.uniq_id].stat_t.lastIndexOf('/') + 1).replace('tele', 'cmnd') + 'teleperiod';
-    this.accessory.context.mqttHost.sendMessage(teleperiod, '300');
   }
 
   statusUpdate(topic, message) {
-    // debug("MQTT", topic, message.toString());
+    debug('MQTT', topic, message.toString());
 
     this.accessory.context.timeout = this.platform.autoCleanup(this.accessory);
-    const interim = {
-      value_json: JSON.parse(message.toString()),
-    };
 
-    // debug('statusUpdate: ', this.characteristic.value,  (nunjucks.renderString(this.accessory.context.device[this.uniq_id].val_tpl, interim) === this.accessory.context.device[this.uniq_id].pl_on ? 1 : 0));
+    try {
+      let value = this.parseValue(this.accessory.context.device[this.uniq_id].val_tpl, {
+        value_json: JSON.parse(message.toString()),
+      });
 
-    if (this.characteristic.value !== (nunjucks.renderString(this.accessory.context.device[this.uniq_id].val_tpl, interim) === this.accessory.context.device[this.uniq_id].pl_on ? 1 : 0)) {
+      // Adjust value to format expected by sensor type
 
-      this.platform.log.info('Updating \'%s\' to %s', this.service.displayName, nunjucks.renderString(this.accessory.context.device[this.uniq_id].val_tpl, interim));
+      switch (this.device_class) {
+        case 'doorbell':
+          break;
+        case 'moisture':
+          // 1 / 0
+          debug('moisture', this.accessory.context.device[this.uniq_id].pl_on, value);
+          value = (this.accessory.context.device[this.uniq_id].pl_on === value ? this.platform.Characteristic.LeakDetected.LEAK_DETECTED : this.platform.Characteristic.LeakDetected.LEAK_NOT_DETECTED);
+          break;
+        case 'motion':
+          // boolean
+          value = (this.accessory.context.device[this.uniq_id].pl_on === value ? true : false);
+          break;
+      }
 
-    } else {
+      if (this.characteristic.value !== value) {
 
-      // this.platform.log.debug('Updating \'%s\' to %s', this.service.displayName, nunjucks.renderString(this.accessory.context.device[this.uniq_id].val_tpl, interim));
-    }
+        this.platform.log.info('Updating \'%s\' binary sensor to %s', this.service.displayName, value);
+        let timesOpened;
+        switch (this.device_class) {
+          case 'doorbell':
+            timesOpened = timesOpened + this.service.getCharacteristic(this.CustomCharacteristic.TimesOpened).value;
+            this.service.updateCharacteristic(this.CustomCharacteristic.TimesOpened, timesOpened);
+          // fall thru
+          /* eslint-disable */
+          case 'moisture':
+          case 'motion':
+            if (this.platform.config.history) {
+              const now = Math.round(new Date().valueOf() / 1000);
+              const lastActivation = now - this.accessory.context.fakegatoService.getInitialTime();
+              this.service.updateCharacteristic(this.CustomCharacteristic.LastActivation, lastActivation);
+            }
+            break;
+        }
 
-    this.characteristic.updateValue((nunjucks.renderString(this.accessory.context.device[this.uniq_id].val_tpl, interim) === this.accessory.context.device[this.uniq_id].pl_on ? 1 : 0));
-  }
+      } else {
+        this.platform.log.debug('Updating \'%s\' binary sensor to %s', this.service.displayName, value);
+      }
 
+      this.characteristic.updateValue(value);
 
-
-  /**
-   * Handle "LWT" Last Will and Testament messages from Tasmota
-   * These are sent when the device is no longer available from the MQTT server.
-   */
-
-  availabilityUpdate(topic, message) {
-    // debug("availabilityUpdate", this, topic, message.toString());
-    this.platform.log.info('Marking sensor accessory \'%s\' to %s', this.service.displayName, message);
-
-    const availability = (message.toString() === this.accessory.context.device[this.uniq_id].pl_not_avail ? new Error(this.accessory.displayName + ' ' + message.toString()) : 0);
-
-    this.characteristic.updateValue(availability);
-  }
-
-  // Utility functions for status update
-
-  delta(value1, value2) {
-    // debug("delta", (parseInt(value1) !== parseInt(value2)));
-    return (parseInt(value1) !== parseInt(value2));
-  }
-
-
-  parseValue(valueTemplate, value) {
-    const result = nunjucks.renderString(valueTemplate, value);
-    if (result) {
-      return parseFloat(result);
-    } else {
-      this.platform.log.error('ERROR: Sensor %s missing data', this.service.displayName);
-      return (new Error('Missing sensor value'));
+      if (this.platform.config.history && this.fakegato && this.accessory.context.fakegatoService ?.addEntry) {
+        debug('Updating fakegato', this.service.displayName, {
+          [this.fakegato]: (this.characteristic.value ? 1 : 0),
+        });
+        this.accessory.context.fakegatoService.appendData({
+          [this.fakegato]: (this.characteristic.value ? 1 : 0),
+        });
+      } else {
+        // debug('Not updating fakegato', this.service.displayName);
+      }
+    } catch (err) {
+      this.platform.log.error('ERROR: Message Parse Error', topic, message.toString())
     }
   }
 }
