@@ -89,10 +89,20 @@ export class tasmotaBinarySensorService extends TasmotaService {
         value_json: JSON.parse(message.toString()),
       });
 
-      if ( this.characteristic.props.format === this.platform.Characteristic.Formats.BOOL ) {
-        // value = value;
-      } else {
-        value = (value ? 1 : 0);
+      // Adjust value to format expected by sensor type
+
+      switch (this.device_class) {
+        case 'doorbell':
+          break;
+        case 'moisture':
+          // 1 / 0
+          debug('moisture', this.accessory.context.device[this.uniq_id].pl_on, value);
+          value = (this.accessory.context.device[this.uniq_id].pl_on === value ? this.platform.Characteristic.LeakDetected.LEAK_DETECTED : this.platform.Characteristic.LeakDetected.LEAK_NOT_DETECTED);
+          break;
+        case 'motion':
+          // boolean
+          value = (this.accessory.context.device[this.uniq_id].pl_on === value ? true : false);
+          break;
       }
 
       if (this.characteristic.value !== value) {
@@ -129,7 +139,7 @@ export class tasmotaBinarySensorService extends TasmotaService {
           [this.fakegato]: (this.characteristic.value ? 1 : 0),
         });
       } else {
-        debug('Not updating fakegato', this.service.displayName);
+        // debug('Not updating fakegato', this.service.displayName);
       }
     } catch (err) {
       this.platform.log.error('ERROR: Message Parse Error', topic, message.toString())

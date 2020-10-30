@@ -222,7 +222,7 @@ Rule1 ON System#Boot DO publish2 homeassistant/binary_sensor/18A6B3_SNS_1/config
 
 Rule2 on Power1#state=1 do backlog delay 50 ; teleperiod 300; backlog delay 50; publish tasmota_18A6B3/stat/Moisture {"Leak":"%Var1%"} ; delay 5; power off endon
 
-Rule3 on Tele-ANALOG#Moisture>=10 DO Var1 On endon on Tele-ANALOG#Moisture<10 do Var1 Off endon
+Rule3 on Tele-ANALOG#Moisture>=10 DO Var1 ON endon on Tele-ANALOG#Moisture<10 do Var1 OFF endon
 ```
 
 
