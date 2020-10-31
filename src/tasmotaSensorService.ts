@@ -203,23 +203,23 @@ export class tasmotaSensorService extends TasmotaService {
           switch (that.device_class) {
             case 'temperature':
               debug('Updating fakegato \'%s:%s\'', that.service.displayName, that.characteristic.displayName, {
-                temp: value,
-                pressure: that.accessory.getService(that.CustomCharacteristic.AtmosphericPressureSensor) ?.getCharacteristic(that.CustomCharacteristic.AtmosphericPressureLevel).value ?? 0,
-                humidity: that.accessory.getService(that.platform.Service.HumiditySensor) ?.getCharacteristic(that.platform.Characteristic.CurrentRelativeHumidity).value ?? 0,
+                temp: +value,
+                pressure: +that.accessory.getService(that.CustomCharacteristic.AtmosphericPressureSensor) ?.getCharacteristic(that.CustomCharacteristic.AtmosphericPressureLevel).value ?? 0,
+                humidity: +that.accessory.getService(that.platform.Service.HumiditySensor) ?.getCharacteristic(that.platform.Characteristic.CurrentRelativeHumidity).value ?? 0,
               });
 
               that.accessory.context.fakegatoService.appendData({
-                temp: value,
-                pressure: that.accessory.getService(that.CustomCharacteristic.AtmosphericPressureSensor) ?.getCharacteristic(that.CustomCharacteristic.AtmosphericPressureLevel).value ?? 0,
-                humidity: that.accessory.getService(that.platform.Service.HumiditySensor) ?.getCharacteristic(that.platform.Characteristic.CurrentRelativeHumidity).value ?? 0,
+                temp: +value,
+                pressure: +that.accessory.getService(that.CustomCharacteristic.AtmosphericPressureSensor) ?.getCharacteristic(that.CustomCharacteristic.AtmosphericPressureLevel).value ?? 0,
+                humidity: +that.accessory.getService(that.platform.Service.HumiditySensor) ?.getCharacteristic(that.platform.Characteristic.CurrentRelativeHumidity).value ?? 0,
               });
               break;
             case 'power':
               debug('Updating fakegato \'%s:%s\'', that.characteristic.displayName, that.service.displayName, {
-                power: value,
+                power: +value,
               });
               that.accessory.context.fakegatoService.appendData({
-                power: value,
+                power: +value,
               });
               break;
             case undefined:
