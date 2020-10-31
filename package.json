@@ -1,7 +1,7 @@
 {
   "displayName": "Homebridge Tasmota",
   "name": "homebridge-tasmota",
-  "version": "0.0.68",
+  "version": "0.0.69",
   "description": "Homebridge plugin for Tasmota devices leveraging home assistant auto discovery.",
   "license": "Apache-2.0",
   "repository": {
