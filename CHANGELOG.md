@@ -2,9 +2,18 @@
 
 All notable changes to this project will be documented in this file. This project uses [Semantic Versioning](https://semver.org/).
 
+## 0.0.70 (2020-11-10)
+
+## [Version 0.0.70](https://github.com/northernman54/homebridge-tasmota/compare/v0.0.67...v0.0.70)
+
+#### Changes
+
+- Added support for RGB Effects control using a TV Accessory widget and the input selection slider to select effects scheme.
+
+
 ## 0.0.67 (2020-10-30)
 
-## [Version 0.0.35](https://github.com/northernman54/homebridge-tasmota/compare/v0.0.22...v0.0.67)
+## [Version 0.0.67](https://github.com/northernman54/homebridge-tasmota/compare/v0.0.22...v0.0.67)
 
 #### Changes
 
@@ -19,7 +28,7 @@ All notable changes to this project will be documented in this file. This projec
 
 ## 0.0.32 (2020-09-30)
 
-## [Version 0.0.29](https://github.com/northernman54/homebridge-tasmota/compare/v0.0.27...v0.0.32)
+## [Version 0.0.32](https://github.com/northernman54/homebridge-tasmota/compare/v0.0.27...v0.0.32)
 
 #### Changes
 
