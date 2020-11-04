@@ -1,6 +1,7 @@
 import { Service, PlatformAccessory, CharacteristicValue, CharacteristicSetCallback, Characteristic } from 'homebridge';
 import { TasmotaService } from './TasmotaService';
 import { tasmotaPlatform } from './platform';
+import os from 'os';
 import { PLATFORM_NAME, PLUGIN_NAME } from './settings';
 
 import createDebug from 'debug';
@@ -71,16 +72,27 @@ export class tasmotaLightService extends TasmotaService {
         .on('set', this.setColorTemperature.bind(this));
     }
 
-    // Does the lightbulb include an effects characteristic
+    // Does the lightbulb include an effects characteristic and is effects enabled
 
     if (this.platform.config.effects && accessory.context.device[this.uniq_id].fx_cmd_t) {
 
-      const uuid = this.platform.api.hap.uuid.generate(this.uniq_id);
+      const uuid = this.platform.api.hap.uuid.generate(this.uniq_id + os.hostname());
 
       // debug('api', this.platform.api);
       const effectsAccessory = new this.platform.api.platformAccessory(this.accessory.displayName, uuid, this.platform.api.hap.Categories.AUDIO_RECEIVER);
 
-      this.TVservice = effectsAccessory.getService(this.platform.Service.Television) || effectsAccessory.addService(this.platform.Service.Television, this.accessory.displayName);
+      effectsAccessory.getService(this.platform.Service.AccessoryInformation)!
+        .setCharacteristic(this.platform.Characteristic.Name, this.accessory.displayName)
+        .setCharacteristic(this.platform.Characteristic.Manufacturer, (accessory.context.device[this.uniq_id].dev.mf ?? 'undefined').replace(/[^-_ a-zA-Z0-9]/gi, ''))
+        .setCharacteristic(this.platform.Characteristic.Model, (accessory.context.device[this.uniq_id].dev.mdl ?? 'undefined').replace(/[^-_ a-zA-Z0-9]/gi, ''))
+        .setCharacteristic(this.platform.Characteristic.FirmwareRevision, (accessory.context.device[this.uniq_id].dev.sw ?? 'undefined').replace(/[^-_. a-zA-Z0-9]/gi, ''))
+        .setCharacteristic(this.platform.Characteristic.SerialNumber, accessory.context.device[this.uniq_id].dev.ids[0] + '-' + os.hostname()); // A unique fakegato ID
+
+      this.TVservice = effectsAccessory.getService(this.platform.Service.Television) || effectsAccessory.addService(this.platform.Service.Television);
+
+      if (!this.TVservice.displayName) {
+        this.TVservice.setCharacteristic(this.platform.Characteristic.Name, accessory.context.device[this.uniq_id].name);
+      }
 
       this.TVservice.getCharacteristic(this.platform.Characteristic.Active)
         .on('set', this.setOn.bind(this));
@@ -131,8 +143,12 @@ export class tasmotaLightService extends TasmotaService {
 
   setActiveIdentifier(value, callback) {
     this.platform.log.info('%s Set Effects Scheme ->', this.accessory.displayName, value);
-    this.accessory.context.mqttHost.sendMessage(this.accessory.context.device[this.uniq_id].fx_cmd_t, value.toString());
-    callback(null);
+    try {
+      this.accessory.context.mqttHost.sendMessage(this.accessory.context.device[this.uniq_id].fx_cmd_t, value.toString());
+      callback(null);
+    } catch (err) {
+      callback(err);
+    }
   }
 
   setConfiguredName(value, callback) {
