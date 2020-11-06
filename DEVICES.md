@@ -1,6 +1,6 @@
 ## Advanced configurations
 
-My standard config after setting name
+My standard config after setting name and device configuration
 ```
 Backlog MqttHost mqtt.local; topic tasmota_%06X; setoption19 1
 ```
