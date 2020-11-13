@@ -62,7 +62,7 @@
         "type": "number",
         "required": false,
         "default": 10,
-        "description": "Update interval for the logging of history data.  No requirement to change."
+        "description": "Update interval for the logging of history data.  Time is in minutes, defaults to 10 minutes."
       },
       "filter": {
         "title": "Filter device discovery topic",

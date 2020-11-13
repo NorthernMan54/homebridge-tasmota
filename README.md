@@ -127,18 +127,10 @@ Rule1 1
 
 As a side effect the rule resets the `teleperiod` to 300 seconds similar to restarting the plugin.
 
+## Some Sample Device Configurations
+
+[Devices](DEVICES.md)
+
 ## Discord Server
 
 A channel #tasmota has been created on the Homebridge Discord Server.
-
-## Backlog prior to Production
-
-* [x] Add config.schema.json for homebridge-config-ui-x
-* [x] Add automated removal of non-responding devices
-* [x] Add support for sensors
-* [x] Add support for multiple relays
-* [x] Add support for RGB Lights
-* [x] Phantom sensors don't go 'Not Responding' on a device with working sensors. ( Workaround available, )
-* [x] Enable debug logging via config.json
-* [x] Clean up README
-* [x] Clean up debug and production logging

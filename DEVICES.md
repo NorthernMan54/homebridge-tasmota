@@ -1,11 +1,11 @@
-## Advanced configurations
+# Sample Device Configurations ( My personal collection )
 
 My standard config after setting name and device configuration
 ```
 Backlog MqttHost mqtt.local; topic tasmota_%06X; setoption19 1
 ```
 
-### [MCUIOT](docs/MCUIOT.md) BME280 Temperature Sensor
+## [MCUIOT](docs/MCUIOT.md) BME280 Temperature Sensor
 
 * Tasmota Configuration
 
@@ -17,7 +17,7 @@ D4 - GPIO2 -> LedLink
 Template: {"NAME":"BME","GPIO":[255,255,157,255,255,255,255,255,6,255,5,255,255],"FLAG":15,"BASE":18}
 ```
 
-### [MCUIOT](docs/MCUIOT.md) DHT11 Temperature Sensor
+## [MCUIOT](docs/MCUIOT.md) DHT11 Temperature Sensor
 
 * Tasmota Configuration
 
@@ -28,7 +28,7 @@ D4 - GPIO2 -> LedLinki
 Template: {"NAME":"DHT-D2/GPIO4","GPIO":[255,255,158,255,2,255,255,255,255,255,255,255,255],"FLAG":15,"BASE":18}
 ```
 
-### Water Leak Sensor with On/Off control
+## Water Leak Sensor with On/Off control
 
 * [DHT11](docs/MCUIOT.md#dht-yl) / LEAK Tasmota configuration
 
@@ -71,7 +71,7 @@ Rule3 on Tele-ANALOG#Moisture>=20 DO backlog publish tasmota_860695/stat/Moistur
 on Tele-ANALOG#Moisture<20 do backlog publish tasmota_860695/stat/Moisture {"Leak":"OFF"} ; power off endon
 ```
 
-### Motion + BME280 Temperature Sensor
+## Motion + BME280 Temperature Sensor
 
 * Tasmota Configuration
 
@@ -104,7 +104,7 @@ Console: SwitchMode 1
   }
 ```
 
-### ZMAi-90 Current Sensor Switch
+## ZMAi-90 Current Sensor Switch
 
 * Tasmota configuration
 
@@ -113,9 +113,7 @@ Backlog SetOption66 1; TuyaMCU 0,17; TuyaMCU 32,18; TuyaMCU 31,19; TuyaMCU 33,20
 Rule1 on System#Boot do RuleTimer1 5 endon on Rules#Timer=1 do backlog SerialSend5 55aa0001000000; RuleTimer1 5 endon
 ```
 
-
-
-### MCULED Device with RGB+W Strip
+## MCULED Device with RGB+W Strip
 
 ```
 D4 - GPIO 2 - ledlinki ( Blue LED )
@@ -137,12 +135,15 @@ Power1 - White            RGB         <--- Mode Switch
 Power2 - RGB              White
 
 
-rule2 on Power1#State=1 do backlog power1 off; power2 off; rule2 0; rule3 1; setoption37 24; template {"NAME":"RGB Mode","GPIO":[0,0,0,0,18,17,0,0,7,0,21,0,157],"FLAG":0,"BASE":18}; power2 on endon
 
-rule3 on Power1#State=1 do backlog power1 off; dimmer2 0; power2 off; rule3 0; rule2 1; setoption37 0; template {"NAME":"PWM Mode","GPIO":[0,0,157,0,18,17,0,0,22,0,37,0,0],"FLAG":0,"BASE":18}; power2 on endon
+backlog template {"NAME":"PWM Mode","GPIO":[0,0,157,0,18,17,0,0,22,0,37,0,0],"FLAG":0,"BASE":18}; friendlyname1 Sink Mode ; friendlyname2 Kitchen Sink ; rule2 1; MqttHost mqtt.local; topic tasmota_%06X; Module 0; fade 1; webbutton2 Power; webbutton1 Mode; switchmode2 3; setoption19 1
+
+rule2 on Power1#State=1 do backlog power1 off; power2 off; rule2 0; rule3 1; setoption37 24; template {"NAME":"RGB Mode","GPIO":[0,0,0,0,18,10,0,0,7,17,21,0,157],"FLAG":0,"BASE":18}; power2 on endon
+
+rule3 on Power1#State=1 do backlog power1 off; dimmer2 0; power2 off; rule3 0; rule2 1; setoption37 0; template  {"NAME":"PWM Mode","GPIO":[0,0,157,0,18,10,0,0,22,17,37,0,0],"FLAG":0,"BASE":18}; power2 on; endon
 ```
 
-### Tuya Dimmer Module as a FAN
+## Tuya Dimmer Module as a FAN
 
 * Tasmota configuration
 
@@ -150,3 +151,7 @@ rule3 on Power1#State=1 do backlog power1 off; dimmer2 0; power2 off; rule3 0; r
 TuyaMCU 21,3
 DimmerRange 100,255
 ```
+
+## Trailer Relay Board
+
+backlog webbutton1 Ceiling; webbutton2 Flood; webbutton3 Porch; webbutton4 Step
