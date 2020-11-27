@@ -109,7 +109,7 @@ Console: SwitchMode 1
 * Tasmota configuration
 
 ```
-Backlog SetOption66 1; TuyaMCU 0,17; TuyaMCU 32,18; TuyaMCU 31,19; TuyaMCU 33,20; SetOption59 1
+Backlog module 54; SetOption66 1; TuyaMCU 0,17; TuyaMCU 32,18; TuyaMCU 31,19; TuyaMCU 33,20; SetOption59 1; MqttHost mqtt.local; topic tasmota_%06X;
 Rule1 on System#Boot do RuleTimer1 5 endon on Rules#Timer=1 do backlog SerialSend5 55aa0001000000; RuleTimer1 5 endon
 ```
 
@@ -136,7 +136,7 @@ Power2 - RGB              White
 
 
 
-backlog template {"NAME":"PWM Mode","GPIO":[0,0,157,0,18,17,0,0,22,0,37,0,0],"FLAG":0,"BASE":18}; friendlyname1 Sink Mode ; friendlyname2 Kitchen Sink ; rule2 1; MqttHost mqtt.local; topic tasmota_%06X; Module 0; fade 1; webbutton2 Power; webbutton1 Mode; switchmode2 3; setoption19 1
+backlog template {"NAME":"PWM Mode","GPIO":[0,0,157,0,18,17,0,0,22,0,37,0,0],"FLAG":0,"BASE":18}; friendlyname1 Sink Mode ; friendlyname2 Kitchen Sink ; rule2 1; MqttHost mqtt.local; topic tasmota_%06X; Module 0; fade 1; webbutton2 Power; webbutton1 Mode; switchmode2 3; MqttHost mqtt.local; topic tasmota_%06X; setoption19 1
 
 rule2 on Power1#State=1 do backlog power1 off; power2 off; rule2 0; rule3 1; setoption37 24; template {"NAME":"RGB Mode","GPIO":[0,0,0,0,18,10,0,0,7,17,21,0,157],"FLAG":0,"BASE":18}; power2 on endon
 
@@ -155,3 +155,9 @@ DimmerRange 100,255
 ## Trailer Relay Board
 
 backlog webbutton1 Ceiling; webbutton2 Flood; webbutton3 Porch; webbutton4 Step
+
+## FEIT Wifi Dimmer
+
+```
+backlog module 54; DimmerRange 10,1000; TuyaMCU 21,2; MqttHost mqtt.local; topic tasmota_%06X; setoption19 1
+```
