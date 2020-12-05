@@ -95,14 +95,7 @@ Console: SwitchMode 1
  }
  ```
 
-* homerbidge-tasmota config.json
 
-```
-"override": {
-   "EF159D_LI_1": {     <--- This is the unique_id of the discovery message you want to override
-   "tasmotaType": "fan" <--- This is the key and property you want to override
-  }
-```
 
 ## ZMAi-90 Current Sensor Switch
 
@@ -152,6 +145,15 @@ TuyaMCU 21,3
 DimmerRange 100,255
 ```
 
+* homerbidge-tasmota config.json
+
+```
+"override": {
+   "EF159D_LI_1": {     <--- This is the unique_id of the discovery message you want to override
+   "tasmotaType": "fan" <--- This is the key and property you want to override
+  }
+```
+
 ## Trailer Relay Board
 
 backlog webbutton1 Ceiling; webbutton2 Flood; webbutton3 Porch; webbutton4 Step
@@ -160,4 +162,59 @@ backlog webbutton1 Ceiling; webbutton2 Flood; webbutton3 Porch; webbutton4 Step
 
 ```
 backlog module 54; DimmerRange 10,1000; TuyaMCU 21,2; MqttHost mqtt.local; topic tasmota_%06X; setoption19 1
+```
+
+## Treatlife DS03 Fan Controller and Light Dimmer
+
+* Tasmota configuration - from https://newadventuresinwi-fi.blogspot.com/2019/12/brilliant-smart-ceiling-fan-remote-in-home-assistant.html
+
+```
+backlog module 54
+backlog so97 1 ; tuyamcu 11,1 ; tuyamcu 12,9 ; tuyamcu 21,10
+backlog ledtable 0 ; dimmerrange 10,1000 ; so59 1 ; so68 0
+```
+
+
+What do the settings mean
+
+```
+so97 - Set TuyaMCU serial baudrate
+so59 - Send tele/%topic%/STATE in addition to stat/%topic%/RESULT for commands: State, Power and any command causing a light to be turned on.
+so68 - Multi-channel PWM instead of a single light
+ledtable - do not use LED gamma correction (default «6.5.0.9)
+```
+
+Stuff I'm playing with ( fake dimmer is promising)
+
+```
+tuyamcu 22,99 --> create a fake dimmer control
+tuyamcu 62,3 - 62 for 4 speeds fan controller (possible values 0,1,2,3)
+```
+
+Trial Tasmota config
+
+```
+backlog SetOption68 1; setoption37 128; tuyamcu 22,99
+
+Rule1 on TuyaReceived#Data=55AA03070005030400010016 do channel1 0 endon
+      on TuyaReceived#Data=55AA03070005030400010117 do channel1 33 endon
+      on TuyaReceived#Data=55AA03070005030400010218 do channel1 66 endon
+      on TuyaReceived#Data=55AA03070005030400010319 do channel1 100 endon
+
+Rule2 on channel1 <= 25 do TuyaSend4 3,0 break
+      on Channel1 <= 50 do TuyaSend4 3,1 break
+      on Channel1 <= 75 do TuyaSend4 3,2 break
+      on Channel1 <= 100 do TuyaSend4 3,3 endon
+
+backlog rule1 1; rule2 1
+
+```
+
+* homerbidge-tasmota config.json
+
+```
+"override": {
+   "EF159D_RL_1": {     <--- This is the unique_id of the discovery message you want to override
+   "tasmotaType": "fan" <--- This is the key and property you want to override
+  }
 ```
