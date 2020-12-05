@@ -171,13 +171,13 @@ backlog module 54; DimmerRange 10,1000; TuyaMCU 21,2; MqttHost mqtt.local; topic
 ```
 backlog module 54
 backlog so97 1 ; tuyamcu 11,1 ; tuyamcu 12,9 ; tuyamcu 21,10
-backlog ledtable 0 ; dimmerrange 10,1000 ; so59 1 ; so68 0
+backlog ledtable 0 ; dimmerrange 10,1000 ; so59
 ```
 
-Trial Tasmota config based on fake dimmer concept
+Trial Tasmota config based on fake dimmer concept ( Requires Tasmota 9.1.0 or greater )
 
 ```
-backlog SetOption68 1; setoption37 128; tuyamcu 22,99
+backlog so68 1; so37 128; tuyamcu 22,99
 backlog webbutton1 Fan; webbutton2 Light
 
 Rule1 on TuyaReceived#Data=55AA03070005030400010016 do channel1 0 endon
@@ -196,12 +196,13 @@ backlog rule1 1; rule2 1
 What do the settings mean
 
 ```
-so97 - Set TuyaMCU serial baudrate
-so59 - Send tele/%topic%/STATE in addition to stat/%topic%/RESULT for commands: State, Power and any command causing a light to be turned on.
-so68 - Multi-channel PWM instead of a single light
+so37 128 -->  same as 0..127 but with independent channel handling enabled
+so97 --> Set TuyaMCU serial baudrate
+so59 --> Send tele/%topic%/STATE in addition to stat/%topic%/RESULT for commands: State, Power and any command causing a light to be turned on.
+so68 --> Multi-channel PWM instead of a single light
 ledtable - do not use LED gamma correction (default «6.5.0.9)
 tuyamcu 22,99 --> create a fake dimmer control
-tuyamcu 62,3 - 62 for 4 speeds fan controller (possible values 0,1,2,3)
+tuyamcu 62,3 --> 62 for 4 speeds fan controller (possible values 0,1,2,3)
 ```
 
 
