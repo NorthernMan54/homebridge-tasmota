@@ -174,27 +174,11 @@ backlog so97 1 ; tuyamcu 11,1 ; tuyamcu 12,9 ; tuyamcu 21,10
 backlog ledtable 0 ; dimmerrange 10,1000 ; so59 1 ; so68 0
 ```
 
-
-What do the settings mean
-
-```
-so97 - Set TuyaMCU serial baudrate
-so59 - Send tele/%topic%/STATE in addition to stat/%topic%/RESULT for commands: State, Power and any command causing a light to be turned on.
-so68 - Multi-channel PWM instead of a single light
-ledtable - do not use LED gamma correction (default «6.5.0.9)
-```
-
-Stuff I'm playing with ( fake dimmer is promising)
-
-```
-tuyamcu 22,99 --> create a fake dimmer control
-tuyamcu 62,3 - 62 for 4 speeds fan controller (possible values 0,1,2,3)
-```
-
 Trial Tasmota config based on fake dimmer concept
 
 ```
 backlog SetOption68 1; setoption37 128; tuyamcu 22,99
+backlog webbutton1 Fan; webbutton2 Light
 
 Rule1 on TuyaReceived#Data=55AA03070005030400010016 do channel1 0 endon
       on TuyaReceived#Data=55AA03070005030400010117 do channel1 33 endon
@@ -207,14 +191,25 @@ Rule2 on channel1 <= 25 do TuyaSend4 3,0 break
       on Channel1 <= 100 do TuyaSend4 3,3 endon
 
 backlog rule1 1; rule2 1
+```
+
+What do the settings mean
 
 ```
+so97 - Set TuyaMCU serial baudrate
+so59 - Send tele/%topic%/STATE in addition to stat/%topic%/RESULT for commands: State, Power and any command causing a light to be turned on.
+so68 - Multi-channel PWM instead of a single light
+ledtable - do not use LED gamma correction (default «6.5.0.9)
+tuyamcu 22,99 --> create a fake dimmer control
+tuyamcu 62,3 - 62 for 4 speeds fan controller (possible values 0,1,2,3)
+```
+
 
 * homerbidge-tasmota config.json
 
 ```
 "override": {
-   "EF159D_RL_1": {     <--- This is the unique_id of the discovery message you want to override
+   "EF159D_LI_1": {     <--- This is the unique_id of the discovery message you want to override
    "tasmotaType": "fan" <--- This is the key and property you want to override
   }
 ```
