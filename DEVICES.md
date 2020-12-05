@@ -191,7 +191,7 @@ tuyamcu 22,99 --> create a fake dimmer control
 tuyamcu 62,3 - 62 for 4 speeds fan controller (possible values 0,1,2,3)
 ```
 
-Trial Tasmota config
+Trial Tasmota config based on fake dimmer concept
 
 ```
 backlog SetOption68 1; setoption37 128; tuyamcu 22,99
