@@ -62,7 +62,7 @@
         "type": "number",
         "required": false,
         "default": 10,
-        "description": "Update interval for the logging of history data.  No requirement to change."
+        "description": "Update interval for the logging of history data.  Time is in minutes, defaults to 10 minutes."
       },
       "filter": {
         "title": "Filter device discovery topic",
@@ -70,6 +70,13 @@
         "required": false,
         "default": "",
         "description": "Regular expression to filter discovery topic messages against. ie \"F52066|00F861\" limit discovery to these two devices."
+      },
+      "effects": {
+        "title": "RGB Light Effects",
+        "type": "boolean",
+        "required": false,
+        "default": false,
+        "description": "Enable ability to select RGB light effects.  Requires adding an additional accessory/UI widget for each RGB light."
       }
     }
   }

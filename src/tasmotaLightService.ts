@@ -1,6 +1,8 @@
 import { Service, PlatformAccessory, CharacteristicValue, CharacteristicSetCallback, Characteristic } from 'homebridge';
 import { TasmotaService } from './TasmotaService';
 import { tasmotaPlatform } from './platform';
+import os from 'os';
+import { PLATFORM_NAME, PLUGIN_NAME } from './settings';
 
 import createDebug from 'debug';
 const debug = createDebug('Tasmota:light');
@@ -13,6 +15,7 @@ const debug = createDebug('Tasmota:light');
 
 export class tasmotaLightService extends TasmotaService {
   private update: ChangeHSB;
+  private TVservice;
 
   constructor(
     public readonly platform: tasmotaPlatform,
@@ -69,9 +72,89 @@ export class tasmotaLightService extends TasmotaService {
         .on('set', this.setColorTemperature.bind(this));
     }
 
+    // Does the lightbulb include an effects characteristic and is effects enabled
+
+    if (this.platform.config.effects && accessory.context.device[this.uniq_id].fx_cmd_t) {
+
+      const uuid = this.platform.api.hap.uuid.generate(this.uniq_id + os.hostname());
+
+      // debug('api', this.platform.api);
+      const effectsAccessory = new this.platform.api.platformAccessory(this.accessory.displayName, uuid, this.platform.api.hap.Categories.AUDIO_RECEIVER);
+
+      effectsAccessory.getService(this.platform.Service.AccessoryInformation)!
+        .setCharacteristic(this.platform.Characteristic.Name, this.accessory.displayName)
+        .setCharacteristic(this.platform.Characteristic.Manufacturer, (accessory.context.device[this.uniq_id].dev.mf ?? 'undefined').replace(/[^-_ a-zA-Z0-9]/gi, ''))
+        .setCharacteristic(this.platform.Characteristic.Model, (accessory.context.device[this.uniq_id].dev.mdl ?? 'undefined').replace(/[^-_ a-zA-Z0-9]/gi, ''))
+        .setCharacteristic(this.platform.Characteristic.FirmwareRevision, (accessory.context.device[this.uniq_id].dev.sw ?? 'undefined').replace(/[^-_. a-zA-Z0-9]/gi, ''))
+        .setCharacteristic(this.platform.Characteristic.SerialNumber, accessory.context.device[this.uniq_id].dev.ids[0] + '-' + os.hostname()); // A unique fakegato ID
+
+      this.TVservice = effectsAccessory.getService(this.platform.Service.Television) || effectsAccessory.addService(this.platform.Service.Television);
+
+      if (!this.TVservice.displayName) {
+        this.TVservice.setCharacteristic(this.platform.Characteristic.Name, accessory.context.device[this.uniq_id].name);
+      }
+
+      this.TVservice.getCharacteristic(this.platform.Characteristic.Active)
+        .on('set', this.setOn.bind(this));
+
+      this.TVservice.getCharacteristic(this.platform.Characteristic.ActiveIdentifier)
+        .on('set', this.setActiveIdentifier.bind(this));
+
+      this.TVservice.getCharacteristic(this.platform.Characteristic.ConfiguredName)
+        .on('set', this.setConfiguredName.bind(this));
+
+      // Tasmota effects schemes for ws2812 lights
+
+      const schemes: { name: string, id: number, TVinput?: any }[] = [{ name: 'None', id: 0 },
+        { name: 'Wakeup', id: 1 },
+        { name: 'Cycle Up', id: 2 },
+        { name: 'Cycle Down', id: 3 },
+        { name: 'Random', id: 4 },
+        { name: 'Clock', id: 5 },
+        { name: 'Candlelight', id: 6 },
+        { name: 'RGB', id: 7 },
+        { name: 'Christmas', id: 8 },
+        { name: 'Hanukkah', id: 9 },
+        { name: 'Kwanzaa', id: 10 },
+        { name: 'Rainbow', id: 11 },
+        { name: 'Fire', id: 12 }];
+
+      for (const element of schemes) {
+        debug('element', element);
+        element.TVinput = effectsAccessory.getService(element.name) || effectsAccessory.addService(this.platform.Service.InputSource, element.name, element.name);
+
+        element.TVinput.getCharacteristic(this.platform.Characteristic.IsConfigured)
+          .updateValue(1);
+
+        element.TVinput.getCharacteristic(this.platform.Characteristic.CurrentVisibilityState)
+          .updateValue(0);
+
+        element.TVinput.getCharacteristic(this.platform.Characteristic.Identifier)
+          .updateValue(element.id);                        // Required
+
+        this.TVservice.addLinkedService(element.TVinput);
+      }
+
+      this.platform.api.publishExternalAccessories(PLUGIN_NAME, [effectsAccessory]);
+    }
+
     this.enableStatus();
   }
 
+  setActiveIdentifier(value, callback) {
+    this.platform.log.info('%s Set Effects Scheme ->', this.accessory.displayName, value);
+    try {
+      this.accessory.context.mqttHost.sendMessage(this.accessory.context.device[this.uniq_id].fx_cmd_t, value.toString());
+      callback(null);
+    } catch (err) {
+      callback(err);
+    }
+  }
+
+  setConfiguredName(value, callback) {
+    this.platform.log.info('setConfiguredName', value);
+    callback(null);
+  }
 
   /**
    * Handle "STATE" messages from Tasmotastat_t:
@@ -121,9 +204,9 @@ export class tasmotaLightService extends TasmotaService {
 
       if (this.accessory.context.device[this.uniq_id].rgb_stat_t) {
 
-        debug('RGB->HSL RGB(%s,%s,%s) HSB(%s) From Tasmota HSB(%s)', this.parseValue(this.accessory.context.device[this.uniq_id].rgb_val_tpl, {value_json: JSON.parse(message.toString())}).split(',')[0], this.parseValue(this.accessory.context.device[this.uniq_id].rgb_val_tpl, {value_json: JSON.parse(message.toString())}).split(',')[1], this.parseValue(this.accessory.context.device[this.uniq_id].rgb_val_tpl, {value_json: JSON.parse(message.toString())}).split(',')[2], RGBtoScaledHSV(this.parseValue(this.accessory.context.device[this.uniq_id].rgb_val_tpl, {value_json: JSON.parse(message.toString())}).split(',')[0], this.parseValue(this.accessory.context.device[this.uniq_id].rgb_val_tpl, {value_json: JSON.parse(message.toString())}).split(',')[1], this.parseValue(this.accessory.context.device[this.uniq_id].rgb_val_tpl, {value_json: JSON.parse(message.toString())}).split(',')[2]), JSON.parse(message.toString()).HSBColor);
+        debug('RGB->HSL RGB(%s,%s,%s) HSB(%s) From Tasmota HSB(%s)', this.parseValue(this.accessory.context.device[this.uniq_id].rgb_val_tpl, { value_json: JSON.parse(message.toString()) }).split(',')[0], this.parseValue(this.accessory.context.device[this.uniq_id].rgb_val_tpl, { value_json: JSON.parse(message.toString()) }).split(',')[1], this.parseValue(this.accessory.context.device[this.uniq_id].rgb_val_tpl, { value_json: JSON.parse(message.toString()) }).split(',')[2], RGBtoScaledHSV(this.parseValue(this.accessory.context.device[this.uniq_id].rgb_val_tpl, { value_json: JSON.parse(message.toString()) }).split(',')[0], this.parseValue(this.accessory.context.device[this.uniq_id].rgb_val_tpl, { value_json: JSON.parse(message.toString()) }).split(',')[1], this.parseValue(this.accessory.context.device[this.uniq_id].rgb_val_tpl, { value_json: JSON.parse(message.toString()) }).split(',')[2]), JSON.parse(message.toString()).HSBColor);
 
-        const hsb = RGBtoScaledHSV(this.parseValue(this.accessory.context.device[this.uniq_id].rgb_val_tpl, {value_json: JSON.parse(message.toString())}).split(',')[0], this.parseValue(this.accessory.context.device[this.uniq_id].rgb_val_tpl, {value_json: JSON.parse(message.toString())}).split(',')[1], this.parseValue(this.accessory.context.device[this.uniq_id].rgb_val_tpl, {value_json: JSON.parse(message.toString())}).split(',')[2]);
+        const hsb = RGBtoScaledHSV(this.parseValue(this.accessory.context.device[this.uniq_id].rgb_val_tpl, { value_json: JSON.parse(message.toString()) }).split(',')[0], this.parseValue(this.accessory.context.device[this.uniq_id].rgb_val_tpl, { value_json: JSON.parse(message.toString()) }).split(',')[1], this.parseValue(this.accessory.context.device[this.uniq_id].rgb_val_tpl, { value_json: JSON.parse(message.toString()) }).split(',')[2]);
 
 
         // Use debug logging for no change updates, and info when a change occurred
@@ -150,7 +233,8 @@ export class tasmotaLightService extends TasmotaService {
       if (this.accessory.context.device[this.uniq_id].clr_temp_cmd_t) {
 
         // Use debug logging for no change updates, and info when a change occurred
-        const clr_temp = this.parseValue(this.accessory.context.device[this.uniq_id].clr_temp_tpl, {
+
+        const clr_temp = this.parseValue(this.accessory.context.device[this.uniq_id].clr_temp_val_tpl, {
           value_json: JSON.parse(message.toString()),
         });
 
@@ -163,6 +247,29 @@ export class tasmotaLightService extends TasmotaService {
 
         this.service.getCharacteristic(this.platform.Characteristic.ColorTemperature).updateValue(clr_temp);
       }
+
+      // RGB Lights that support effects
+
+      if (this.platform.config.effects && this.accessory.context.device[this.uniq_id].fx_cmd_t) {
+
+        this.TVservice.getCharacteristic(this.platform.Characteristic.Active).updateValue((value === this.accessory.context.device[this.uniq_id].pl_on ? 1 : 0));
+
+        const effects = this.parseValue(this.accessory.context.device[this.uniq_id].fx_val_tpl, {
+          value_json: JSON.parse(message.toString()),
+        });
+
+        if (this.TVservice.getCharacteristic(this.platform.Characteristic.ActiveIdentifier).value != effects) {
+
+          this.platform.log.info('Updating \'%s\' Effects Scheme to %s', this.accessory.displayName, effects);
+        } else {
+          this.platform.log.debug('Updating \'%s\' Effects Scheme to %s', this.accessory.displayName, effects);
+        }
+
+        this.TVservice.getCharacteristic(this.platform.Characteristic.ActiveIdentifier).updateValue(effects);
+
+      }
+
+
     } catch (err) {
       this.platform.log.error('ERROR: Message Parse Error', topic, message.toString(), err.message);
     }
