@@ -21,6 +21,7 @@ Homebridge Plugin for Tasmota Devices that leverage's the Home Assistant Auto Di
 * RGB LED Light Strip
 * Support for [AZ-7798 CO2 Monitor](https://tasmota.github.io/docs/AZ-7798) - Tks Jeroen Vermeulen
 * PIR Motion sensor ( requires minor configuration )
+* Wipro Next 20W Smart LED Batten (White) Light
 
 * WemosDB - Doorbell device
 

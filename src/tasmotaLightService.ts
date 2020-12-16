@@ -233,7 +233,8 @@ export class tasmotaLightService extends TasmotaService {
       if (this.accessory.context.device[this.uniq_id].clr_temp_cmd_t) {
 
         // Use debug logging for no change updates, and info when a change occurred
-        const clr_temp = this.parseValue(this.accessory.context.device[this.uniq_id].clr_temp_tpl, {
+
+        const clr_temp = this.parseValue(this.accessory.context.device[this.uniq_id].clr_temp_val_tpl, {
           value_json: JSON.parse(message.toString()),
         });
 

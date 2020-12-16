@@ -2,13 +2,15 @@
 
 All notable changes to this project will be documented in this file. This project uses [Semantic Versioning](https://semver.org/).
 
-## 0.0.70 (2020-11-10)
+## 0.0.77 (2020-12-16)
 
-## [Version 0.0.70](https://github.com/northernman54/homebridge-tasmota/compare/v0.0.67...v0.0.70)
+## [Version 0.0.70](https://github.com/northernman54/homebridge-tasmota/compare/v0.0.67...v0.0.77)
 
 #### Changes
 
 - Added support for RGB Effects control using a TV Accessory widget and the input selection slider to select effects scheme.
+- Fix for issue #21 - Colour temperature causing error messages
+- Updated DEVICES.md with my latest personal device settings
 
 
 ## 0.0.67 (2020-10-30)
