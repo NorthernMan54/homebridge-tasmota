@@ -2,7 +2,7 @@
 
 My standard config after setting name and device configuration
 ```
-Backlog MqttHost mqtt.local; topic tasmota_%06X; setoption19 1
+Backlog MqttHost mqtt.local; topic tasmota_%06X; setoption57 1; setoption19 1
 ```
 
 ## [MCUIOT](docs/MCUIOT.md) BME280 Temperature Sensor
@@ -81,7 +81,7 @@ D6 - GPIO12 -> I2C SDA
 D4 - GPIO2 -> LedLink
 D2 - GPIO4 -> Switch1 (9)
 
-Template: {"NAME":"BME + Motion","GPIO":[255,255,157,255,9,255,255,255,6,255,5,255,255],"FLAG":15,"BASE":18}
+Template {"NAME":"BME + Motion","GPIO":[255,255,157,255,9,255,255,255,6,255,5,255,255],"FLAG":15,"BASE":18}
 Console: SwitchMode 1
 ```
 
@@ -160,8 +160,34 @@ backlog webbutton1 Ceiling; webbutton2 Flood; webbutton3 Porch; webbutton4 Step
 
 ## FEIT Wifi Dimmer
 
+* Tasmota configuration
+
 ```
-backlog module 54; DimmerRange 10,1000; TuyaMCU 21,2; MqttHost mqtt.local; topic tasmota_%06X; setoption19 1
+backlog module 54; DimmerRange 10,1440; TuyaMCU 21,2; MqttHost mqtt.local; topic tasmota_%06X; setoption19 1
+```
+
+* Tasmota configuration with Dimming removed
+
+I have one installed on a non-dimmable light.  This removes the dimmer functionality from HomeKit only, unfortunately local control is still available, and if used will reset to 100% after turning off/on.
+
+```
+backlog module 54; DimmerRange 10,1440; MqttHost mqtt.local; topic tasmota_%06X; setoption19 1
+rule1 on Power1#State do tuyasend2 2,1440 endon
+rule1 1
+```
+
+## Hampton Bay Fan/Light Controller
+
+* Tasmota configuration
+
+```
+irsend 0,350,295,700,695,300,695,300,295,700,295,700,695,300,695,300,695,300,695,300,695,300,295,700,695,300,600,350,295,700,695,300,695,300,295,700,295,700,695,300,695,300,695,300,695,300,695,300,295,700,695,300,600,350,295,700,695,300,695,300,295,700,295,700,695,300,695,300,695,300,695,300,695,300,295,700,695,300,600,350,295,700,695,300,695,300,295,700,295,700,695,300,695,300,695,300,695,300,695,300,295,700,695,300,600,350,295,700,695,300,695,300,295,700,295,700,695,300,695,300,695,300,695,300,695,300,295,700,695,300,600,350,295,700,695,300,695,300,295,700,295,700,695,300,695,300,695,300,695,300,695,300,295,700,695,300
+```
+
+```
+0110 0111 1111
+Fan Off from my hampton bay with remote code "1100"
+[{"type":"raw","out":3,"khz":500,"data":[350,295,700,695,300,695,300,295,700,295,700,695,300,695,300,695,300,695,300,695,300,295,700,695,300],"pulse":8,"pdelay":10,"repeat":1,"rdelay":600}]
 ```
 
 ## Treatlife DS03 Fan Controller and Light Dimmer
