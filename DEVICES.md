@@ -176,18 +176,36 @@ rule1 on Power1#State do tuyasend2 2,1440 endon
 rule1 1
 ```
 
-## Hampton Bay Fan/Light Controller
+## Hampton Bay Fan/Light RF Controller
 
 * Tasmota configuration
 
+D6 - GPIO 12 - 303.9 Mhz RF Transmitter
+D7 - GPIO 13 - 303.9 Mhz RF Receiver
+
+
 ```
-irsend 0,350,295,700,695,300,695,300,295,700,295,700,695,300,695,300,695,300,695,300,695,300,295,700,695,300,600,350,295,700,695,300,695,300,295,700,295,700,695,300,695,300,695,300,695,300,695,300,295,700,695,300,600,350,295,700,695,300,695,300,295,700,295,700,695,300,695,300,695,300,695,300,695,300,295,700,695,300,600,350,295,700,695,300,695,300,295,700,295,700,695,300,695,300,695,300,695,300,695,300,295,700,695,300,600,350,295,700,695,300,695,300,295,700,295,700,695,300,695,300,695,300,695,300,695,300,295,700,695,300,600,350,295,700,695,300,695,300,295,700,295,700,695,300,695,300,695,300,695,300,695,300,295,700,695,300
+backlog template {"NAME":"RF Transmitter","GPIO":[0,0,544,0,0,0,0,0,1120,1152,416,225,0,0],"FLAG":0,"BASE":18}
+backlog webbutton1 Light; webbutton2 Fan; MqttHost mqtt.local; topic tasmota_%06X;
 ```
 
 ```
-0110 0111 1111
-Fan Off from my hampton bay with remote code "1100"
-[{"type":"raw","out":3,"khz":500,"data":[350,295,700,695,300,695,300,295,700,295,700,695,300,695,300,695,300,695,300,695,300,295,700,695,300],"pulse":8,"pdelay":10,"repeat":1,"rdelay":600}]
+Rule2 on Power1#State do rfsend {"Data":"0x67E","Bits":12,"Protocol":6,"Pulse":340} endon
+      on Power2#State=0 do rfsend {"Data":"0x67D","Bits":12,"Protocol":6,"Pulse":340} endon
+      on dimmer#state <= 25 do rfsend {"Data":"0x67D","Bits":12,"Protocol":6,"Pulse":340} break
+      on dimmer#state <= 50 do rfsend {"Data":"0x677","Bits":12,"Protocol":6,"Pulse":340} break
+      on dimmer#state <= 75 do rfsend {"Data":"0x66F","Bits":12,"Protocol":6,"Pulse":340} break
+      on dimmer#state <= 100 do rfsend {"Data":"0x65F","Bits":12,"Protocol":6,"Pulse":340} break
+      on Power2#State=1 do rfsend {"Data":"0x677","Bits":12,"Protocol":6,"Pulse":340} break
+```
+
+* homerbidge-tasmota config.json
+
+```
+"override": {
+   "EF159D_LI_1": {     <--- This is the unique_id of the discovery message you want to override
+   "tasmotaType": "fan" <--- This is the key and property you want to override
+  }
 ```
 
 ## Treatlife DS03 Fan Controller and Light Dimmer
