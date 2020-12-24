@@ -176,7 +176,9 @@ rule1 on Power1#State do tuyasend2 2,1440 endon
 rule1 1
 ```
 
-## Hampton Bay Fan/Light RF Controller
+## Hampton Bay Fan/Light RF Remote Control
+
+FCCID: CHQ7083T / CHQ9050H 303.9 Mhz RF Remote Control
 
 * Tasmota configuration
 
