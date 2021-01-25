@@ -194,7 +194,7 @@ export class tasmotaSensorService extends TasmotaService {
         }
       }
 
-      this.characteristic.updateValue(value);
+      this.characteristic.updateValue(+value);
 
       // debug('fakegato', this.platform.config.history, this.fakegato, this.device_class);
       if (this.platform.config.history && this.fakegato) {
