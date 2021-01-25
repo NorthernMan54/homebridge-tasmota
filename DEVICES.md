@@ -2,7 +2,7 @@
 
 My standard config after setting name and device configuration
 ```
-Backlog MqttHost mqtt.local; topic tasmota_%06X; setoption19 1
+Backlog MqttHost mqtt.local; topic tasmota_%06X; setoption57 1; setoption19 1
 ```
 
 ## [MCUIOT](docs/MCUIOT.md) BME280 Temperature Sensor
@@ -81,7 +81,7 @@ D6 - GPIO12 -> I2C SDA
 D4 - GPIO2 -> LedLink
 D2 - GPIO4 -> Switch1 (9)
 
-Template: {"NAME":"BME + Motion","GPIO":[255,255,157,255,9,255,255,255,6,255,5,255,255],"FLAG":15,"BASE":18}
+Template {"NAME":"BME + Motion","GPIO":[255,255,157,255,9,255,255,255,6,255,5,255,255],"FLAG":15,"BASE":18}
 Console: SwitchMode 1
 ```
 
@@ -160,8 +160,54 @@ backlog webbutton1 Ceiling; webbutton2 Flood; webbutton3 Porch; webbutton4 Step
 
 ## FEIT Wifi Dimmer
 
+* Tasmota configuration
+
 ```
-backlog module 54; DimmerRange 10,1000; TuyaMCU 21,2; MqttHost mqtt.local; topic tasmota_%06X; setoption19 1
+backlog module 54; DimmerRange 10,1440; TuyaMCU 21,2; MqttHost mqtt.local; topic tasmota_%06X; setoption19 1
+```
+
+* Tasmota configuration with Dimming removed
+
+I have one installed on a non-dimmable light.  This removes the dimmer functionality from HomeKit only, unfortunately local control is still available, and if used will reset to 100% after turning off/on.
+
+```
+backlog module 54; DimmerRange 10,1440; MqttHost mqtt.local; topic tasmota_%06X; setoption19 1
+rule1 on Power1#State do tuyasend2 2,1440 endon
+rule1 1
+```
+
+## Hampton Bay Fan/Light RF Remote Control
+
+FCCID: CHQ7083T / CHQ9050H 303.9 Mhz RF Remote Control
+
+* Tasmota configuration
+
+D6 - GPIO 12 - 303.9 Mhz RF Transmitter
+D7 - GPIO 13 - 303.9 Mhz RF Receiver
+
+
+```
+backlog template {"NAME":"RF Transmitter","GPIO":[0,0,544,0,0,0,0,0,1120,1152,416,225,0,0],"FLAG":0,"BASE":18}
+backlog webbutton1 Light; webbutton2 Fan; MqttHost mqtt.local; topic tasmota_%06X;
+```
+
+```
+Rule2 on Power1#State do rfsend {"Data":"0x67E","Bits":12,"Protocol":6,"Pulse":340} endon
+      on Power2#State=0 do rfsend {"Data":"0x67D","Bits":12,"Protocol":6,"Pulse":340} endon
+      on dimmer#state <= 25 do rfsend {"Data":"0x67D","Bits":12,"Protocol":6,"Pulse":340} break
+      on dimmer#state <= 50 do rfsend {"Data":"0x677","Bits":12,"Protocol":6,"Pulse":340} break
+      on dimmer#state <= 75 do rfsend {"Data":"0x66F","Bits":12,"Protocol":6,"Pulse":340} break
+      on dimmer#state <= 100 do rfsend {"Data":"0x65F","Bits":12,"Protocol":6,"Pulse":340} break
+      on Power2#State=1 do rfsend {"Data":"0x677","Bits":12,"Protocol":6,"Pulse":340} break
+```
+
+* homerbidge-tasmota config.json
+
+```
+"override": {
+   "EF159D_LI_1": {     <--- This is the unique_id of the discovery message you want to override
+   "tasmotaType": "fan" <--- This is the key and property you want to override
+  }
 ```
 
 ## Treatlife DS03 Fan Controller and Light Dimmer
