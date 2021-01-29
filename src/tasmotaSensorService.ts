@@ -159,9 +159,9 @@ export class tasmotaSensorService extends TasmotaService {
     this.accessory.context.timeout = this.platform.autoCleanup(this.accessory);
 
     try {
-      let value = this.parseValue(this.accessory.context.device[this.uniq_id].val_tpl, {
+      let value: number = parseFloat(this.parseValue(this.accessory.context.device[this.uniq_id].val_tpl, {
         value_json: JSON.parse(message.toString()),
-      });
+      }));
 
       // Sensor value tweaks or adjustments needed for homekit
 
@@ -184,17 +184,13 @@ export class tasmotaSensorService extends TasmotaService {
           break;
       }
 
-      if (value instanceof Error) {
-        // Error has already been handled
-      } else {
         if (this.characteristic.value != value && this.delta(this.characteristic.value, value)) {
           this.platform.log.info('Updating \'%s:%s\' to %s', this.service.displayName, this.characteristic.displayName ?? '', value);
         } else {
           this.platform.log.debug('Updating \'%s:%s\' to %s', this.service.displayName, this.characteristic.displayName ?? '', value);
         }
-      }
 
-      this.characteristic.updateValue(+value);
+      this.characteristic.updateValue(value);
 
       // debug('fakegato', this.platform.config.history, this.fakegato, this.device_class);
       if (this.platform.config.history && this.fakegato) {
@@ -203,15 +199,15 @@ export class tasmotaSensorService extends TasmotaService {
           switch (that.device_class) {
             case 'temperature':
               debug('Updating fakegato \'%s:%s\'', that.service.displayName, that.characteristic.displayName, {
-                temp: +value,
-                pressure: +that.accessory.getService(that.CustomCharacteristic.AtmosphericPressureSensor) ?.getCharacteristic(that.CustomCharacteristic.AtmosphericPressureLevel).value ?? 0,
-                humidity: +that.accessory.getService(that.platform.Service.HumiditySensor) ?.getCharacteristic(that.platform.Characteristic.CurrentRelativeHumidity).value ?? 0,
+                temp: value,
+                pressure: that.accessory.getService(that.CustomCharacteristic.AtmosphericPressureSensor) ?.getCharacteristic(that.CustomCharacteristic.AtmosphericPressureLevel).value ?? 0,
+                humidity: that.accessory.getService(that.platform.Service.HumiditySensor) ?.getCharacteristic(that.platform.Characteristic.CurrentRelativeHumidity).value ?? 0,
               });
 
               that.accessory.context.fakegatoService.appendData({
-                temp: +value,
-                pressure: +that.accessory.getService(that.CustomCharacteristic.AtmosphericPressureSensor) ?.getCharacteristic(that.CustomCharacteristic.AtmosphericPressureLevel).value ?? 0,
-                humidity: +that.accessory.getService(that.platform.Service.HumiditySensor) ?.getCharacteristic(that.platform.Characteristic.CurrentRelativeHumidity).value ?? 0,
+                temp: value,
+                pressure: that.accessory.getService(that.CustomCharacteristic.AtmosphericPressureSensor) ?.getCharacteristic(that.CustomCharacteristic.AtmosphericPressureLevel).value ?? 0,
+                humidity: that.accessory.getService(that.platform.Service.HumiditySensor) ?.getCharacteristic(that.platform.Characteristic.CurrentRelativeHumidity).value ?? 0,
               });
               break;
             case 'power':

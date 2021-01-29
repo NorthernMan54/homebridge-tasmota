@@ -63,10 +63,10 @@ module.exports = function(Service, Characteristic) {
   CustomCharacteristic.AtmosphericPressureLevel = function() {
     Characteristic.call(this, 'Air Pressure', CustomCharacteristic.AtmosphericPressureLevel.UUID);
     this.setProps({
-      format: Characteristic.Formats.UINT8,
-      unit: "mbar",
-      minValue: 800,
-      maxValue: 1200,
+      format: Characteristic.Formats.UINT16,
+      unit: "hPa",
+      minValue: 700,
+      maxValue: 1100,
       minStep: 1,
       perms: [Characteristic.Perms.READ, Characteristic.Perms.NOTIFY]
     });
