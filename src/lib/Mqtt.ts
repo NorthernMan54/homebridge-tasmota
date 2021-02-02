@@ -41,7 +41,7 @@ export class Mqtt extends EventEmitter {
       switch (subject[0]) {
         case "homeassistant":
 
-          if (message.length > 5) {
+          if (message.length > 5 && topic.endsWith("config")) {
             try {
               const device = JSON.parse(message.toString());
 
@@ -62,7 +62,7 @@ export class Mqtt extends EventEmitter {
               debug("Triggerd by:", message.toString());
             }
           } else {
-            this.emit('Remove', topic);
+            // this.emit('Remove', topic);
             // debug('Remove', topic);
           }
           break;
