@@ -98,15 +98,15 @@ export class tasmotaBinarySensorService extends TasmotaService {
 
     try {
 
-      debug('this.uniq_id', this.uniq_id);
-      debug('val_tpl', this.accessory.context.device[this.uniq_id].val_tpl);
-      debug('message', JSON.parse(message.toString()));
+      // debug('this.uniq_id', this.uniq_id);
+      // debug('val_tpl', this.accessory.context.device[this.uniq_id].val_tpl);
+      // debug('message', JSON.parse(message.toString()));
 
       let value = this.parseValue(this.accessory.context.device[this.uniq_id].val_tpl, {
         value_json: JSON.parse(message.toString()),
       });
-      debug('value', value);
-      debug('device_class', this.device_class);
+      // debug('value', value, typeof value);
+      // debug('device_class', this.device_class);
 
       // Adjust value to format expected by sensor type
 
@@ -119,9 +119,16 @@ export class tasmotaBinarySensorService extends TasmotaService {
           value = (this.accessory.context.device[this.uniq_id].pl_on === value ? this.platform.Characteristic.LeakDetected.LEAK_DETECTED : this.platform.Characteristic.LeakDetected.LEAK_NOT_DETECTED);
           break;
         case 'door':
-          debug('response test', this.accessory.context.device[this.uniq_id].pl_on === value);
-          value = (this.accessory.context.device[this.uniq_id].pl_on === value ? this.platform.Characteristic.ContactSensorState.CONTACT_DETECTED : this.platform.Characteristic.ContactSensorState.CONTACT_NOT_DETECTED);
-          debug('response value', value);
+          // debug('pl_on', this.accessory.context.device[this.uniq_id].pl_on, typeof this.accessory.context.device[this.uniq_id].pl_on);
+          if (typeof this.accessory.context.device[this.uniq_id].pl_on === 'boolean') {
+            value = (value === 'true' ? true : value);
+            value = (value === 'false' ? false : value);
+          }
+          // debug('value', value, typeof value);
+          // debug('response test', (this.accessory.context.device[this.uniq_id].pl_on = value));
+          // debug('pl_on', this.accessory.context.device[this.uniq_id].pl_on);
+          value = (this.accessory.context.device[this.uniq_id].pl_on === value ? this.platform.Characteristic.ContactSensorState.CONTACT_NOT_DETECTED : this.platform.Characteristic.ContactSensorState.CONTACT_DETECTED);
+          // debug('response value', value);
           break;
         case 'motion':
           // boolean
