@@ -112,7 +112,7 @@ export class tasmotaBinarySensorService extends TasmotaService {
           value = (this.accessory.context.device[this.uniq_id].pl_on === value ? this.platform.Characteristic.LeakDetected.LEAK_DETECTED : this.platform.Characteristic.LeakDetected.LEAK_NOT_DETECTED);
           break;
         case 'door':
-          value = (this.accessory.context.device[this.uniq_id].pl_on === value ? this.platform.Characteristic.LeakDetected.CONTACT_DETECTED : this.platform.Characteristic.LeakDetected.CONTACT_NOT_DETECTED);
+          value = (this.accessory.context.device[this.uniq_id].pl_on === value ? this.platform.Characteristic.ContactSensorState.CONTACT_DETECTED : this.platform.Characteristic.ContactSensorState.CONTACT_NOT_DETECTED);
           break;
         case 'motion':
           // boolean
