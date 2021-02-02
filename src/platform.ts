@@ -1,4 +1,5 @@
-import { API, DynamicPlatformPlugin, Logger, PlatformAccessory, PlatformConfig, Service, Characteristic, CharacteristicValue, CharacteristicSetCallback } from 'homebridge';
+import { API, DynamicPlatformPlugin, Logger, PlatformAccessory, PlatformConfig, Service, Characteristic,
+  CharacteristicValue, CharacteristicSetCallback } from 'homebridge';
 
 import { PLATFORM_NAME, PLUGIN_NAME } from './settings';
 // import { tasmotaAccessory } from './platformAccessory';
@@ -28,7 +29,9 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
 
   // this is used to track restored cached accessories
   public readonly accessories: PlatformAccessory[] = [];
-  public readonly services: tasmotaSwitchService[] | tasmotaLightService[] | tasmotaSensorService[] | tasmotaBinarySensorService[] | tasmotaFanService[] = [];
+  public readonly services: tasmotaSwitchService[] | tasmotaLightService[] | tasmotaSensorService[] |
+    tasmotaBinarySensorService[] | tasmotaFanService[] = [];
+
   private discoveryTopicMap: DiscoveryTopicMap[] = [];
   private CustomCharacteristic;
 

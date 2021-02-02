@@ -20,7 +20,8 @@ export class tasmotaSwitchService extends TasmotaService {
   ) {
     super(platform, accessory, uniq_id);
 
-    this.service = this.accessory.getService(this.uuid) || this.accessory.addService(this.platform.Service.Switch, accessory.context.device[this.uniq_id].name, this.uuid);
+    this.service = this.accessory.getService(this.uuid) || this.accessory.addService(this.platform.Service.Switch,
+      accessory.context.device[this.uniq_id].name, this.uuid);
 
     // set the service name, this is what is displayed as the default name on the Home app
     // in this example we are using the name we stored in the `accessory.context` in the `discoverDevices` method.
@@ -60,7 +61,8 @@ export class tasmotaSwitchService extends TasmotaService {
         value_json: JSON.parse(message.toString()),
       };
 
-      const value = (this.parseValue(this.accessory.context.device[this.uniq_id].val_tpl, interim) === this.accessory.context.device[this.uniq_id].pl_on ? true : false);
+      const value = (this.parseValue(this.accessory.context.device[this.uniq_id].val_tpl, interim) ===
+        this.accessory.context.device[this.uniq_id].pl_on ? true : false);
 
       if (this.characteristic.value !== value) {
         this.platform.log.info('Updating \'%s:%s\' to %s', this.service.displayName, this.characteristic.displayName, value);
@@ -98,7 +100,8 @@ export class tasmotaSwitchService extends TasmotaService {
     try {
       this.platform.log.info('%s Set Characteristic On ->', this.service.displayName, value);
 
-      this.accessory.context.mqttHost.sendMessage(this.accessory.context.device[this.uniq_id].cmd_t, (value ? this.accessory.context.device[this.uniq_id].pl_on : this.accessory.context.device[this.uniq_id].pl_off));
+      this.accessory.context.mqttHost.sendMessage(this.accessory.context.device[this.uniq_id].cmd_t, (value ?
+        this.accessory.context.device[this.uniq_id].pl_on : this.accessory.context.device[this.uniq_id].pl_off));
 
       if (this.platform.config.history && this.accessory.context.fakegatoService ?.addEntry) {
         debug('Updating fakegato', this.service.displayName, {
