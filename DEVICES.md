@@ -82,7 +82,7 @@ D4 - GPIO2 -> LedLink
 D2 - GPIO4 -> Switch1 (9)
 
 Template {"NAME":"BME + Motion","GPIO":[255,255,157,255,9,255,255,255,6,255,5,255,255],"FLAG":15,"BASE":18}
-Console: SwitchMode 1
+SwitchMode 1
 ```
 
 * homerbidge-tasmota config.json

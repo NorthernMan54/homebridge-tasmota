@@ -51,6 +51,21 @@ export class tasmotaBinarySensorService extends TasmotaService {
           debug('adding', this.fakegato);
         }
         break;
+      case 'door':
+        this.platform.log.debug('Creating %s binary sensor %s', accessory.context.device[this.uniq_id].dev_cla, accessory.context.device[this.uniq_id].name);
+
+        this.service = this.accessory.getService(this.uuid) || this.accessory.addService(this.platform.Service.ContactSensor, accessory.context.device[this.uniq_id].name, this.uuid);
+
+        if (!this.service.displayName) {
+          this.service.setCharacteristic(this.platform.Characteristic.Name, accessory.context.device[this.uniq_id].name);
+        }
+        this.characteristic = this.service.getCharacteristic(this.platform.Characteristic.ContactSensorState);
+        if (this.platform.config.history) {
+          this.fakegato = 'motion';
+          this.service.addOptionalCharacteristic(this.CustomCharacteristic.LastActivation);
+          debug('adding', this.fakegato);
+        }
+        break;
       case 'moisture':
         this.platform.log.debug('Creating %s binary sensor %s', accessory.context.device[this.uniq_id].dev_cla, accessory.context.device[this.uniq_id].name);
 
@@ -95,6 +110,9 @@ export class tasmotaBinarySensorService extends TasmotaService {
           // 1 / 0
           debug('moisture', this.accessory.context.device[this.uniq_id].pl_on, value);
           value = (this.accessory.context.device[this.uniq_id].pl_on === value ? this.platform.Characteristic.LeakDetected.LEAK_DETECTED : this.platform.Characteristic.LeakDetected.LEAK_NOT_DETECTED);
+          break;
+        case 'door':
+          value = (this.accessory.context.device[this.uniq_id].pl_on === value ? this.platform.Characteristic.LeakDetected.CONTACT_DETECTED : this.platform.Characteristic.LeakDetected.CONTACT_NOT_DETECTED);
           break;
         case 'motion':
           // boolean
