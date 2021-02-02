@@ -97,9 +97,16 @@ export class tasmotaBinarySensorService extends TasmotaService {
     this.accessory.context.timeout = this.platform.autoCleanup(this.accessory);
 
     try {
+
+      debug('this.uniq_id', this.uniq_id);
+      debug('val_tpl', this.accessory.context.device[this.uniq_id].val_tpl);
+      debug('message', JSON.parse(message.toString());
+
       let value = this.parseValue(this.accessory.context.device[this.uniq_id].val_tpl, {
         value_json: JSON.parse(message.toString()),
       });
+      debug('value', value);
+      debug('device_class', this.device_class);
 
       // Adjust value to format expected by sensor type
 
