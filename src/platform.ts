@@ -424,8 +424,6 @@ function setConfiguredName(this: tasmotaSwitchService | tasmotaLightService | ta
 
 /* The various Tasmota firmware's have a slightly different flavors of the message. */
 
-{"name":"Stereo status","stat_t":"~HASS_STATE","avty_t":"~LWT","frc_upd":true,"pl_avail":"Online","pl_not_avail":"Offline","json_attributes_topic":"~HASS_STATE","unit_of_meas":" ","val_tpl":"{{value_json['RSSI']}}","ic":"mdi:information-outline","uniq_id":"00F861_status","device":{"identifiers":["00F861"],"connections":[["mac","38:2B:78:00:F8:61"]],"name":"Stereo","model":"WiOn","sw_version":"8.1.0(tasmota)","manufacturer":"Tasmota"},"~":"tasmota_00F861/tele/"}
-
 function normalizeMessage(message) {
 
   const translation = {
