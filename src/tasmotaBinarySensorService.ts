@@ -1,5 +1,5 @@
 import { Service, PlatformAccessory, Characteristic, CharacteristicValue } from 'homebridge';
-import { TasmotaService } from './TasmotaService';
+import { TasmotaService, isTrue } from './TasmotaService';
 import { tasmotaPlatform } from './platform';
 
 import createDebug from 'debug';
@@ -130,18 +130,12 @@ export class tasmotaBinarySensorService extends TasmotaService {
             this.platform.Characteristic.LeakDetected.LEAK_NOT_DETECTED);
           break;
         case 'door':
-          // debug('pl_on', this.accessory.context.device[this.uniq_id].pl_on, typeof this.accessory.context.device[this.uniq_id].pl_on);
           if (typeof this.accessory.context.device[this.uniq_id].pl_on === 'boolean') {
-            value = (value === 'true' ? true : value);
-            value = (value === 'false' ? false : value);
+            value = isTrue(value);
           }
-          // debug('value', value, typeof value);
-          // debug('response test', (this.accessory.context.device[this.uniq_id].pl_on = value));
-          // debug('pl_on', this.accessory.context.device[this.uniq_id].pl_on);
           value = (this.accessory.context.device[this.uniq_id].pl_on === value ?
             this.platform.Characteristic.ContactSensorState.CONTACT_NOT_DETECTED :
             this.platform.Characteristic.ContactSensorState.CONTACT_DETECTED);
-          // debug('response value', value);
           break;
         case 'motion':
           // boolean

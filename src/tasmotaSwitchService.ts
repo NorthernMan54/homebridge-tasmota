@@ -1,5 +1,5 @@
 import { Service, PlatformAccessory, CharacteristicValue, CharacteristicSetCallback, Characteristic } from 'homebridge';
-import { TasmotaService } from './TasmotaService';
+import { TasmotaService, isTrue } from './TasmotaService';
 import { tasmotaPlatform } from './platform';
 
 import createDebug from 'debug';
@@ -61,8 +61,12 @@ export class tasmotaSwitchService extends TasmotaService {
         value_json: JSON.parse(message.toString()),
       };
 
-      const value = (this.parseValue(this.accessory.context.device[this.uniq_id].val_tpl, interim) ===
+      let value = (this.parseValue(this.accessory.context.device[this.uniq_id].val_tpl, interim) ===
         this.accessory.context.device[this.uniq_id].pl_on ? true : false);
+
+      if (typeof this.accessory.context.device[this.uniq_id].pl_on === 'boolean') {
+        value = isTrue(this.parseValue(this.accessory.context.device[this.uniq_id].val_tpl, interim));
+      }
 
       if (this.characteristic.value !== value) {
         this.platform.log.info('Updating \'%s:%s\' to %s', this.service.displayName, this.characteristic.displayName, value);
@@ -100,8 +104,13 @@ export class tasmotaSwitchService extends TasmotaService {
     try {
       this.platform.log.info('%s Set Characteristic On ->', this.service.displayName, value);
 
-      this.accessory.context.mqttHost.sendMessage(this.accessory.context.device[this.uniq_id].cmd_t, (value ?
-        this.accessory.context.device[this.uniq_id].pl_on : this.accessory.context.device[this.uniq_id].pl_off));
+      if (typeof this.accessory.context.device[this.uniq_id].pl_on === 'boolean') {
+        this.accessory.context.mqttHost.sendMessage(this.accessory.context.device[this.uniq_id].cmd_t, (value ?
+          'true' : 'false'));
+      } else {
+        this.accessory.context.mqttHost.sendMessage(this.accessory.context.device[this.uniq_id].cmd_t, (value ?
+          this.accessory.context.device[this.uniq_id].pl_on : this.accessory.context.device[this.uniq_id].pl_off));
+      }
 
       if (this.platform.config.history && this.accessory.context.fakegatoService ?.addEntry) {
         debug('Updating fakegato', this.service.displayName, {
@@ -122,6 +131,44 @@ export class tasmotaSwitchService extends TasmotaService {
 
 }
 
+/*
+discovery message is published to homeassistant /switch/Office-OfficeLight/switch/config with a value of
+
+{ "payload_off": false,
+"payload_on": true,
+"value_template": "{{ value_json.value }}",
+"command_topic": "zwave/Office/3/37/1/0/set",
+"state_topic": "zwave/Office/3/37/1/0",
+"device": { "identifiers": ["zwave2mqtt_0xc9fcc1ac_node3"],
+"manufacturer": "Honeywell", "model": "39348 / ZW4008 In-Wall Smart Switch (0x3135)", "name": "Office-OfficeLight", "sw_version": "5.53" },
+"name": "Office-OfficeLight_switch",
+"unique_id": "zwave2mqtt_0xc9fcc1ac_3-37-1-0" }
+
+
+state_topic's value is
+
+{ "value_id": "3-37-1-0",
+"node_id": 3, "class_id": 37,
+"type": "bool", "genre": "user",
+"instance": 1,
+"index": 0,
+"label": "Switch",
+"units": "",
+"help": "Turn On/Off Device",
+"read_only": false,
+"write_only": false,
+"min": 0,
+"max": 0,
+"is_polled": false,
+"value": true,
+"lastUpdate": 1612302355145 }
+
+
+command_topic's value is True or False
+although I just tested and you can use ON and OFF for the command topic as well, that's just what HA sends
+and false and true work as well
+
+*/
 /* stat_t: 'tele/tasmota_00F861/STATE',
  * pl_off: 'OFF',
    pl_on: 'ON',
