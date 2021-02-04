@@ -57,10 +57,6 @@ export class tasmotaSwitchService extends TasmotaService {
 
     try {
       this.accessory.context.timeout = this.platform.autoCleanup(this.accessory);
-      const interim = {
-        value_json: JSON.parse(message.toString()),
-      };
-
       let value = message.toString();
 
       if (this.accessory.context.device[this.uniq_id].val_tpl) {
@@ -69,10 +65,12 @@ export class tasmotaSwitchService extends TasmotaService {
         });
       }
 
-      value = (value === this.accessory.context.device[this.uniq_id].pl_on ? true : false);
-
       if (typeof this.accessory.context.device[this.uniq_id].pl_on === 'boolean') {
-        value = isTrue(this.parseValue(this.accessory.context.device[this.uniq_id].val_tpl, interim));
+        value = isTrue(this.parseValue(this.accessory.context.device[this.uniq_id].val_tpl, {
+          value_json: JSON.parse(message.toString()),
+        }));
+      } else {
+        value = (value === this.accessory.context.device[this.uniq_id].pl_on ? true : false);
       }
 
       if (this.characteristic.value !== value) {
