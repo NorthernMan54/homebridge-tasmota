@@ -443,7 +443,8 @@ function normalizeMessage(message) {
     value_template: 'val_tpl',
     unit_of_measurement: 'unit_of_meas',
     state_topic: 'stat_t',
-    availability_topic: 'avty_t'
+    availability_topic: 'avty_t',
+    command_topic: 'cmd_t'
   };
 
   message = renameKeys(message, translation);
