@@ -1,5 +1,7 @@
-import { API, DynamicPlatformPlugin, Logger, PlatformAccessory, PlatformConfig, Service, Characteristic,
-  CharacteristicValue, CharacteristicSetCallback } from 'homebridge';
+import {
+  API, DynamicPlatformPlugin, Logger, PlatformAccessory, PlatformConfig, Service, Characteristic,
+  CharacteristicValue, CharacteristicSetCallback,
+} from 'homebridge';
 
 import { PLATFORM_NAME, PLUGIN_NAME } from './settings';
 // import { tasmotaAccessory } from './platformAccessory';
@@ -463,6 +465,16 @@ function normalizeMessage(message) {
     } else if (message.uniq_id.match(/_AirQuality$/)) {
       message.dev_cla = 'pm25';
     }
+  }
+
+  // Defaults for ESPHome devices https://www.home-assistant.io/integrations/binary_sensor.mqtt/#payload_off
+  // Issue #26
+
+  if (typeof message.pl_on === 'undefined') {
+    message.pl_on = 'ON';
+  }
+  if (typeof message.pl_off === 'undefined') {
+    message.pl_off = 'OFF';
   }
 
   return (message);
