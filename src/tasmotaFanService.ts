@@ -56,9 +56,13 @@ export class tasmotaFanService extends TasmotaService {
     this.accessory.context.timeout = this.platform.autoCleanup(this.accessory);
 
     try {
-      const value = this.parseValue(this.accessory.context.device[this.uniq_id].val_tpl, {
-        value_json: JSON.parse(message.toString()),
-      });
+      let value = message.toString();
+
+      if (this.accessory.context.device[this.uniq_id].val_tpl) {
+        value = this.parseValue(this.accessory.context.device[this.uniq_id].val_tpl, {
+          value_json: JSON.parse(message.toString()),
+        });
+      }
 
       if (this.service.getCharacteristic(this.platform.Characteristic.On).value !== (value ===
         this.accessory.context.device[this.uniq_id].pl_on ? true : false)) {

@@ -61,8 +61,15 @@ export class tasmotaSwitchService extends TasmotaService {
         value_json: JSON.parse(message.toString()),
       };
 
-      let value = (this.parseValue(this.accessory.context.device[this.uniq_id].val_tpl, interim) ===
-        this.accessory.context.device[this.uniq_id].pl_on ? true : false);
+      let value = message.toString();
+
+      if (this.accessory.context.device[this.uniq_id].val_tpl) {
+        value = this.parseValue(this.accessory.context.device[this.uniq_id].val_tpl, {
+          value_json: JSON.parse(message.toString()),
+        });
+      }
+
+      value = (value === this.accessory.context.device[this.uniq_id].pl_on ? true : false);
 
       if (typeof this.accessory.context.device[this.uniq_id].pl_on === 'boolean') {
         value = isTrue(this.parseValue(this.accessory.context.device[this.uniq_id].val_tpl, interim));
