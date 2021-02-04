@@ -116,7 +116,7 @@ export class tasmotaBinarySensorService extends TasmotaService {
           value_json: JSON.parse(message.toString()),
         });
       } else {
-        let value = message;
+        let value = message.toString();
       }
       // debug('value', value, typeof value);
       // debug('device_class', this.device_class);
