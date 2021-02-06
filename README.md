@@ -136,3 +136,7 @@ As a side effect the rule resets the `teleperiod` to 300 seconds similar to rest
 ## Discord Server
 
 A channel #tasmota has been created on the Homebridge Discord Server.
+
+## Credits
+
+* ESPHome support was added by [Zach White](https://github.com/skullydazed)
