@@ -109,13 +109,11 @@ export class tasmotaBinarySensorService extends TasmotaService {
 
       // debug('this.uniq_id', this.uniq_id);
       // debug('val_tpl', this.accessory.context.device[this.uniq_id].val_tpl);
-      // debug('message', JSON.parse(message.toString()));
+      // debug('message', message.toString());
       let value = message.toString();
 
       if (this.accessory.context.device[this.uniq_id].val_tpl) {
-        value = this.parseValue(this.accessory.context.device[this.uniq_id].val_tpl, {
-          value_json: JSON.parse(message.toString()),
-        });
+        value = this.parseValue(this.accessory.context.device[this.uniq_id].val_tpl, message.toString());
       }
       // debug('value', value, typeof value);
       // debug('device_class', this.device_class);
