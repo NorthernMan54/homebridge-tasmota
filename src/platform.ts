@@ -119,13 +119,14 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
   isTopicAllowed(topic: string, filter: string, filterAllow: Array<string>, filterDeny: Array<string>): boolean {
     // debug('isTopicFiltered', topic)
     let defaultAllow = true;
+    let allowThis = false;
 
     if (filter) {
       defaultAllow = false;
 
       if (filter && topic.match(filter)) {
         debug('isTopicFiltered matched filter', filter);
-        return true;
+        allowThis = true;
       }
     }
 
@@ -135,7 +136,7 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
       for (const filter of filterAllow) {
         if (topic.match(filter)) {
           debug('isTopicFiltered matched filterAllow entry', filter);
-          return true;
+          allowThis = true;
         }
       }
     }
@@ -149,8 +150,7 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
       }
     }
 
-    // debug('isTopicFiltered matched none');
-    return defaultAllow;
+    return allowThis || defaultAllow;
   }
 
   /**
