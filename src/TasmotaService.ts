@@ -91,6 +91,19 @@ export class TasmotaService {
     }
   }
 
+  findDeviceClass() {
+    switch (this.accessory.context.device[this.uniq_id].unit_of_meas) {
+      case '%':
+        return 'humidity';
+      case '°F':
+      case '°C':
+        return 'temperature';
+      case 'hPa':
+        return 'pressure';
+    }
+    return '';
+  }
+
   deviceClassToHKCharacteristic(device_class: string) {
     switch (device_class) {
       case '_energy_current': // Amps
@@ -117,9 +130,7 @@ export class TasmotaService {
     this.accessory.context.timeout = this.platform.autoCleanup(this.accessory);
 
     try {
-      let value = this.parseValue(this.accessory.context.device[this.uniq_id].val_tpl, {
-        value_json: JSON.parse(message.toString()),
-      });
+      let value = this.parseValue(this.accessory.context.device[this.uniq_id].val_tpl, message.toString());
 
       // Sensor value tweaks or adjustments needed for homekit
 
@@ -184,15 +195,19 @@ export class TasmotaService {
 
   parseValue(valueTemplate, value) {
     try {
-      // debug('nunjucksEnvironment', this, this.nunjucksEnvironment);
-      var template = nunjucks.compile(valueTemplate, this.nunjucksEnvironment);
+      if (valueTemplate) {
+        // debug('nunjucksEnvironment', this, this.nunjucksEnvironment);
+        var template = nunjucks.compile(valueTemplate, this.nunjucksEnvironment);
+        const result = template.render({value_json: JSON.parse(value), });
 
-      const result = template.render(value);
-      if (result) {
-        return result;
+        if (result) {
+          return result;
+        } else {
+          this.platform.log.error('ERROR: Template %s missing data', this.service.displayName, valueTemplate, value);
+          return (new Error('Missing sensor value'));
+        }
       } else {
-        this.platform.log.error('ERROR: Template %s missing data', this.service.displayName, valueTemplate, value);
-        return (new Error('Missing sensor value'));
+        return value;
       }
     }
     catch (err) {

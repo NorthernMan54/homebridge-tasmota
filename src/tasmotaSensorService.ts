@@ -22,6 +22,11 @@ export class tasmotaSensorService extends TasmotaService {
     super(platform, accessory, uniq_id);
 
     let hostname;
+
+    if (! accessory.context.device[this.uniq_id].dev_cla) {
+       accessory.context.device[this.uniq_id].dev_cla = this.findDeviceClass();
+    }
+
     switch (accessory.context.device[this.uniq_id].dev_cla) {
       case 'temperature':
         this.platform.log.debug('Creating %s sensor %s', accessory.context.device[this.uniq_id].dev_cla, accessory.context.device[this.uniq_id].name);
@@ -159,9 +164,7 @@ export class tasmotaSensorService extends TasmotaService {
     this.accessory.context.timeout = this.platform.autoCleanup(this.accessory);
 
     try {
-      let value: number = parseFloat(this.parseValue(this.accessory.context.device[this.uniq_id].val_tpl, {
-        value_json: JSON.parse(message.toString()),
-      }));
+      let value = this.parseValue(this.accessory.context.device[this.uniq_id].val_tpl, message.toString());
 
       // Sensor value tweaks or adjustments needed for homekit
 
@@ -227,6 +230,7 @@ export class tasmotaSensorService extends TasmotaService {
       }
     } catch (err) {
       this.platform.log.error('ERROR: Message Parse Error', topic, message.toString());
+      this.platform.log.debug(err);
     }
   }
 

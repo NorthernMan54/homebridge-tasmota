@@ -167,9 +167,7 @@ export class tasmotaLightService extends TasmotaService {
     this.accessory.context.timeout = this.platform.autoCleanup(this.accessory);
 
     try {
-      const value = this.parseValue(this.accessory.context.device[this.uniq_id].val_tpl, {
-        value_json: JSON.parse(message.toString()),
-      });
+      let value = this.parseValue(this.accessory.context.device[this.uniq_id].val_tpl, message.toString());
 
       if (this.service.getCharacteristic(this.platform.Characteristic.On).value !== (value === this.accessory.context.device[this.uniq_id].pl_on ? true : false)) {
 
@@ -187,9 +185,7 @@ export class tasmotaLightService extends TasmotaService {
       if (this.accessory.context.device[this.uniq_id].bri_val_tpl) {
 
         // Use debug logging for no change updates, and info when a change occurred
-        const bri_val = this.parseValue(this.accessory.context.device[this.uniq_id].bri_val_tpl, {
-          value_json: JSON.parse(message.toString()),
-        });
+        const bri_val = this.parseValue(this.accessory.context.device[this.uniq_id].bri_val_tpl, message.toString());
 
         if (this.service.getCharacteristic(this.platform.Characteristic.Brightness).value != bri_val) {
           this.platform.log.info('Updating \'%s\' Brightness to %s', this.accessory.displayName, bri_val);
@@ -204,9 +200,9 @@ export class tasmotaLightService extends TasmotaService {
 
       if (this.accessory.context.device[this.uniq_id].rgb_stat_t) {
 
-        debug('RGB->HSL RGB(%s,%s,%s) HSB(%s) From Tasmota HSB(%s)', this.parseValue(this.accessory.context.device[this.uniq_id].rgb_val_tpl, { value_json: JSON.parse(message.toString()) }).split(',')[0], this.parseValue(this.accessory.context.device[this.uniq_id].rgb_val_tpl, { value_json: JSON.parse(message.toString()) }).split(',')[1], this.parseValue(this.accessory.context.device[this.uniq_id].rgb_val_tpl, { value_json: JSON.parse(message.toString()) }).split(',')[2], RGBtoScaledHSV(this.parseValue(this.accessory.context.device[this.uniq_id].rgb_val_tpl, { value_json: JSON.parse(message.toString()) }).split(',')[0], this.parseValue(this.accessory.context.device[this.uniq_id].rgb_val_tpl, { value_json: JSON.parse(message.toString()) }).split(',')[1], this.parseValue(this.accessory.context.device[this.uniq_id].rgb_val_tpl, { value_json: JSON.parse(message.toString()) }).split(',')[2]), JSON.parse(message.toString()).HSBColor);
+        debug('RGB->HSL RGB(%s,%s,%s) HSB(%s) From Tasmota HSB(%s)', this.parseValue(this.accessory.context.device[this.uniq_id].rgb_val_tpl, message.toString()).split(',')[0], this.parseValue(this.accessory.context.device[this.uniq_id].rgb_val_tpl, message.toString()).split(',')[1], this.parseValue(this.accessory.context.device[this.uniq_id].rgb_val_tpl, message.toString()).split(',')[2], RGBtoScaledHSV(this.parseValue(this.accessory.context.device[this.uniq_id].rgb_val_tpl, message.toString()).split(',')[0], this.parseValue(this.accessory.context.device[this.uniq_id].rgb_val_tpl, message.toString()).split(',')[1], this.parseValue(this.accessory.context.device[this.uniq_id].rgb_val_tpl, message.toString()).split(',')[2]), JSON.parse(message.toString()).HSBColor);
 
-        const hsb = RGBtoScaledHSV(this.parseValue(this.accessory.context.device[this.uniq_id].rgb_val_tpl, { value_json: JSON.parse(message.toString()) }).split(',')[0], this.parseValue(this.accessory.context.device[this.uniq_id].rgb_val_tpl, { value_json: JSON.parse(message.toString()) }).split(',')[1], this.parseValue(this.accessory.context.device[this.uniq_id].rgb_val_tpl, { value_json: JSON.parse(message.toString()) }).split(',')[2]);
+        const hsb = RGBtoScaledHSV(this.parseValue(this.accessory.context.device[this.uniq_id].rgb_val_tpl, message.toString()).split(',')[0], this.parseValue(this.accessory.context.device[this.uniq_id].rgb_val_tpl, message.toString()).split(',')[1], this.parseValue(this.accessory.context.device[this.uniq_id].rgb_val_tpl, message.toString()).split(',')[2]);
 
 
         // Use debug logging for no change updates, and info when a change occurred
@@ -234,9 +230,7 @@ export class tasmotaLightService extends TasmotaService {
 
         // Use debug logging for no change updates, and info when a change occurred
 
-        const clr_temp = this.parseValue(this.accessory.context.device[this.uniq_id].clr_temp_val_tpl, {
-          value_json: JSON.parse(message.toString()),
-        });
+        const clr_temp = this.parseValue(this.accessory.context.device[this.uniq_id].clr_temp_val_tpl, message.toString());
 
         if (this.service.getCharacteristic(this.platform.Characteristic.ColorTemperature).value != clr_temp) {
 
@@ -254,9 +248,7 @@ export class tasmotaLightService extends TasmotaService {
 
         this.TVservice.getCharacteristic(this.platform.Characteristic.Active).updateValue((value === this.accessory.context.device[this.uniq_id].pl_on ? 1 : 0));
 
-        const effects = this.parseValue(this.accessory.context.device[this.uniq_id].fx_val_tpl, {
-          value_json: JSON.parse(message.toString()),
-        });
+        const effects = this.parseValue(this.accessory.context.device[this.uniq_id].fx_val_tpl, message.toString());
 
         if (this.TVservice.getCharacteristic(this.platform.Characteristic.ActiveIdentifier).value != effects) {
 
