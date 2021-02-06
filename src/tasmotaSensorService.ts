@@ -23,8 +23,8 @@ export class tasmotaSensorService extends TasmotaService {
 
     let hostname;
 
-    if (! accessory.context.device[this.uniq_id].dev_cla) {
-       accessory.context.device[this.uniq_id].dev_cla = this.findDeviceClass();
+    if (!accessory.context.device[this.uniq_id].dev_cla && this.findDeviceClass(this.accessory.context.device[this.uniq_id].unit_of_meas)) {
+      accessory.context.device[this.uniq_id].dev_cla = this.findDeviceClass(this.accessory.context.device[this.uniq_id].unit_of_meas);
     }
 
     switch (accessory.context.device[this.uniq_id].dev_cla) {
