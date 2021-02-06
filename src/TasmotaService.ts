@@ -91,17 +91,8 @@ export class TasmotaService {
     }
   }
 
-  findDeviceClass(unit_of_meas) {
-    switch (unit_of_meas) {
-      case '%':
-        return 'humidity';
-      case '°F':
-      case '°C':
-        return 'temperature';
-      case 'hPa':
-        return 'pressure';
-    }
-    return undefined;
+  findDeviceClass(alternate_value) {
+    return '';
   }
 
   deviceClassToHKCharacteristic(device_class: string) {
