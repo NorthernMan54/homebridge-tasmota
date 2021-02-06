@@ -58,7 +58,7 @@ export class TasmotaService {
     });
 
     if (!accessory.context.device[this.uniq_id].dev_cla && this.findDeviceClass() {
-      accessory.context.device[this.uniq_id].dev_cla = this.findDeviceClass(;
+      accessory.context.device[this.uniq_id].dev_cla = this.findDeviceClass();
     }
   }
 
