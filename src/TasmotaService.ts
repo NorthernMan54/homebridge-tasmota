@@ -91,7 +91,7 @@ export class TasmotaService {
     }
   }
 
-  findDeviceClass(alternate_value): string | undefined {
+  findDeviceClass(): string | undefined {
     return undefined;
   }
 

@@ -158,10 +158,14 @@ export class tasmotaSensorService extends TasmotaService {
 
   // Override base findDeviceClass
 
-  findDeviceClass(unit_of_meas) {
-    switch (unit_of_meas) {
+  findDeviceClass() {
+    switch (this.accessory.context.device[this.uniq_id].unit_of_meas) {
       case '%':
-        return 'humidity';
+        switch (this.accessory.context.device[this.uniq_id].ic) {
+          case 'mdi:gauge':
+            return 'humidity';
+        }
+        return undefined;
       case '°F':
       case '°C':
         return 'temperature';
