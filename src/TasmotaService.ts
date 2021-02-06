@@ -91,8 +91,8 @@ export class TasmotaService {
     }
   }
 
-  findDeviceClass(alternate_value) {
-    return '';
+  findDeviceClass(alternate_value): string | undefined {
+    return undefined;
   }
 
   deviceClassToHKCharacteristic(device_class: string) {
