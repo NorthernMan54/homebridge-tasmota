@@ -61,12 +61,13 @@ export class Mqtt extends EventEmitter {
               debug("Error:", error);
               debug("Triggerd by:", message.toString());
             }
-          } else {
-            // this.emit('Remove', topic);
+          } else if (topic.endsWith("config")) {
+            this.emit('Remove', topic);
             // debug('Remove', topic);
           }
           break;
         default:
+          // debug('emit', topic, message.toString());
           this.emit(topic, topic, message);
           break;
       }
@@ -74,10 +75,12 @@ export class Mqtt extends EventEmitter {
   }
 
   availabilitySubscribe(topic) {
+    // debug('availabilitySubscribe', topic);
     connection.subscribe(topic);
   }
 
   statusSubscribe(topic) {
+    // debug('statusSubscribe', topic);
     connection.subscribe(topic);
   }
 

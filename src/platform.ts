@@ -446,7 +446,8 @@ function normalizeMessage(message) {
     unit_of_measurement: 'unit_of_meas',
     state_topic: 'stat_t',
     availability_topic: 'avty_t',
-    command_topic: 'cmd_t'
+    command_topic: 'cmd_t',
+    icon: 'ic'
   };
 
   message = renameKeys(message, translation);

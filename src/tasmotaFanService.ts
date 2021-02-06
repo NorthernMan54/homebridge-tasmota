@@ -80,7 +80,7 @@ export class tasmotaFanService extends TasmotaService {
       if (this.accessory.context.device[this.uniq_id].bri_val_tpl) {
 
         // Use debug logging for no change updates, and info when a change occurred
-        let bri_val = this.parseValue(this.accessory.context.device[this.uniq_id].bri_val_tpl, message.toString());
+        const bri_val = this.parseValue(this.accessory.context.device[this.uniq_id].bri_val_tpl, message.toString());
 
         if (this.service.getCharacteristic(this.platform.Characteristic.RotationSpeed).value != bri_val) {
           this.platform.log.info('Updating \'%s\' RotationSpeed to %s', this.accessory.displayName, bri_val);

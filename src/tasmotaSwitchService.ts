@@ -1,4 +1,4 @@
-import { Service, PlatformAccessory, CharacteristicValue, CharacteristicSetCallback, Characteristic } from 'homebridge';
+import { PlatformAccessory, CharacteristicValue, CharacteristicSetCallback } from 'homebridge';
 import { TasmotaService, isTrue } from './TasmotaService';
 import { tasmotaPlatform } from './platform';
 

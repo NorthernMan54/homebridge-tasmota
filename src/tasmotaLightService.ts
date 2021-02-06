@@ -1,8 +1,8 @@
-import { Service, PlatformAccessory, CharacteristicValue, CharacteristicSetCallback, Characteristic } from 'homebridge';
+import { PlatformAccessory, CharacteristicValue, CharacteristicSetCallback } from 'homebridge';
 import { TasmotaService } from './TasmotaService';
 import { tasmotaPlatform } from './platform';
 import os from 'os';
-import { PLATFORM_NAME, PLUGIN_NAME } from './settings';
+import { PLUGIN_NAME } from './settings';
 
 import createDebug from 'debug';
 const debug = createDebug('Tasmota:light');
@@ -25,7 +25,8 @@ export class tasmotaLightService extends TasmotaService {
 
     super(platform, accessory, uniq_id);
 
-    this.service = this.accessory.getService(this.uuid) || this.accessory.addService(this.platform.Service.Lightbulb, accessory.context.device[this.uniq_id].name, this.uuid);
+    this.service = this.accessory.getService(this.uuid) || this.accessory.addService(this.platform.Service.Lightbulb,
+      accessory.context.device[this.uniq_id].name, this.uuid);
 
     if (!this.service.displayName) {
       this.service.setCharacteristic(this.platform.Characteristic.Name, accessory.context.device[this.uniq_id].name);
@@ -41,7 +42,8 @@ export class tasmotaLightService extends TasmotaService {
       accessory.context.mqttHost.on(accessory.context.device[this.uniq_id].stat_t, this.statusUpdate.bind(this));
       accessory.context.mqttHost.statusSubscribe(accessory.context.device[this.uniq_id].stat_t);
 
-      this.availabilitySubscribe = { event: accessory.context.device[this.uniq_id].avty_t, callback: this.availabilityUpdate.bind(this) };
+      this.availabilitySubscribe = { event: accessory.context.device[this.uniq_id].avty_t, callback:
+        this.availabilityUpdate.bind(this) };
       accessory.context.mqttHost.on(accessory.context.device[this.uniq_id].avty_t, this.availabilityUpdate.bind(this));
       accessory.context.mqttHost.availabilitySubscribe(accessory.context.device[this.uniq_id].avty_t);
     }
@@ -49,7 +51,8 @@ export class tasmotaLightService extends TasmotaService {
     // Does the lightbulb include a brightness characteristic
 
     if (accessory.context.device[this.uniq_id].bri_cmd_t) {
-      (this.service.getCharacteristic(this.platform.Characteristic.Brightness) || this.service.addCharacteristic(this.platform.Characteristic.Brightness))
+      (this.service.getCharacteristic(this.platform.Characteristic.Brightness) ||
+        this.service.addCharacteristic(this.platform.Characteristic.Brightness))
         .on('set', this.setBrightness.bind(this));
     }
 
@@ -59,16 +62,19 @@ export class tasmotaLightService extends TasmotaService {
 
       this.update = new ChangeHSB(accessory, this);
 
-      (this.service.getCharacteristic(this.platform.Characteristic.Hue) || this.service.addCharacteristic(this.platform.Characteristic.Hue))
+      (this.service.getCharacteristic(this.platform.Characteristic.Hue) ||
+        this.service.addCharacteristic(this.platform.Characteristic.Hue))
         .on('set', this.setHue.bind(this));
-      (this.service.getCharacteristic(this.platform.Characteristic.Saturation) || this.service.addCharacteristic(this.platform.Characteristic.Saturation))
+      (this.service.getCharacteristic(this.platform.Characteristic.Saturation) ||
+        this.service.addCharacteristic(this.platform.Characteristic.Saturation))
         .on('set', this.setSaturation.bind(this));
     }
 
     // Does the lightbulb include a colour temperature characteristic
 
     if (accessory.context.device[this.uniq_id].clr_temp_cmd_t) {
-      (this.service.getCharacteristic(this.platform.Characteristic.ColorTemperature) || this.service.addCharacteristic(this.platform.Characteristic.ColorTemperature))
+      (this.service.getCharacteristic(this.platform.Characteristic.ColorTemperature) ||
+        this.service.addCharacteristic(this.platform.Characteristic.ColorTemperature))
         .on('set', this.setColorTemperature.bind(this));
     }
 
@@ -79,16 +85,22 @@ export class tasmotaLightService extends TasmotaService {
       const uuid = this.platform.api.hap.uuid.generate(this.uniq_id + os.hostname());
 
       // debug('api', this.platform.api);
-      const effectsAccessory = new this.platform.api.platformAccessory(this.accessory.displayName, uuid, this.platform.api.hap.Categories.AUDIO_RECEIVER);
+      const effectsAccessory = new this.platform.api.platformAccessory(this.accessory.displayName, uuid,
+        this.platform.api.hap.Categories.AUDIO_RECEIVER);
 
       effectsAccessory.getService(this.platform.Service.AccessoryInformation)!
         .setCharacteristic(this.platform.Characteristic.Name, this.accessory.displayName)
-        .setCharacteristic(this.platform.Characteristic.Manufacturer, (accessory.context.device[this.uniq_id].dev.mf ?? 'undefined').replace(/[^-_ a-zA-Z0-9]/gi, ''))
-        .setCharacteristic(this.platform.Characteristic.Model, (accessory.context.device[this.uniq_id].dev.mdl ?? 'undefined').replace(/[^-_ a-zA-Z0-9]/gi, ''))
-        .setCharacteristic(this.platform.Characteristic.FirmwareRevision, (accessory.context.device[this.uniq_id].dev.sw ?? 'undefined').replace(/[^-_. a-zA-Z0-9]/gi, ''))
-        .setCharacteristic(this.platform.Characteristic.SerialNumber, accessory.context.device[this.uniq_id].dev.ids[0] + '-' + os.hostname()); // A unique fakegato ID
+        .setCharacteristic(this.platform.Characteristic.Manufacturer, (accessory.context.device[this.uniq_id].dev.mf ??
+          'undefined').replace(/[^-_ a-zA-Z0-9]/gi, ''))
+        .setCharacteristic(this.platform.Characteristic.Model, (accessory.context.device[this.uniq_id].dev.mdl ??
+          'undefined').replace(/[^-_ a-zA-Z0-9]/gi, ''))
+        .setCharacteristic(this.platform.Characteristic.FirmwareRevision, (accessory.context.device[this.uniq_id].dev.sw ??
+          'undefined').replace(/[^-_. a-zA-Z0-9]/gi, ''))
+        .setCharacteristic(this.platform.Characteristic.SerialNumber, accessory.context.device[this.uniq_id].dev.ids[0] +
+          '-' + os.hostname()); // A unique fakegato ID
 
-      this.TVservice = effectsAccessory.getService(this.platform.Service.Television) || effectsAccessory.addService(this.platform.Service.Television);
+      this.TVservice = effectsAccessory.getService(this.platform.Service.Television) ||
+        effectsAccessory.addService(this.platform.Service.Television);
 
       if (!this.TVservice.displayName) {
         this.TVservice.setCharacteristic(this.platform.Characteristic.Name, accessory.context.device[this.uniq_id].name);
@@ -121,7 +133,8 @@ export class tasmotaLightService extends TasmotaService {
 
       for (const element of schemes) {
         debug('element', element);
-        element.TVinput = effectsAccessory.getService(element.name) || effectsAccessory.addService(this.platform.Service.InputSource, element.name, element.name);
+        element.TVinput = effectsAccessory.getService(element.name) ||
+          effectsAccessory.addService(this.platform.Service.InputSource, element.name, element.name);
 
         element.TVinput.getCharacteristic(this.platform.Characteristic.IsConfigured)
           .updateValue(1);
@@ -167,9 +180,10 @@ export class tasmotaLightService extends TasmotaService {
     this.accessory.context.timeout = this.platform.autoCleanup(this.accessory);
 
     try {
-      let value = this.parseValue(this.accessory.context.device[this.uniq_id].val_tpl, message.toString());
+      const value = this.parseValue(this.accessory.context.device[this.uniq_id].val_tpl, message.toString());
 
-      if (this.service.getCharacteristic(this.platform.Characteristic.On).value !== (value === this.accessory.context.device[this.uniq_id].pl_on ? true : false)) {
+      if (this.service.getCharacteristic(this.platform.Characteristic.On).value !== (value ===
+        this.accessory.context.device[this.uniq_id].pl_on ? true : false)) {
 
         // Use debug logging for no change updates, and info when a change occurred
 
@@ -178,7 +192,8 @@ export class tasmotaLightService extends TasmotaService {
       } else {
         this.platform.log.debug('Updating \'%s\' to %s', this.accessory.displayName, value);
       }
-      this.service.getCharacteristic(this.platform.Characteristic.On).updateValue((value === this.accessory.context.device[this.uniq_id].pl_on ? true : false));
+      this.service.getCharacteristic(this.platform.Characteristic.On).updateValue((value ===
+        this.accessory.context.device[this.uniq_id].pl_on ? true : false));
 
       // Update brightness if supported
 
@@ -200,9 +215,19 @@ export class tasmotaLightService extends TasmotaService {
 
       if (this.accessory.context.device[this.uniq_id].rgb_stat_t) {
 
-        debug('RGB->HSL RGB(%s,%s,%s) HSB(%s) From Tasmota HSB(%s)', this.parseValue(this.accessory.context.device[this.uniq_id].rgb_val_tpl, message.toString()).split(',')[0], this.parseValue(this.accessory.context.device[this.uniq_id].rgb_val_tpl, message.toString()).split(',')[1], this.parseValue(this.accessory.context.device[this.uniq_id].rgb_val_tpl, message.toString()).split(',')[2], RGBtoScaledHSV(this.parseValue(this.accessory.context.device[this.uniq_id].rgb_val_tpl, message.toString()).split(',')[0], this.parseValue(this.accessory.context.device[this.uniq_id].rgb_val_tpl, message.toString()).split(',')[1], this.parseValue(this.accessory.context.device[this.uniq_id].rgb_val_tpl, message.toString()).split(',')[2]), JSON.parse(message.toString()).HSBColor);
+        debug('RGB->HSL RGB(%s,%s,%s) HSB(%s) From Tasmota HSB(%s)',
+          this.parseValue(this.accessory.context.device[this.uniq_id].rgb_val_tpl, message.toString()).split(',')[0],
+          this.parseValue(this.accessory.context.device[this.uniq_id].rgb_val_tpl, message.toString()).split(',')[1],
+          this.parseValue(this.accessory.context.device[this.uniq_id].rgb_val_tpl, message.toString()).split(',')[2],
+          RGBtoScaledHSV(this.parseValue(this.accessory.context.device[this.uniq_id].rgb_val_tpl,
+            message.toString()).split(',')[0], this.parseValue(this.accessory.context.device[this.uniq_id].rgb_val_tpl,
+            message.toString()).split(',')[1], this.parseValue(this.accessory.context.device[this.uniq_id].rgb_val_tpl,
+            message.toString()).split(',')[2]), JSON.parse(message.toString()).HSBColor);
 
-        const hsb = RGBtoScaledHSV(this.parseValue(this.accessory.context.device[this.uniq_id].rgb_val_tpl, message.toString()).split(',')[0], this.parseValue(this.accessory.context.device[this.uniq_id].rgb_val_tpl, message.toString()).split(',')[1], this.parseValue(this.accessory.context.device[this.uniq_id].rgb_val_tpl, message.toString()).split(',')[2]);
+        const hsb = RGBtoScaledHSV(this.parseValue(this.accessory.context.device[this.uniq_id].rgb_val_tpl,
+          message.toString()).split(',')[0], this.parseValue(this.accessory.context.device[this.uniq_id].rgb_val_tpl,
+          message.toString()).split(',')[1], this.parseValue(this.accessory.context.device[this.uniq_id].rgb_val_tpl,
+          message.toString()).split(',')[2]);
 
 
         // Use debug logging for no change updates, and info when a change occurred
@@ -246,7 +271,8 @@ export class tasmotaLightService extends TasmotaService {
 
       if (this.platform.config.effects && this.accessory.context.device[this.uniq_id].fx_cmd_t) {
 
-        this.TVservice.getCharacteristic(this.platform.Characteristic.Active).updateValue((value === this.accessory.context.device[this.uniq_id].pl_on ? 1 : 0));
+        this.TVservice.getCharacteristic(this.platform.Characteristic.Active).updateValue((value ===
+          this.accessory.context.device[this.uniq_id].pl_on ? 1 : 0));
 
         const effects = this.parseValue(this.accessory.context.device[this.uniq_id].fx_val_tpl, message.toString());
 
@@ -270,7 +296,8 @@ export class tasmotaLightService extends TasmotaService {
   setOn(value: CharacteristicValue, callback: CharacteristicSetCallback) {
     this.platform.log.info('%s Set Characteristic On ->', this.accessory.displayName, value);
 
-    this.accessory.context.mqttHost.sendMessage(this.accessory.context.device[this.uniq_id].cmd_t, (value ? this.accessory.context.device[this.uniq_id].pl_on : this.accessory.context.device[this.uniq_id].pl_off));
+    this.accessory.context.mqttHost.sendMessage(this.accessory.context.device[this.uniq_id].cmd_t, (value ?
+      this.accessory.context.device[this.uniq_id].pl_on : this.accessory.context.device[this.uniq_id].pl_off));
     callback(null);
   }
 
@@ -355,9 +382,12 @@ class ChangeHSB {
       if (!this.timeout) {
         this.timeout = setTimeout(() => {
           debug('put start %s', this.desiredState);
-          debug('HSL->RGB', ScaledHSVtoRGB(this.desiredState ?.newHue ?? this.desiredState ?.oldHue, this.desiredState ?.newSaturation ?? this.desiredState ?.oldSaturation, 50).toString());
+          debug('HSL->RGB', ScaledHSVtoRGB(this.desiredState ?.newHue ?? this.desiredState ?.oldHue,
+            this.desiredState ?.newSaturation ?? this.desiredState ?.oldSaturation, 50).toString());
 
-          this.accessory.context.mqttHost.sendMessage(this.accessory.context.device[this.uniq_id].rgb_cmd_t, ScaledHSVtoRGB(this.desiredState ?.newHue ?? this.desiredState ?.oldHue, this.desiredState ?.newSaturation ?? this.desiredState ?.oldSaturation, 50).toString());
+          this.accessory.context.mqttHost.sendMessage(this.accessory.context.device[this.uniq_id].rgb_cmd_t,
+            ScaledHSVtoRGB(this.desiredState ?.newHue ?? this.desiredState ?.oldHue,
+              this.desiredState ?.newSaturation ?? this.desiredState ?.oldSaturation, 50).toString());
 
           for (const d of this.deferrals) {
             d.resolve();

@@ -91,19 +91,6 @@ export class TasmotaService {
     }
   }
 
-  findDeviceClass(unit_of_meas) {
-    switch (unit_of_meas) {
-      case '%':
-        return 'humidity';
-      case '°F':
-      case '°C':
-        return 'temperature';
-      case 'hPa':
-        return 'pressure';
-    }
-    return undefined;
-  }
-
   deviceClassToHKCharacteristic(device_class: string) {
     switch (device_class) {
       case '_energy_current': // Amps
@@ -198,7 +185,7 @@ export class TasmotaService {
       if (valueTemplate) {
         // debug('nunjucksEnvironment', this, this.nunjucksEnvironment);
         var template = nunjucks.compile(valueTemplate, this.nunjucksEnvironment);
-        const result = template.render({value_json: JSON.parse(value), });
+        const result = template.render({ value_json: JSON.parse(value), });
 
         if (result) {
           return result;
@@ -222,19 +209,19 @@ function float(val) {
   return (parseFloat(val));
 }
 
-export function isTrue(value){
-    if (typeof(value) === 'string'){
-        value = value.trim().toLowerCase();
-    }
-    switch(value){
-        case true:
-        case "true":
-        case 1:
-        case "1":
-        case "on":
-        case "yes":
-            return true;
-        default:
-            return false;
-    }
+export function isTrue(value: string | boolean | number): boolean {
+  if (typeof (value) === 'string') {
+    value = value.trim().toLowerCase();
+  }
+  switch (value) {
+    case true:
+    case "true":
+    case 1:
+    case "1":
+    case "on":
+    case "yes":
+      return true;
+    default:
+      return false;
+  }
 }
