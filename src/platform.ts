@@ -124,7 +124,7 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
     if (filter) {
       defaultAllow = false;
 
-      if (filter && topic.match(filter)) {
+      if (topic.match(filter)) {
         debug('isTopicFiltered matched filter', filter);
         allowThis = true;
       }
