@@ -57,6 +57,9 @@ export class TasmotaService {
       autoescape: true,
     });
 
+    if (!accessory.context.device[this.uniq_id].dev_cla && this.findDeviceClass() {
+      accessory.context.device[this.uniq_id].dev_cla = this.findDeviceClass(;
+    }
   }
 
   enableFakegato() {
