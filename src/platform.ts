@@ -114,6 +114,45 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
     this.accessories.push(accessory);
   }
 
+  /* Check the topic against the configuration's filterList.
+   */
+  isTopicAllowed(topic: string, filter: string, filterAllow: Array<string>, filterDeny: Array<string>): boolean {
+    // debug('isTopicFiltered', topic)
+    let defaultAllow = true;
+    let allowThis = false;
+
+    if (filter) {
+      defaultAllow = false;
+
+      if (topic.match(filter)) {
+        debug('isTopicFiltered matched filter', filter);
+        allowThis = true;
+      }
+    }
+
+    if (filterAllow) {
+      defaultAllow = false;
+
+      for (const filter of filterAllow) {
+        if (topic.match(filter)) {
+          debug('isTopicFiltered matched filterAllow entry', filter);
+          allowThis = true;
+        }
+      }
+    }
+
+    if (filterDeny) {
+      for (const filter of filterDeny) {
+        if (topic.match(filter)) {
+          debug('isTopicFiltered matched filterDeny entry', filter);
+          return false;
+        }
+      }
+    }
+
+    return allowThis || defaultAllow;
+  }
+
   /**
    * This is an example method showing how to register discovered accessories.
    * Accessories must only be registered once, previously created accessories
@@ -162,8 +201,10 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
       // something globally unique, but constant, for example, the device serial
       // number or MAC address
 
+      // debug('topic', topic);
       // debug('filter', this.config.filter);
-      if (topic.match(this.config.filter)) {
+      // debug('filterList', this.config.filterList);
+      if (this.isTopicAllowed(topic, this.config.filter, this.config.filterAllow, this.config.filterDeny)) {
 
         let message = normalizeMessage(config);
         // debug('normalizeMessage ->', message);
