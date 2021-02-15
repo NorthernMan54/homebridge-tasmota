@@ -1,7 +1,7 @@
 {
   "displayName": "Homebridge Tasmota",
   "name": "homebridge-tasmota",
-  "version": "0.0.101",
+  "version": "0.0.103",
   "description": "Homebridge plugin for Tasmota devices leveraging home assistant auto discovery.",
   "license": "Apache-2.0",
   "repository": {
@@ -50,7 +50,7 @@
     "@typescript-eslint/eslint-plugin": "^3.9.0",
     "@typescript-eslint/parser": "^3.9.0",
     "eslint": "^7.7.0",
-    "homebridge": "^1.3.0-beta.47",
+    "homebridge": "^1.3.0-beta.57",
     "nodemon": "^2.0.4",
     "rimraf": "^3.0.2",
     "ts-node": "^9.1.1",
