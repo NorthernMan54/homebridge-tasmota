@@ -21,7 +21,8 @@ export class tasmotaFanService extends TasmotaService {
 
     super(platform, accessory, uniq_id);
 
-    this.service = this.accessory.getService(this.uuid) || this.accessory.addService(this.platform.Service.Fan, accessory.context.device[this.uniq_id].name, this.uuid);
+    this.service = this.accessory.getService(this.uuid) || this.accessory.addService(this.platform.Service.Fan,
+      accessory.context.device[this.uniq_id].name, this.uuid);
 
     if (!this.service.displayName) {
       this.service.setCharacteristic(this.platform.Characteristic.Name, accessory.context.device[this.uniq_id].name);
@@ -36,7 +37,8 @@ export class tasmotaFanService extends TasmotaService {
     // Does the Fan include a RotationSpeed characteristic
 
     if (accessory.context.device[this.uniq_id].bri_cmd_t) {
-      (this.service.getCharacteristic(this.platform.Characteristic.RotationSpeed) || this.service.addCharacteristic(this.platform.Characteristic.RotationSpeed))
+      (this.service.getCharacteristic(this.platform.Characteristic.RotationSpeed) ||
+        this.service.addCharacteristic(this.platform.Characteristic.RotationSpeed))
         .on('set', this.setRotationSpeed.bind(this));
     }
 
@@ -54,11 +56,14 @@ export class tasmotaFanService extends TasmotaService {
     this.accessory.context.timeout = this.platform.autoCleanup(this.accessory);
 
     try {
-      const value = this.parseValue(this.accessory.context.device[this.uniq_id].val_tpl, {
-        value_json: JSON.parse(message.toString()),
-      });
+      let value = message.toString();
 
-      if (this.service.getCharacteristic(this.platform.Characteristic.On).value !== (value === this.accessory.context.device[this.uniq_id].pl_on ? true : false)) {
+      if (this.accessory.context.device[this.uniq_id].val_tpl) {
+        value = this.parseValue(this.accessory.context.device[this.uniq_id].val_tpl, message.toString());
+      }
+
+      if (this.service.getCharacteristic(this.platform.Characteristic.On).value !== (value ===
+        this.accessory.context.device[this.uniq_id].pl_on ? true : false)) {
 
         // Use debug logging for no change updates, and info when a change occurred
 
@@ -67,16 +72,15 @@ export class tasmotaFanService extends TasmotaService {
       } else {
         this.platform.log.debug('Updating \'%s\' to %s', this.accessory.displayName, value);
       }
-      this.service.getCharacteristic(this.platform.Characteristic.On).updateValue((value === this.accessory.context.device[this.uniq_id].pl_on ? true : false));
+      this.service.getCharacteristic(this.platform.Characteristic.On).updateValue((value ===
+        this.accessory.context.device[this.uniq_id].pl_on ? true : false));
 
       // Update RotationSpeed if supported
 
       if (this.accessory.context.device[this.uniq_id].bri_val_tpl) {
 
         // Use debug logging for no change updates, and info when a change occurred
-        const bri_val = this.parseValue(this.accessory.context.device[this.uniq_id].val_tpl, {
-          value_json: JSON.parse(message.toString()),
-        });
+        const bri_val = this.parseValue(this.accessory.context.device[this.uniq_id].bri_val_tpl, message.toString());
 
         if (this.service.getCharacteristic(this.platform.Characteristic.RotationSpeed).value != bri_val) {
           this.platform.log.info('Updating \'%s\' RotationSpeed to %s', this.accessory.displayName, bri_val);
@@ -94,7 +98,8 @@ export class tasmotaFanService extends TasmotaService {
   setOn(value: CharacteristicValue, callback: CharacteristicSetCallback) {
     this.platform.log.info('%s Set Characteristic On ->', this.accessory.displayName, value);
 
-    this.accessory.context.mqttHost.sendMessage(this.accessory.context.device[this.uniq_id].cmd_t, (value ? this.accessory.context.device[this.uniq_id].pl_on : this.accessory.context.device[this.uniq_id].pl_off));
+    this.accessory.context.mqttHost.sendMessage(this.accessory.context.device[this.uniq_id].cmd_t, (value ?
+      this.accessory.context.device[this.uniq_id].pl_on : this.accessory.context.device[this.uniq_id].pl_off));
     callback(null);
   }
 

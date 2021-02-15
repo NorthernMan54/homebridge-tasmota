@@ -82,7 +82,7 @@ D4 - GPIO2 -> LedLink
 D2 - GPIO4 -> Switch1 (9)
 
 Template {"NAME":"BME + Motion","GPIO":[255,255,157,255,9,255,255,255,6,255,5,255,255],"FLAG":15,"BASE":18}
-Console: SwitchMode 1
+SwitchMode 1
 ```
 
 * homerbidge-tasmota config.json
@@ -95,6 +95,29 @@ Console: SwitchMode 1
  }
  ```
 
+ ## PIR Motion + BME280 Temperature Sensor + BH1750 Lux Illuminance Sensor
+
+ * Tasmota Configuration
+
+ ```
+ D5 - GPIO14 -> I2C SCL
+ D6 - GPIO12 -> I2C SDA
+ D4 - GPIO2 -> LedLink
+ D2 - GPIO4 -> Switch1 (9)
+
+ Template {"NAME":"BME + Motion","GPIO":[255,255,157,255,9,255,255,255,6,255,5,255,255],"FLAG":15,"BASE":18}
+ Console: SwitchMode 1
+ ```
+
+ * homerbidge-tasmota config.json
+
+ ```
+ "override":
+   "869815_SW_1": {             <--- This is the unique_id of the discovery message you want to override
+     "device_class": "motion",  <--- This is the key and property you want to override
+     "name": "Motion Sensor"    <--- You can overwrite an existing value
+  }
+  ```
 
 
 ## ZMAi-90 Current Sensor Switch

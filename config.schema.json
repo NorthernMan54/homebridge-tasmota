@@ -71,6 +71,26 @@
         "default": "",
         "description": "Regular expression to filter discovery topic messages against. ie \"F52066|00F861\" limit discovery to these two devices."
       },
+      "filterAllow": {
+        "title": "List of allowed topics for discovery",
+        "type": "array",
+        "required": false,
+        "default": "",
+        "description": "A list of regex's specifying allowed disocvery topics. If this is non-empty all non-specified topics will be blocked.",
+        "items": {
+          "type": "string"
+        }
+      },
+      "filterDeny": {
+        "title": "List of denied topics for discovery",
+        "type": "array",
+        "required": false,
+        "default": "",
+        "description": "A list of regex's specifying topics to skip. Any matching mqtt topic will always be skipped, even if it matches a filterAllow rule.",
+        "items": {
+          "type": "string"
+        }
+      },
       "effects": {
         "title": "RGB Light Effects",
         "type": "boolean",
