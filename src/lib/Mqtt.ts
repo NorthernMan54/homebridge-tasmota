@@ -41,7 +41,7 @@ export class Mqtt extends EventEmitter {
       switch (subject[0]) {
         case "homeassistant":
 
-          if (message.length > 5) {
+          if (message.length > 5 && topic.endsWith("config")) {
             try {
               const device = JSON.parse(message.toString());
 
@@ -61,12 +61,13 @@ export class Mqtt extends EventEmitter {
               debug("Error:", error);
               debug("Triggerd by:", message.toString());
             }
-          } else {
+          } else if (topic.endsWith("config")) {
             this.emit('Remove', topic);
             // debug('Remove', topic);
           }
           break;
         default:
+          // debug('emit', topic, message.toString());
           this.emit(topic, topic, message);
           break;
       }
@@ -74,10 +75,12 @@ export class Mqtt extends EventEmitter {
   }
 
   availabilitySubscribe(topic) {
+    // debug('availabilitySubscribe', topic);
     connection.subscribe(topic);
   }
 
   statusSubscribe(topic) {
+    // debug('statusSubscribe', topic);
     connection.subscribe(topic);
   }
 

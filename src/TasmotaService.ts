@@ -1,4 +1,4 @@
-import { Service, PlatformAccessory, Characteristic } from 'homebridge';
+import { Service, PlatformAccessory, Characteristic, CharacteristicValue, Nullable } from 'homebridge';
 import { tasmotaPlatform } from './platform';
 import nunjucks from 'nunjucks';
 
@@ -117,9 +117,7 @@ export class TasmotaService {
     this.accessory.context.timeout = this.platform.autoCleanup(this.accessory);
 
     try {
-      let value = this.parseValue(this.accessory.context.device[this.uniq_id].val_tpl, {
-        value_json: JSON.parse(message.toString()),
-      });
+      let value = this.parseValue(this.accessory.context.device[this.uniq_id].val_tpl, message.toString());
 
       // Sensor value tweaks or adjustments needed for homekit
 
@@ -169,7 +167,7 @@ export class TasmotaService {
     // debug("availabilityUpdate", this, topic, message.toString());
     this.platform.log.info('Marking accessory \'%s\' to %s', this.service.displayName, message);
 
-    const availability = (message.toString() === this.accessory.context.device[this.uniq_id].pl_not_avail ? new Error(this.accessory.displayName + ' ' + message.toString()) : 0);
+    const availability: Nullable<CharacteristicValue> | Error = (message.toString() === this.accessory.context.device[this.uniq_id].pl_not_avail ? new Error(this.accessory.displayName + ' ' + message.toString()) : 0);
 
     this.characteristic.updateValue(availability);
   }
@@ -184,15 +182,19 @@ export class TasmotaService {
 
   parseValue(valueTemplate, value) {
     try {
-      // debug('nunjucksEnvironment', this, this.nunjucksEnvironment);
-      var template = nunjucks.compile(valueTemplate, this.nunjucksEnvironment);
+      if (valueTemplate) {
+        // debug('nunjucksEnvironment', this, this.nunjucksEnvironment);
+        var template = nunjucks.compile(valueTemplate, this.nunjucksEnvironment);
+        const result = template.render({ value_json: JSON.parse(value), });
 
-      const result = template.render(value);
-      if (result) {
-        return result;
+        if (result) {
+          return result;
+        } else {
+          this.platform.log.error('ERROR: Template %s missing data', this.service.displayName, valueTemplate, value);
+          return (new Error('Missing sensor value'));
+        }
       } else {
-        this.platform.log.error('ERROR: Template %s missing data', this.service.displayName, valueTemplate, value);
-        return (new Error('Missing sensor value'));
+        return value;
       }
     }
     catch (err) {
@@ -205,4 +207,21 @@ export class TasmotaService {
 
 function float(val) {
   return (parseFloat(val));
+}
+
+export function isTrue(value: string | boolean | number): boolean {
+  if (typeof (value) === 'string') {
+    value = value.trim().toLowerCase();
+  }
+  switch (value) {
+    case true:
+    case "true":
+    case 1:
+    case "1":
+    case "on":
+    case "yes":
+      return true;
+    default:
+      return false;
+  }
 }

@@ -15,6 +15,7 @@ Homebridge Plugin for Tasmota Devices that leverage's the Home Assistant Auto Di
 * light - Tuya Dimmer (54) Dimmer Switch
 * sensor - Generic (18) with a bme280 connected
 * relay - ESP with multiple relays connected.
+* Door contact sensors
 * Arilux LC06 - Light with Dimmer and Colour Temperature capabilities
 * [Franken sensor](docs/IMG_5365.jpg) - 2 DHT22 Temperature / Humidity Sensors, 2 BME280 Temperature / Humidity / Air Pressure Sensors ( pressure is not supported ) and a BH1750 Luminance.  In [Tasmota](docs/IMG_5367.png) and in [HomeKit](docs/IMG_5368.png).
 * ws2812 addressable RGB led light strip
@@ -135,3 +136,7 @@ As a side effect the rule resets the `teleperiod` to 300 seconds similar to rest
 ## Discord Server
 
 A channel #tasmota has been created on the Homebridge Discord Server.
+
+## Credits
+
+* ESPHome support was added by [Zach White](https://github.com/skullydazed)

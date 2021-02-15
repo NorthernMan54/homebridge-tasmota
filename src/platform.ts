@@ -1,4 +1,7 @@
-import { API, DynamicPlatformPlugin, Logger, PlatformAccessory, PlatformConfig, Service, Characteristic, CharacteristicValue, CharacteristicSetCallback } from 'homebridge';
+import {
+  API, DynamicPlatformPlugin, Logger, PlatformAccessory, PlatformConfig, Service, Characteristic,
+  CharacteristicValue, CharacteristicSetCallback,
+} from 'homebridge';
 
 import { PLATFORM_NAME, PLUGIN_NAME } from './settings';
 // import { tasmotaAccessory } from './platformAccessory';
@@ -28,7 +31,9 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
 
   // this is used to track restored cached accessories
   public readonly accessories: PlatformAccessory[] = [];
-  public readonly services: tasmotaSwitchService[] | tasmotaLightService[] | tasmotaSensorService[] | tasmotaBinarySensorService[] | tasmotaFanService[] = [];
+  public readonly services: tasmotaSwitchService[] | tasmotaLightService[] | tasmotaSensorService[] |
+    tasmotaBinarySensorService[] | tasmotaFanService[] = [];
+
   private discoveryTopicMap: DiscoveryTopicMap[] = [];
   private CustomCharacteristic;
 
@@ -109,6 +114,45 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
     this.accessories.push(accessory);
   }
 
+  /* Check the topic against the configuration's filterList.
+   */
+  isTopicAllowed(topic: string, filter: string, filterAllow: Array<string>, filterDeny: Array<string>): boolean {
+    // debug('isTopicFiltered', topic)
+    let defaultAllow = true;
+    let allowThis = false;
+
+    if (filter) {
+      defaultAllow = false;
+
+      if (topic.match(filter)) {
+        debug('isTopicFiltered matched filter', filter);
+        allowThis = true;
+      }
+    }
+
+    if (filterAllow) {
+      defaultAllow = false;
+
+      for (const filter of filterAllow) {
+        if (topic.match(filter)) {
+          debug('isTopicFiltered matched filterAllow entry', filter);
+          allowThis = true;
+        }
+      }
+    }
+
+    if (filterDeny) {
+      for (const filter of filterDeny) {
+        if (topic.match(filter)) {
+          debug('isTopicFiltered matched filterDeny entry', filter);
+          return false;
+        }
+      }
+    }
+
+    return allowThis || defaultAllow;
+  }
+
   /**
    * This is an example method showing how to register discovered accessories.
    * Accessories must only be registered once, previously created accessories
@@ -157,8 +201,10 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
       // something globally unique, but constant, for example, the device serial
       // number or MAC address
 
+      // debug('topic', topic);
       // debug('filter', this.config.filter);
-      if (topic.match(this.config.filter)) {
+      // debug('filterList', this.config.filterList);
+      if (this.isTopicAllowed(topic, this.config.filter, this.config.filterAllow, this.config.filterDeny)) {
 
         let message = normalizeMessage(config);
         // debug('normalizeMessage ->', message);
@@ -438,7 +484,11 @@ function normalizeMessage(message) {
     manufacturer: 'mf',
     identifiers: 'ids',
     value_template: 'val_tpl',
-    unit_of_measurement: 'unit_of_meas'
+    unit_of_measurement: 'unit_of_meas',
+    state_topic: 'stat_t',
+    availability_topic: 'avty_t',
+    command_topic: 'cmd_t',
+    icon: 'ic'
   };
 
   message = renameKeys(message, translation);
@@ -457,6 +507,16 @@ function normalizeMessage(message) {
     } else if (message.uniq_id.match(/_AirQuality$/)) {
       message.dev_cla = 'pm25';
     }
+  }
+
+  // Defaults for ESPHome devices https://www.home-assistant.io/integrations/binary_sensor.mqtt/#payload_off
+  // Issue #26
+
+  if (typeof message.pl_on === 'undefined') {
+    message.pl_on = 'ON';
+  }
+  if (typeof message.pl_off === 'undefined') {
+    message.pl_off = 'OFF';
   }
 
   return (message);
