@@ -199,39 +199,69 @@ rule1 on Power1#State do tuyasend2 2,1440 endon
 rule1 1
 ```
 
-## Hampton Bay Fan/Light RF Remote Control
+## Hampton Bay Fan/Light RF Remote Control ( 303.9 Mhz )
 
 FCCID: CHQ7083T / CHQ9050H 303.9 Mhz RF Remote Control
 
 * Tasmota configuration
 
+D4 - GPIO 2 - ledlink ( Blue LED )
 D6 - GPIO 12 - 303.9 Mhz RF Transmitter
 D7 - GPIO 13 - 303.9 Mhz RF Receiver
+D0 - GPIO 16 - ( Red LED )
 
 
 ```
 backlog template {"NAME":"RF Transmitter","GPIO":[0,0,544,0,0,0,0,0,1120,1152,416,225,0,0],"FLAG":0,"BASE":18}
-backlog webbutton1 Light; webbutton2 Fan; MqttHost mqtt.local; topic tasmota_%06X;
+backlog friendlyname1 Light; friendlyname2 Fan; webbutton1 Light; webbutton2 Fan; MqttHost mqtt.local; topic tasmota_%06X; setoption20 1
+
+template {"NAME":"RF Transmitter","GPIO":[0,0,544,0,0,0,0,0,1,1,417,224,0,0],"FLAG":0,"BASE":18}
 ```
 
 ```
-Rule2 on Power1#State do rfsend {"Data":"0x67E","Bits":12,"Protocol":6,"Pulse":340} endon
-      on Power2#State=0 do rfsend {"Data":"0x67D","Bits":12,"Protocol":6,"Pulse":340} endon
-      on dimmer#state <= 25 do rfsend {"Data":"0x67D","Bits":12,"Protocol":6,"Pulse":340} break
-      on dimmer#state <= 50 do rfsend {"Data":"0x677","Bits":12,"Protocol":6,"Pulse":340} break
-      on dimmer#state <= 75 do rfsend {"Data":"0x66F","Bits":12,"Protocol":6,"Pulse":340} break
-      on dimmer#state <= 100 do rfsend {"Data":"0x65F","Bits":12,"Protocol":6,"Pulse":340} break
-      on Power2#State=1 do rfsend {"Data":"0x677","Bits":12,"Protocol":6,"Pulse":340} break
+Rule2
+  on Power2#State=0 do dimmer 0 endon
+  on dimmer#state = 0 do rfsend {"Data":"0x67D","Bits":12,"Protocol":6,"Pulse":340} break
+  on dimmer#state <= 33 do rfsend {"Data":"0x677","Bits":12,"Protocol":6,"Pulse":340} break
+  on dimmer#state <= 66 do rfsend {"Data":"0x66F","Bits":12,"Protocol":6,"Pulse":340} break
+  on dimmer#state <= 100 do rfsend {"Data":"0x65F","Bits":12,"Protocol":6,"Pulse":340} break
+  on Power2#State=1 do dimmer 25 break
+
+Rule3 on Power1#State do rfsend {"Data":"0x67E","Bits":12,"Protocol":6,"Pulse":340} endon
 ```
 
 * homerbidge-tasmota config.json
 
 ```
 "override": {
-   "EF159D_LI_1": {     <--- This is the unique_id of the discovery message you want to override
+   "562CC4_LI_2": {     <--- This is the unique_id of the discovery message you want to override
    "tasmotaType": "fan" <--- This is the key and property you want to override
   }
 ```
+
+## Valor Fireplace Remote ( 315 Mhz )
+
+```
+Off
+rfsend {"Data":"0x5D1C8","Bits":22,"Protocol":6,"Pulse":340}
+
+rfsend {"Data":"0x3A2E37","Bits":24,"Protocol":2,"Pulse":340}
+
+rfsend {"Data":"0x3A2E37","Bits":23,"Protocol":2,"Pulse":340}
+
+rfsend {"Data":"0xE8B8DC","Bits":22,"Protocol":2,"Pulse":340}
+
+rfsend {"Data":"0x555555","Bits":22,"Protocol":2,"Pulse":340}
+
+rfsend {"Data":"0x174720","Bits":22,"Protocol":6,"Pulse":340}
+
+irsend 0,200,700,700,200,700,200,700,200,200,700,700,200,200,700,200,700,200,700,700,200,200,700,700,200,700,200,700,200,200,700,200,700,200,700,700,200,700,200,200,700,700,200,700,200,700,200
+
+irsend raw,0,300,10001011101000111001000
+irsend raw,0,300,00101110111011100010111000100010001011100010111011101110001000100010111011100010111011101110
+
+```
+
 
 ## Treatlife DS03 Fan Controller and Light Dimmer
 
