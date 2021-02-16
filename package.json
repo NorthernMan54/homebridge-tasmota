@@ -1,7 +1,7 @@
 {
   "displayName": "Homebridge Tasmota",
   "name": "homebridge-tasmota",
-  "version": "0.0.104",
+  "version": "0.0.105",
   "description": "Homebridge plugin for Tasmota devices leveraging home assistant auto discovery.",
   "license": "Apache-2.0",
   "repository": {
@@ -29,7 +29,7 @@
     ],
     "ext": "ts",
     "ignore": [],
-    "exec": "DEBUG= tsc && DEBUG= homebridge -T -I -D -R -P ..",
+    "exec": "DEBUG= tsc && DEBUG=HAP-NodeJS:Accessory homebridge -T -I -D -R -P ..",
     "signal": "SIGTERM",
     "env": {
       "NODE_OPTIONS": "--trace-warnings"
@@ -41,7 +41,7 @@
   ],
   "dependencies": {
     "debug": "4.3.x",
-    "fakegato-history": "0.6.x",
+    "fakegato-history": "^0.6.1",
     "mqtt": "4.2.x",
     "nunjucks": "3.2.x"
   },

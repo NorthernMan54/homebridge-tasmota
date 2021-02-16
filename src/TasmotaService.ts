@@ -167,9 +167,10 @@ export class TasmotaService {
     // debug("availabilityUpdate", this, topic, message.toString());
     this.platform.log.info('Marking accessory \'%s\' to %s', this.service.displayName, message);
 
-    const availability: Nullable<CharacteristicValue> | Error = (message.toString() === this.accessory.context.device[this.uniq_id].pl_not_avail ? new Error(this.accessory.displayName + ' ' + message.toString()) : 0);
-
-    this.characteristic.updateValue(availability);
+    if (message.toString() === this.accessory.context.device[this.uniq_id].pl_not_avail) {
+      const availability: Nullable<CharacteristicValue> | Error = new Error(this.accessory.displayName + ' ' + message.toString());
+      this.characteristic.updateValue(availability);
+    }
   }
 
   // Utility functions for status update
