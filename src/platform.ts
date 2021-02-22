@@ -336,7 +336,7 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
             this.accessories.push(accessory);
           }
 
-          if (this.services[uniq_id].service && this.services[uniq_id].service.getCharacteristic(this.Characteristic.ConfiguredName).listenerCount('set') < 1) {
+          if (this.services[uniq_id] && this.services[uniq_id].service && this.services[uniq_id].service.getCharacteristic(this.Characteristic.ConfiguredName).listenerCount('set') < 1) {
             this.services[uniq_id].service.getCharacteristic(this.Characteristic.ConfiguredName)
               .on('set', setConfiguredName.bind(this.services[uniq_id]));
           }

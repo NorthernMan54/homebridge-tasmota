@@ -23,8 +23,17 @@ Homebridge Plugin for Tasmota Devices that leverage's the Home Assistant Auto Di
 * Support for [AZ-7798 CO2 Monitor](https://tasmota.github.io/docs/AZ-7798) - Tks Jeroen Vermeulen
 * PIR Motion sensor ( requires minor configuration )
 * Wipro Next 20W Smart LED Batten (White) Light
-
 * WemosDB - Doorbell device
+
+## Sensor types supported
+
+* Temperature
+* Humidity
+* Air Pressure ( only visible via Eve app )
+* Motion
+* Contact
+* Lux
+* CO2
 
 ## Tasmota Devices that do not work or have issues
 
