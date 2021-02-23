@@ -77,10 +77,12 @@ export class TasmotaService {
   enableStatus() {
     this.refresh();
     if (this.characteristic) {
-      this.platform.log.debug('Creating statusUpdate listener for %s %s', this.accessory.context.device[this.uniq_id].stat_t, this.accessory.context.device[this.uniq_id].name);
-      this.statusSubscribe = { event: this.accessory.context.device[this.uniq_id].stat_t, callback: this.statusUpdate.bind(this) };
-      this.accessory.context.mqttHost.on(this.accessory.context.device[this.uniq_id].stat_t, this.statusUpdate.bind(this));
-      this.accessory.context.mqttHost.statusSubscribe(this.accessory.context.device[this.uniq_id].stat_t);
+      if (this.accessory.context.device[this.uniq_id].stat_t) {
+        this.platform.log.debug('Creating statusUpdate listener for %s %s', this.accessory.context.device[this.uniq_id].stat_t, this.accessory.context.device[this.uniq_id].name);
+        this.statusSubscribe = { event: this.accessory.context.device[this.uniq_id].stat_t, callback: this.statusUpdate.bind(this) };
+        this.accessory.context.mqttHost.on(this.accessory.context.device[this.uniq_id].stat_t, this.statusUpdate.bind(this));
+        this.accessory.context.mqttHost.statusSubscribe(this.accessory.context.device[this.uniq_id].stat_t);
+      }
       if (this.accessory.context.device[this.uniq_id].avty_t) {
         this.availabilitySubscribe = { event: this.accessory.context.device[this.uniq_id].avty_t, callback: this.availabilityUpdate.bind(this) };
         this.accessory.context.mqttHost.on(this.accessory.context.device[this.uniq_id].avty_t, this.availabilityUpdate.bind(this));
@@ -107,8 +109,10 @@ export class TasmotaService {
 
   refresh() {
     // Get current status for accessory/service on startup
-    const teleperiod = this.accessory.context.device[this.uniq_id].stat_t.substr(0, this.accessory.context.device[this.uniq_id].stat_t.lastIndexOf('/') + 1).replace('tele', 'cmnd') + 'teleperiod';
-    this.accessory.context.mqttHost.sendMessage(teleperiod, this.platform.teleperiod.toString());
+    if (this.accessory.context.device[this.uniq_id].stat_t) {
+      const teleperiod = this.accessory.context.device[this.uniq_id].stat_t.substr(0, this.accessory.context.device[this.uniq_id].stat_t.lastIndexOf('/') + 1).replace('tele', 'cmnd') + 'teleperiod';
+      this.accessory.context.mqttHost.sendMessage(teleperiod, this.platform.teleperiod.toString());
+    }
   }
 
   statusUpdate(topic, message) {
