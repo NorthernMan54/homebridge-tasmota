@@ -1,7 +1,7 @@
 {
   "displayName": "Homebridge Tasmota",
   "name": "homebridge-tasmota",
-  "version": "0.0.107",
+  "version": "0.0.108",
   "description": "Homebridge plugin for Tasmota devices leveraging home assistant auto discovery.",
   "license": "Apache-2.0",
   "repository": {
@@ -29,7 +29,7 @@
     ],
     "ext": "ts",
     "ignore": [],
-    "exec": "DEBUG= tsc && DEBUG=HAP-NodeJS:Accessory homebridge -T -I -D -R -P ..",
+    "exec": "DEBUG= tsc && DEBUG=-HAP-NodeJS:Accessory homebridge -T -I -D -R -P ..",
     "signal": "SIGTERM",
     "env": {
       "NODE_OPTIONS": "--trace-warnings"

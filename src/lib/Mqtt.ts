@@ -33,6 +33,14 @@ export class Mqtt extends EventEmitter {
       */
     });
 
+    connection.on('reconnect', function() {
+      console.error('ERROR: mqtt reconnect to', config.mqttHost);
+    });
+
+    connection.on('error', function(err) {
+      console.error('ERROR: mqtt connection error ', config.mqttHost, err);
+    });
+
     connection.on('message', (topic, message) => {
       // debug("Message: Topic %s -> %s", topic, message.toString());
 
