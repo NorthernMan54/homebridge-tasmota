@@ -315,3 +315,82 @@ tuyamcu 62,3 --> 62 for 4 speeds fan controller (possible values 0,1,2,3)
    "tasmotaType": "fan" <--- This is the key and property you want to override
   }
 ```
+
+# OpenMQTTGateway devices
+
+I have been working on utilizing an OpenMQTTGateway device configured with a cc1101 RF Transceiver and the GatewayRF module.  The goal is to control my Hampton Bay ( 303 Mhz ), and GE Fans ( 315 Mhz ) and other RF devices.
+
+## Hampton Bay Light
+
+msg.payload =
+```
+{
+    "avty_t": "~LWT",
+    "name": "Test Ceiling 1",
+    "uniq_id": "3C71BF9E0770_LI_1",
+    "pl_on": "{\"value\": 1150,\"protocol\": 6,\"length\": 12,\"delay\": 437,\"mhz\": 303.732}",
+    "pl_off": "{\"value\": 1150,\"protocol\": 6,\"length\": 12,\"delay\": 437,\"mhz\": 303.732}",
+    "pl_avail": "online",
+    "pl_not_avail": "offline",
+    "cmd_t": "~commands/MQTTto433",
+    "device": {
+        "name": "cc1101-9e0770",
+        "model": "[\"BME280\",\"BH1750\",\"RF\",\"Pilight\",\"rtl_433\"]",
+        "manufacturer": "OMG_community",
+        "sw_version": "esp32dev_rtl_433",
+        "identifiers": [
+            "3C71BF9E0770-1"
+        ]
+    },
+    "~": "home/cc1101-9e0770/"
+}
+```
+
+msg.topic =
+```
+homeassistant/light/9e0770_LI_1/config
+```
+
+msg.retain = true
+
+## Hampton Bay FAN
+
+msg.payload =
+```
+{
+    "avty_t": "~LWT",
+    "name": "Test Fan 1",
+    "uniq_id": "3C71BF9E0770_F1_1",
+    "payload_high_speed": "{\"value\": 1119,\"protocol\": 6,\"length\": 12,\"delay\": 437,\"mhz\": 303.732}",
+    "payload_medium_speed": "{\"value\": 1135,\"protocol\": 6,\"length\": 12,\"delay\": 437,\"mhz\": 303.732}",
+    "payload_low_speed": "{\"value\": 1143,\"protocol\": 6,\"length\": 12,\"delay\": 437,\"mhz\": 303.732}",
+    "pl_on": "{\"value\": 1143,\"protocol\": 6,\"length\": 12,\"delay\": 437,\"mhz\": 303.732}",
+    "pl_off": "{\"value\": 1149,\"protocol\": 6,\"length\": 12,\"delay\": 437,\"mhz\": 303.732}",
+    "pl_avail": "online",
+    "pl_not_avail": "offline",
+    "speeds": [
+        "off",
+        "low",
+        "medium",
+        "high"
+    ],
+    "cmd_t": "~commands/MQTTto433",
+    "device": {
+        "name": "cc1101-9e0770",
+        "model": "[\"BME280\",\"BH1750\",\"RF\",\"Pilight\",\"rtl_433\"]",
+        "manufacturer": "OMG_community",
+        "sw_version": "esp32dev_rtl_433",
+        "identifiers": [
+            "3C71BF9E0770-1"
+        ]
+    },
+    "~": "home/cc1101-9e0770/"
+}
+```
+
+msg.topic =
+```
+homeassistant/fan/9e0770_F1_1/config
+```
+
+msg.retain = true

@@ -37,15 +37,21 @@ export class tasmotaLightService extends TasmotaService {
         .on('set', this.setOn.bind(this));                // SET - bind to the `setOn` method below
       // .on('get', this.getOn.bind(this));               // GET - bind to the `getOn` method below
 
-      debug('Creating statusUpdate listener for', accessory.context.device[this.uniq_id].stat_t);
-      this.statusSubscribe = { event: accessory.context.device[this.uniq_id].stat_t, callback: this.statusUpdate.bind(this) };
-      accessory.context.mqttHost.on(accessory.context.device[this.uniq_id].stat_t, this.statusUpdate.bind(this));
-      accessory.context.mqttHost.statusSubscribe(accessory.context.device[this.uniq_id].stat_t);
+      if (accessory.context.device[this.uniq_id].stat_t) {
+        debug('Creating statusUpdate listener for', accessory.context.device[this.uniq_id].stat_t);
+        this.statusSubscribe = { event: accessory.context.device[this.uniq_id].stat_t, callback: this.statusUpdate.bind(this) };
+        accessory.context.mqttHost.on(accessory.context.device[this.uniq_id].stat_t, this.statusUpdate.bind(this));
+        accessory.context.mqttHost.statusSubscribe(accessory.context.device[this.uniq_id].stat_t);
+      }
 
-      this.availabilitySubscribe = { event: accessory.context.device[this.uniq_id].avty_t, callback:
-        this.availabilityUpdate.bind(this) };
-      accessory.context.mqttHost.on(accessory.context.device[this.uniq_id].avty_t, this.availabilityUpdate.bind(this));
-      accessory.context.mqttHost.availabilitySubscribe(accessory.context.device[this.uniq_id].avty_t);
+      if (accessory.context.device[this.uniq_id].avty_t) {
+        this.availabilitySubscribe = {
+          event: accessory.context.device[this.uniq_id].avty_t, callback:
+            this.availabilityUpdate.bind(this)
+        };
+        accessory.context.mqttHost.on(accessory.context.device[this.uniq_id].avty_t, this.availabilityUpdate.bind(this));
+        accessory.context.mqttHost.availabilitySubscribe(accessory.context.device[this.uniq_id].avty_t);
+      }
     }
 
     // Does the lightbulb include a brightness characteristic
@@ -118,18 +124,18 @@ export class tasmotaLightService extends TasmotaService {
       // Tasmota effects schemes for ws2812 lights
 
       const schemes: { name: string, id: number, TVinput?: any }[] = [{ name: 'None', id: 0 },
-        { name: 'Wakeup', id: 1 },
-        { name: 'Cycle Up', id: 2 },
-        { name: 'Cycle Down', id: 3 },
-        { name: 'Random', id: 4 },
-        { name: 'Clock', id: 5 },
-        { name: 'Candlelight', id: 6 },
-        { name: 'RGB', id: 7 },
-        { name: 'Christmas', id: 8 },
-        { name: 'Hanukkah', id: 9 },
-        { name: 'Kwanzaa', id: 10 },
-        { name: 'Rainbow', id: 11 },
-        { name: 'Fire', id: 12 }];
+      { name: 'Wakeup', id: 1 },
+      { name: 'Cycle Up', id: 2 },
+      { name: 'Cycle Down', id: 3 },
+      { name: 'Random', id: 4 },
+      { name: 'Clock', id: 5 },
+      { name: 'Candlelight', id: 6 },
+      { name: 'RGB', id: 7 },
+      { name: 'Christmas', id: 8 },
+      { name: 'Hanukkah', id: 9 },
+      { name: 'Kwanzaa', id: 10 },
+      { name: 'Rainbow', id: 11 },
+      { name: 'Fire', id: 12 }];
 
       for (const element of schemes) {
         debug('element', element);
@@ -221,13 +227,13 @@ export class tasmotaLightService extends TasmotaService {
           this.parseValue(this.accessory.context.device[this.uniq_id].rgb_val_tpl, message.toString()).split(',')[2],
           RGBtoScaledHSV(this.parseValue(this.accessory.context.device[this.uniq_id].rgb_val_tpl,
             message.toString()).split(',')[0], this.parseValue(this.accessory.context.device[this.uniq_id].rgb_val_tpl,
-            message.toString()).split(',')[1], this.parseValue(this.accessory.context.device[this.uniq_id].rgb_val_tpl,
-            message.toString()).split(',')[2]), JSON.parse(message.toString()).HSBColor);
+              message.toString()).split(',')[1], this.parseValue(this.accessory.context.device[this.uniq_id].rgb_val_tpl,
+                message.toString()).split(',')[2]), JSON.parse(message.toString()).HSBColor);
 
         const hsb = RGBtoScaledHSV(this.parseValue(this.accessory.context.device[this.uniq_id].rgb_val_tpl,
           message.toString()).split(',')[0], this.parseValue(this.accessory.context.device[this.uniq_id].rgb_val_tpl,
-          message.toString()).split(',')[1], this.parseValue(this.accessory.context.device[this.uniq_id].rgb_val_tpl,
-          message.toString()).split(',')[2]);
+            message.toString()).split(',')[1], this.parseValue(this.accessory.context.device[this.uniq_id].rgb_val_tpl,
+              message.toString()).split(',')[2]);
 
 
         // Use debug logging for no change updates, and info when a change occurred
@@ -489,7 +495,7 @@ function rgb2hsv(r, g, b) {
   const gabs = g / 255;
   const babs = b / 255;
   v = Math.max(rabs, gabs, babs),
-  diff = v - Math.min(rabs, gabs, babs);
+    diff = v - Math.min(rabs, gabs, babs);
   const diffc = c => (v - c) / 6 / diff + 1 / 2;
   //    percentRoundFn = num => Math.round(num * 100) / 100;
   const percentRoundFn = num => Math.round(num);

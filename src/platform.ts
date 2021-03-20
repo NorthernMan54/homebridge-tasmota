@@ -108,6 +108,7 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
   configureAccessory(accessory: PlatformAccessory) {
     this.log.info('Loading accessory from cache:', accessory.displayName);
 
+    // debug('context', accessory.context);
     accessory.context.timeout = this.autoCleanup(accessory);
 
     // add the restored accessory to the accessories cache so we can track if it has already been registered
@@ -337,7 +338,9 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
           }
 
           if (this.services[uniq_id] && this.services[uniq_id].service && this.services[uniq_id].service.getCharacteristic(this.Characteristic.ConfiguredName).listenerCount('set') < 1) {
-            this.services[uniq_id].service.getCharacteristic(this.Characteristic.ConfiguredName)
+
+            (this.services[uniq_id].service.getCharacteristic(this.Characteristic.ConfiguredName) ||
+              this.services[uniq_id].service.addCharacteristic(this.Characteristic.ConfiguredName))
               .on('set', setConfiguredName.bind(this.services[uniq_id]));
           }
 
@@ -411,17 +414,22 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
     let timeoutID;
 
     // debug("autoCleanup", accessory.displayName, accessory.context.timeout, this.timeouts);
+    // debug('autoCleanup \"%s\" topic %s', accessory.displayName, findVal(accessory.context.device, "stat_t"));
+    if (findVal(accessory.context.device, "stat_t")) {
+      if (accessory.context.timeout) {
+        timeoutID = accessory.context.timeout;
+        clearTimeout(this.timeouts[timeoutID]);
+        delete this.timeouts[timeoutID];
+      }
 
-    if (accessory.context.timeout) {
-      timeoutID = accessory.context.timeout;
-      clearTimeout(this.timeouts[timeoutID]);
-      delete this.timeouts[timeoutID];
+      timeoutID = this.timeoutCounter++;
+      this.timeouts[timeoutID] = setTimeout(this.accessoryCleanup.bind(this), this.cleanup * 60 * 60 * 1000, accessory);
+
+      return (timeoutID);
+    } else {
+      // debug('autoCleanup unavailable \"%s\" topic %s', accessory.displayName);
+      return null;
     }
-
-    timeoutID = this.timeoutCounter++;
-    this.timeouts[timeoutID] = setTimeout(this.accessoryCleanup.bind(this), this.cleanup * 60 * 60 * 1000, accessory);
-
-    return (timeoutID);
   }
 
   accessoryCleanup(existingAccessory: PlatformAccessory) {
@@ -478,6 +486,10 @@ function normalizeMessage(message) {
     device_class: 'dev_cla',
     payload_on: 'pl_on',
     payload_off: 'pl_off',
+    payload_high_speed: 'pl_hi_spd',
+    payload_medium_speed: 'pl_med_spd',
+    payload_low_speed: 'pl_lo_spd',
+    speeds: 'spds',
     device: 'dev',
     model: 'mdl',
     sw_version: 'sw',
@@ -579,4 +591,19 @@ function renameKeys(o, mapShortToLong) {
     build[destKey] = value;
   }
   return build;
+}
+
+function findVal(object, key) {
+  var value;
+  Object.keys(object).some(function(k) {
+    if (k === key) {
+      value = object[k];
+      return true;
+    }
+    if (object[k] && typeof object[k] === 'object') {
+      value = findVal(object[k], key);
+      return value !== undefined;
+    }
+  });
+  return value;
 }

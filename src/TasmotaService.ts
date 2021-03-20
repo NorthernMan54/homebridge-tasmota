@@ -174,6 +174,9 @@ export class TasmotaService {
     if (message.toString() === this.accessory.context.device[this.uniq_id].pl_not_avail) {
       const availability: Nullable<CharacteristicValue> | Error = new Error(this.accessory.displayName + ' ' + message.toString());
       this.characteristic.updateValue(availability);
+    } else {
+      // debug("availabilityUpdate", this.characteristic);
+      this.characteristic.updateValue(this.characteristic.value);
     }
   }
 

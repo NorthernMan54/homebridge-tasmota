@@ -60,6 +60,7 @@ export class Mqtt extends EventEmitter {
                 case "sensor":
                 case "binary_sensor":
                 case "light":
+                case "fan":
                   // debug("emit", subject[1], this);
                   this.emit('Discovered', topic, device);
                   break;
@@ -93,9 +94,9 @@ export class Mqtt extends EventEmitter {
   }
 
   sendMessage(topic, message) {
+    debug("sendMessage", topic, message);
     if (message && topic) {
       connection.publish(topic, message);
-      debug("sendMessage", topic, message);
     } else {
       throw new Error('sendMessage no message ' + topic);
     }

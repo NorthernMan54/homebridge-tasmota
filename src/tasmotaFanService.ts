@@ -40,6 +40,13 @@ export class tasmotaFanService extends TasmotaService {
       (this.service.getCharacteristic(this.platform.Characteristic.RotationSpeed) ||
         this.service.addCharacteristic(this.platform.Characteristic.RotationSpeed))
         .on('set', this.setRotationSpeed.bind(this));
+    } else if (accessory.context.device[this.uniq_id].spds) {
+      (this.service.getCharacteristic(this.platform.Characteristic.RotationSpeed) ||
+        this.service.addCharacteristic(this.platform.Characteristic.RotationSpeed))
+        .on('set', this.setRotationSpeedFixed.bind(this))
+        .setProps({
+          minStep: 33.3
+        });
     }
 
   }
@@ -96,16 +103,39 @@ export class tasmotaFanService extends TasmotaService {
 
 
   setOn(value: CharacteristicValue, callback: CharacteristicSetCallback) {
-    this.platform.log.info('%s Set Characteristic On ->', this.accessory.displayName, value);
+    this.platform.log.info('%s Set Characteristic On ->', this.accessory.displayName, value, this.service.getCharacteristic(this.platform.Characteristic.RotationSpeed).value);
 
-    this.accessory.context.mqttHost.sendMessage(this.accessory.context.device[this.uniq_id].cmd_t, (value ?
-      this.accessory.context.device[this.uniq_id].pl_on : this.accessory.context.device[this.uniq_id].pl_off));
+    this.platform.log.info('%s Set Characteristic On ->', this.accessory.displayName, value, (this.service.getCharacteristic(this.platform.Characteristic.RotationSpeed).value ?? 0 ));
+
+    if ((this.service.getCharacteristic(this.platform.Characteristic.RotationSpeed).value ?? 0 ) === 0) {
+      this.accessory.context.mqttHost.sendMessage(this.accessory.context.device[this.uniq_id].cmd_t, (value ?
+        this.accessory.context.device[this.uniq_id].pl_on : this.accessory.context.device[this.uniq_id].pl_off));
+    }
     callback(null);
   }
 
   setRotationSpeed(value: CharacteristicValue, callback: CharacteristicSetCallback) {
     this.platform.log.info('%s Set Characteristic RotationSpeed ->', this.accessory.displayName, value);
     this.accessory.context.mqttHost.sendMessage(this.accessory.context.device[this.uniq_id].bri_cmd_t, value.toString());
+    callback(null);
+  }
+
+  setRotationSpeedFixed(value: CharacteristicValue, callback: CharacteristicSetCallback) {
+    // debug('config', this.accessory.displayName, this.accessory.context.device[this.uniq_id]);
+    this.platform.log.info('%s Set Characteristic RotationSpeedFixed ->', this.accessory.displayName, value);
+    if (value < 25) { // off
+      this.accessory.context.mqttHost.sendMessage(this.accessory.context.device[this.uniq_id].cmd_t, this.accessory.context.device[this.uniq_id].pl_off);
+    } else if (value < 50) {  // low
+      // debug('low', this.accessory.displayName, this.accessory.context.device[this.uniq_id].pl_lo_spd);
+      this.accessory.context.mqttHost.sendMessage(this.accessory.context.device[this.uniq_id].cmd_t, this.accessory.context.device[this.uniq_id].pl_lo_spd);
+    } else if (value < 75) {  // medium
+      // debug('medium', this.accessory.displayName, this.accessory.context.device[this.uniq_id].pl_med_spd);
+      this.accessory.context.mqttHost.sendMessage(this.accessory.context.device[this.uniq_id].cmd_t, this.accessory.context.device[this.uniq_id].pl_med_spd);
+    } else {  // high
+      // debug('high', this.accessory.displayName, this.accessory.context.device[this.uniq_id].pl_hi_spd);
+      this.accessory.context.mqttHost.sendMessage(this.accessory.context.device[this.uniq_id].cmd_t, this.accessory.context.device[this.uniq_id].pl_hi_spd);
+
+    }
     callback(null);
   }
 }
