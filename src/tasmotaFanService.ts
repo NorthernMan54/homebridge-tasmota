@@ -45,7 +45,7 @@ export class tasmotaFanService extends TasmotaService {
         this.service.addCharacteristic(this.platform.Characteristic.RotationSpeed))
         .on('set', this.setRotationSpeedFixed.bind(this))
         .setProps({
-          minStep: 33.3
+          minStep: 33.3,
         });
     }
 
