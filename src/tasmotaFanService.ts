@@ -103,14 +103,10 @@ export class tasmotaFanService extends TasmotaService {
 
 
   setOn(value: CharacteristicValue, callback: CharacteristicSetCallback) {
-    this.platform.log.info('%s Set Characteristic On ->', this.accessory.displayName, value, this.service.getCharacteristic(this.platform.Characteristic.RotationSpeed).value);
+    this.platform.log.info('%s Set Characteristic On ->', this.accessory.displayName, value);
 
-    this.platform.log.info('%s Set Characteristic On ->', this.accessory.displayName, value, (this.service.getCharacteristic(this.platform.Characteristic.RotationSpeed).value ?? 0 ));
-
-    if ((this.service.getCharacteristic(this.platform.Characteristic.RotationSpeed).value ?? 0 ) === 0) {
-      this.accessory.context.mqttHost.sendMessage(this.accessory.context.device[this.uniq_id].cmd_t, (value ?
-        this.accessory.context.device[this.uniq_id].pl_on : this.accessory.context.device[this.uniq_id].pl_off));
-    }
+    this.accessory.context.mqttHost.sendMessage(this.accessory.context.device[this.uniq_id].cmd_t, (value ?
+      this.accessory.context.device[this.uniq_id].pl_on : this.accessory.context.device[this.uniq_id].pl_off));
     callback(null);
   }
 
