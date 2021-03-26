@@ -101,12 +101,22 @@ export class tasmotaFanService extends TasmotaService {
     }
   }
 
-
   setOn(value: CharacteristicValue, callback: CharacteristicSetCallback) {
     this.platform.log.info('%s Set Characteristic On ->', this.accessory.displayName, value);
 
-    this.accessory.context.mqttHost.sendMessage(this.accessory.context.device[this.uniq_id].cmd_t, (value ?
-      this.accessory.context.device[this.uniq_id].pl_on : this.accessory.context.device[this.uniq_id].pl_off));
+    if (!this.accessory.context.device[this.uniq_id].spds) {
+      // Not hampton bay fans with speeds rather than on
+      this.accessory.context.mqttHost.sendMessage(this.accessory.context.device[this.uniq_id].cmd_t, (value ?
+        this.accessory.context.device[this.uniq_id].pl_on : this.accessory.context.device[this.uniq_id].pl_off));
+    } else if (!value) {
+      // Turning off
+      this.accessory.context.mqttHost.sendMessage(this.accessory.context.device[this.uniq_id].cmd_t, (value ?
+        this.accessory.context.device[this.uniq_id].pl_on : this.accessory.context.device[this.uniq_id].pl_off));
+    } else {
+      // Turning on of Hampton bay RF Fans, they don't have a ON function but can restore previous speed
+      this.setRotationSpeedFixed(this.service.getCharacteristic(this.platform.Characteristic.RotationSpeed).value || 25, callback);
+      return;
+    }
     callback(null);
   }
 

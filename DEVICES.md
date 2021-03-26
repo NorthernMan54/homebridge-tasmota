@@ -364,7 +364,6 @@ msg.payload =
     "payload_high_speed": "{\"value\": 1119,\"protocol\": 6,\"length\": 12,\"delay\": 437,\"mhz\": 303.732}",
     "payload_medium_speed": "{\"value\": 1135,\"protocol\": 6,\"length\": 12,\"delay\": 437,\"mhz\": 303.732}",
     "payload_low_speed": "{\"value\": 1143,\"protocol\": 6,\"length\": 12,\"delay\": 437,\"mhz\": 303.732}",
-    "pl_on": "{\"value\": 1143,\"protocol\": 6,\"length\": 12,\"delay\": 437,\"mhz\": 303.732}",
     "pl_off": "{\"value\": 1149,\"protocol\": 6,\"length\": 12,\"delay\": 437,\"mhz\": 303.732}",
     "pl_avail": "online",
     "pl_not_avail": "offline",
@@ -384,7 +383,7 @@ msg.payload =
             "3C71BF9E0770-1"
         ]
     },
-    "~": "home/cc1101-9e0770/"
+    "~": "home/cc1101-bbbbbb/"
 }
 ```
 
