@@ -159,6 +159,28 @@ rule2 on Power1#State=1 do backlog power1 off; power2 off; rule2 0; rule3 1; set
 rule3 on Power1#State=1 do backlog power1 off; dimmer2 0; power2 off; rule3 0; rule2 1; setoption37 0; template  {"NAME":"PWM Mode","GPIO":[0,0,157,0,18,10,0,0,22,17,37,0,0],"FLAG":0,"BASE":18}; power2 on; endon
 ```
 
+## MCULED Device with RGB+W Strip - Version 2 ( Basement )
+
+```
+D4 - GPIO 2 - ledlinki ( Blue LED )
+D1 - GPIO 5 - Button 1 - Red Button
+D2 - GPIO 4 - Button 2 - Black Button
+D5 - GPIO 14 - PWM 1 - White LED PWM Control
+D6 - GPIO 12 - ws28128 - WS2812 RGB Data Line
+D0 - GPIO 16 - ( Red LED )
+
+Unit 1
+
+backlog DevGroupName basement_led; power1 off; power2 off; Fade 1; setoption37 24; SetOption85 1; webbutton1 White; webbutton2 LED; friendlyname1 Basement White;  friendlyname2 Basement LED; MqttHost mqtt.local; topic tasmota_%06X; Module 0; setoption19 1; rule2 1; template  {"NAME":"MCULED","GPIO":[0,0,0,0,0,0,0,0,1376,0,224,0,544,0],"FLAG":0,"BASE":18}
+
+rule2 on Power1#State=1 do backlog power2 off endon
+  on Power2#State=1 do backlog power1 off endon
+
+Unit 2 - this is a slave unit using device groups to sync status
+
+backlog DevGroupName basement_led; power1 off; power2 off; Fade 1; setoption37 24; SetOption85 1; webbutton1 White; webbutton2 LED; friendlyname1 Basement White 2;  friendlyname2 Basement LED 2; MqttHost mqtt.local; topic tasmota_%06X; Module 0; setoption19 0; rule2 0; template  {"NAME":"MCULED","GPIO":[0,0,0,0,0,0,0,0,1376,0,224,0,544,0],"FLAG":0,"BASE":18}
+```
+
 ## Tuya Dimmer Module as a FAN
 
 * Tasmota configuration
