@@ -196,6 +196,11 @@ export class tasmotaSensorService extends TasmotaService {
     try {
       let value = this.parseValue(this.accessory.context.device[this.uniq_id].val_tpl, message.toString());
 
+      if (value === null) {
+        debug('statusUpdate skipping, not for', this.service.displayName);
+        return;
+      }
+
       // Sensor value tweaks or adjustments needed for homekit
 
       switch (this.device_class) {

@@ -42,8 +42,8 @@ export class TasmotaService {
     // Home Assistant device template filters
 
     this.nunjucksEnvironment.addFilter('is_defined', function(val, cb) {
-      // console.log('is_defined', val);
-      if (val) {
+      // console.log('is_defined', val, cb);
+      if (val || val === 0) {
         cb(null, val);
       } else {
         cb(new Error('missing key'), val);
@@ -193,13 +193,13 @@ export class TasmotaService {
       if (valueTemplate) {
         // debug('nunjucksEnvironment', this, this.nunjucksEnvironment);
         var template = nunjucks.compile(valueTemplate, this.nunjucksEnvironment);
+        // debug('nunjucksEnvironment', template, this.nunjucksEnvironment, value);
         const result = template.render({ value_json: JSON.parse(value), });
 
         if (result) {
           return result;
         } else {
-          this.platform.log.error('ERROR: Template %s missing data', this.service.displayName, valueTemplate, value);
-          return (new Error('Missing sensor value'));
+          return null;
         }
       } else {
         return value;

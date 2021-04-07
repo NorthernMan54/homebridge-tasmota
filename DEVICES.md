@@ -415,3 +415,49 @@ homeassistant/fan/9e0770_F1_1/config
 ```
 
 msg.retain = true
+
+## openMQTTGateway / PiLight temperature sensor
+
+Sensor Message
+
+```
+{"message":
+  {"id":97,
+  "temperature":-16.6,
+  "humidity":14.0,
+  "battery":1},
+"protocol":"alecto_ws1700",
+"length":"97",
+"value":"97",
+"repeats":2,
+"status":2}
+```
+
+msg.payload =
+```
+{
+    "stat_t": "~PilighttoMQTT",
+    "name": "temp",
+    "uniq_id": "240AC4EC20DCtemppilight",
+    "dev_cla": "temperature",
+    "val_tpl": "{% if value_json is defined and value_json.message.id == 97 %} {{ value_json.message.temperature | is_defined }} {% endif %}",
+    "unit_of_meas": "°C",
+    "device": {
+        "name": "cc1101-ec20dc",
+        "model": "[\"BME280\",\"Pilight\",\"BT\"]",
+        "manufacturer": "OMG_community",
+        "sw_version": "development-rtl_433",
+        "identifiers": [
+            "240AC4EC20DC"
+        ]
+    },
+    "~": "home/cc1101-ec20dc/"
+}
+```
+
+msg.topic =
+```
+homeassistant/sensor/240AC4EC20DCtemppilight/config
+```
+
+msg.retain = true
