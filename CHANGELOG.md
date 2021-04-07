@@ -4,11 +4,22 @@ All notable changes to this project will be documented in this file. This projec
 
 ## 0.0.112 (2021-04-6)
 
-## [Version 0.0.111](https://github.com/northernman54/homebridge-tasmota/compare/v0.0.111...v0.0.112)
+## [Version 0.0.112](https://github.com/northernman54/homebridge-tasmota/compare/v0.0.111...v0.0.112)
 
 #### Changes
 
 - Tweaks for OpenMQTTGateway PiLight sensor devices
+
+## 0.0.111 (2021-03-25)
+
+## [Version 0.0.111](https://github.com/northernman54/homebridge-tasmota/compare/v0.0.100...v0.0.111)
+
+#### Changes
+
+- Fixes for homebridge 1.3.4
+- Support for FAN devices with fixed speeds ( off, low, medium and high). Tested with OpenMQTTGateway, Hampton Bay and an injected FAN config via node-red ( see DEVICES.md )
+- Improved logging for MQTT connection errors
+- Tweaks for OpenMQTTGateway devices
 
 ## 0.0.100 (2021-02-06)
 
