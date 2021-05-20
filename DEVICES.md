@@ -5,6 +5,46 @@ My standard config after setting name and device configuration
 Backlog MqttHost mqtt.local; topic tasmota_%06X; setoption57 1; setoption19 1
 ```
 
+## Sonoff IFAN03
+
+* Tasmota Configuration
+
+```
+Backlog MqttHost mqtt.local; topic tasmota_%06X; setoption57 1; setoption19 1; module 71; webbutton1 Light; webbutton2 Off; webbutton3 Fan Low; webbutton4 Fan Med; webbutton5 Fan High; SetOption30 1; friendlyname1 Ceiling Two Light; friendlyname2 Ceiling Two Fan;
+
+Backlog Rule1 on FanSpeed#Data do teleperiod break; rule1 1
+```
+
+* configuration override of discovery object to create a FAN
+
+302F1B is the Tasmota ID
+
+```
+"302F1B_LI_3": {
+   "tasmotaType": "other"
+},
+"302F1B_LI_4": {
+   "tasmotaType": "other"
+},
+"302F1B_LI_2": {
+"tasmotaType": "fan",
+"payload_high_speed": "3",
+"payload_medium_speed": "2",
+"payload_low_speed": "1",
+"pl_off": "0",
+"pl_on": "1",
+"val_tpl": "{% if value_json.FanSpeed == 0 -%}0{%- elif value_json.FanSpeed > 0 -%}1{%- endif %}",
+"bri_val_tpl": "{{value_json.FanSpeed*1/3*100}}",
+"cmd_t": "cmnd/tasmota_302F1B/FanSpeed",
+"speeds": [
+    "off",
+    "low",
+    "medium",
+    "high"
+]
+}
+```
+
 ## [MCUIOT](docs/MCUIOT.md) BME280 Temperature Sensor
 
 * Tasmota Configuration
@@ -180,6 +220,25 @@ Unit 2 - this is a slave unit using device groups to sync status
 
 backlog DevGroupName basement_led; power1 off; power2 off; Fade 1; setoption37 24; SetOption85 1; webbutton1 White; webbutton2 LED; friendlyname1 Basement White 2;  friendlyname2 Basement LED 2; MqttHost mqtt.local; topic tasmota_%06X; Module 0; setoption19 0; rule2 0; template  {"NAME":"MCULED","GPIO":[0,0,0,0,0,0,0,0,1376,0,224,0,544,0],"FLAG":0,"BASE":18}
 ```
+
+## MCULED Device with RGB+W Strip - Version 2 ( Cottage Sink )
+
+```
+D4 - GPIO 2 - ledlinki ( Blue LED )
+D1 - GPIO 5 - Button 1 - Red Button
+D2 - GPIO 4 - Button 2 - Black Button
+D5 - GPIO 14 - PWM 1 - White LED PWM Control
+D6 - GPIO 12 - ws28128 - WS2812 RGB Data Line
+D0 - GPIO 16 - ( Red LED )
+
+Unit 1
+
+backlog power1 off; power2 off; Fade 1; setoption37 24; SetOption85 1; webbutton1 White; webbutton2 LED; friendlyname1 Kitchen Sink;  friendlyname2 Kitchen LED; MqttHost mqtt.local; topic tasmota_%06X; Module 0; setoption19 1; rule2 1; template  {"NAME":"MCULED","GPIO":[0,0,0,0,33,32,0,0,1376,0,224,0,544,0],"FLAG":0,"BASE":18}
+
+rule2 on Power1#State=1 do backlog power2 off endon
+  on Power2#State=1 do backlog power1 off endon
+```
+
 
 ## Tuya Dimmer Module as a FAN
 

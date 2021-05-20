@@ -43,10 +43,10 @@ export class tasmotaFanService extends TasmotaService {
     } else if (accessory.context.device[this.uniq_id].spds) {
       (this.service.getCharacteristic(this.platform.Characteristic.RotationSpeed) ||
         this.service.addCharacteristic(this.platform.Characteristic.RotationSpeed))
-        .on('set', this.setRotationSpeedFixed.bind(this))
-        .setProps({
-          minStep: 33.3,
-        });
+        .on('set', this.setRotationSpeedFixed.bind(this));
+      //        .setProps({
+      //          minStep: 33.33333333333333,
+      //        });
     }
 
   }
@@ -74,11 +74,14 @@ export class tasmotaFanService extends TasmotaService {
 
         // Use debug logging for no change updates, and info when a change occurred
 
-        this.platform.log.info('Updating \'%s\' to %s', this.accessory.displayName, value);
+        this.platform.log.info('Updating \'%s\' to %s', this.service.displayName, value);
 
       } else {
-        this.platform.log.debug('Updating \'%s\' to %s', this.accessory.displayName, value);
+        this.platform.log.debug('Updating \'%s\' to %s', this.service.displayName, value);
       }
+      this.platform.log.debug('Updating \'%s\' to %s ? %s', this.service.displayName, value, this.accessory.context.device[this.uniq_id].pl_on);
+      this.platform.log.debug('Updating \'%s\' to %s ? %s', this.service.displayName, value, (value ===
+        this.accessory.context.device[this.uniq_id].pl_on ? true : false));
       this.service.getCharacteristic(this.platform.Characteristic.On).updateValue((value ===
         this.accessory.context.device[this.uniq_id].pl_on ? true : false));
 
@@ -90,9 +93,9 @@ export class tasmotaFanService extends TasmotaService {
         const bri_val = this.parseValue(this.accessory.context.device[this.uniq_id].bri_val_tpl, message.toString());
 
         if (this.service.getCharacteristic(this.platform.Characteristic.RotationSpeed).value != bri_val) {
-          this.platform.log.info('Updating \'%s\' RotationSpeed to %s', this.accessory.displayName, bri_val);
+          this.platform.log.info('Updating \'%s\' RotationSpeed to %s', this.service.displayName, bri_val);
         } else {
-          this.platform.log.debug('Updating \'%s\' RotationSpeed to %s', this.accessory.displayName, bri_val);
+          this.platform.log.debug('Updating \'%s\' RotationSpeed to %s', this.service.displayName, bri_val);
         }
         this.service.getCharacteristic(this.platform.Characteristic.RotationSpeed).updateValue(bri_val);
       }
