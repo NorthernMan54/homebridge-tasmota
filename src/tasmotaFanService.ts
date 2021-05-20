@@ -44,7 +44,7 @@ export class tasmotaFanService extends TasmotaService {
       (this.service.getCharacteristic(this.platform.Characteristic.RotationSpeed) ||
         this.service.addCharacteristic(this.platform.Characteristic.RotationSpeed))
         .on('set', this.setRotationSpeedFixed.bind(this));
-      //        .setProps({
+      //        .setProps({     // This causes an issue with validateUserInput in Characteristic and 33.3333 becomes 0
       //          minStep: 33.33333333333333,
       //        });
     }

@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. This project uses [Semantic Versioning](https://semver.org/).
 
+## 0.0.115 (2021-05-20)
+
+## [Version 0.0.115](https://github.com/northernman54/homebridge-tasmota/compare/v0.0.112...v0.0.115)
+
+#### Changes
+
+- Added support for SonOff iFan03 as a configuration override
+
 ## 0.0.112 (2021-04-6)
 
 ## [Version 0.0.112](https://github.com/northernman54/homebridge-tasmota/compare/v0.0.111...v0.0.112)
