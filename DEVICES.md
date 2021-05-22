@@ -10,14 +10,14 @@ Backlog MqttHost mqtt.local; topic tasmota_%06X; setoption57 1; setoption19 1
 * Tasmota Configuration
 
 ```
-Backlog MqttHost mqtt.local; topic tasmota_%06X; setoption57 1; setoption19 1; module 71; webbutton1 Light; webbutton2 Off; webbutton3 Fan Low; webbutton4 Fan Med; webbutton5 Fan High; SetOption30 1; friendlyname1 Ceiling Two Light; friendlyname2 Ceiling Two Fan;
+Backlog MqttHost mqtt.local; topic tasmota_%06X; setoption57 1; setoption19 1; module 71; webbutton1 Light; webbutton2 Off; webbutton3 Fan Low; webbutton4 Fan Med; webbutton5 Fan High; SetOption30 1; friendlyname1 Ceiling One; friendlyname2 Fan One;
 
 Backlog Rule1 on FanSpeed#Data do teleperiod break; rule1 1
 ```
 
 * configuration override of discovery object to create a FAN
 
-302F1B is the Tasmota ID
+`302F1B` is the Tasmota ID
 
 ```
 "302F1B_LI_3": {
@@ -261,6 +261,14 @@ DimmerRange 100,255
 ## Trailer Relay Board
 
 backlog webbutton1 Ceiling; webbutton2 Flood; webbutton3 Porch; webbutton4 Step
+
+## CE SMART Wifi Dimmer
+
+* Tasmota configuration
+
+```
+backlog template {"NAME":"CE-WF500D","GPIO":[0,0,0,0,0,0,0,0,0,108,0,107,0],"FLAG":0,"BASE":54}; module 0; TuyaMCU 21,3; MqttHost mqtt.local; topic tasmota_%06X; setoption19 1; setoption57 1
+```
 
 ## FEIT Wifi Dimmer
 
