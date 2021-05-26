@@ -10,7 +10,7 @@ Backlog MqttHost mqtt.local; topic tasmota_%06X; setoption57 1; setoption19 1
 * Tasmota Configuration
 
 ```
-Backlog MqttHost mqtt.local; topic tasmota_%06X; setoption57 1; setoption19 1; module 71; webbutton1 Light; webbutton2 Off; webbutton3 Fan Low; webbutton4 Fan Med; webbutton5 Fan High; SetOption30 1; friendlyname1 Ceiling One; friendlyname2 Fan One;
+Backlog MqttHost mqtt.local; topic tasmota_%06X; setoption57 1; module 71; webbutton1 Light; webbutton2 Off; webbutton3 Fan Low; webbutton4 Fan Med; webbutton5 Fan High; SetOption30 1; devicename Master Light; friendlyname1 Master Light; friendlyname2 Master Fan; setoption19 1;
 
 Backlog Rule1 on FanSpeed#Data do teleperiod break; rule1 1
 ```
@@ -261,6 +261,17 @@ DimmerRange 100,255
 ## Trailer Relay Board
 
 backlog webbutton1 Ceiling; webbutton2 Flood; webbutton3 Porch; webbutton4 Step
+
+## Gowfeel EN71 Water Valve
+
+Flashing required opening the case and using a FTDI connected to the TYWE3S.  Flashed with Tasmota 9.2 
+
+* Tasmota configuration
+
+```
+backlog template  {"NAME":"SmartValve","GPIO":[224,0,0,0,0,0,0,0,32,288,0,0,0,0],"FLAG":0,"BASE":18}; module 0; MqttHost mqtt.local; topic tasmota_%06X; setoption19 1; setoption57 1
+```
+
 
 ## CE SMART Wifi Dimmer
 
