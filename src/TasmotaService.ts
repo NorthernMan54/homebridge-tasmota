@@ -109,7 +109,7 @@ export class TasmotaService {
 
   refresh() {
     // Get current status for accessory/service on startup
-    if (this.accessory.context.device[this.uniq_id].stat_t) {
+    if (this.accessory.context.device[this.uniq_id].stat_t && ! this.accessory.context.device[this.uniq_id].stat_t.includes('+/+/')) {
       const teleperiod = this.accessory.context.device[this.uniq_id].stat_t.substr(0, this.accessory.context.device[this.uniq_id].stat_t.lastIndexOf('/') + 1).replace('tele', 'cmnd') + 'teleperiod';
       this.accessory.context.mqttHost.sendMessage(teleperiod, this.platform.teleperiod.toString());
     }
