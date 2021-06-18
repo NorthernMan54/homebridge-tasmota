@@ -98,10 +98,10 @@ export class Mqtt extends EventEmitter {
     connection.subscribe(topic);
     // fix for openmqttgateway
     if (topic.includes('+') || topic.includes('#')) {
-      debug('statusSubscribe - wildcard', topic);
+    //  debug('statusSubscribe - wildcard', topic);
       wildCardTopics.push({ "topic": topic });
     } else {
-      debug('statusSubscribe - not wildcard', topic);
+    //  debug('statusSubscribe - not wildcard', topic);
     }
   }
 
