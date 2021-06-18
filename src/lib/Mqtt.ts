@@ -78,9 +78,10 @@ export class Mqtt extends EventEmitter {
           }
           break;
         default:
-          // debug('emit', topic, message.toString());
+          debug('emit', topic, message.toString());
           this.emit(topic, topic, message);
           if (isWildcardTopic(topic)) {
+            debug('emit - wildcard', getWildcardTopic(topic), message.toString());
             this.emit(getWildcardTopic(topic), getWildcardTopic(topic), message);
           }
           break;
@@ -94,11 +95,13 @@ export class Mqtt extends EventEmitter {
   }
 
   statusSubscribe(topic) {
-    // debug('statusSubscribe', topic);
     connection.subscribe(topic);
     // fix for openmqttgateway
-    if (topic.match('/\+|#/g')) {
+    if (topic.includes('+') || topic.includes('#')) {
+      debug('statusSubscribe - wildcard', topic);
       wildCardTopics.push({ "topic": topic });
+    } else {
+      debug('statusSubscribe - not wildcard', topic);
     }
   }
 
@@ -114,25 +117,29 @@ export class Mqtt extends EventEmitter {
 
 function isWildcardTopic(topic) {
   // debug("isWildcardTopic", topic, wildCardTopics);
+  var match: boolean = false;
   var index = wildCardTopics.findIndex((wildcard) => {
     // debug("mqttWildcard", topic, wildcard.topic);
     if (mqttWildcard(topic, wildcard.topic)) {
       // debug("match", topic, wildcard.topic);
-      return true;
+      match = true;
     }
   });
-  debug("done", topic, index);
-  return index;
+  // debug("done", topic, match);
+  return match;
 }
 
 function getWildcardTopic(topic) {
+  // debug("getWildcardTopic", topic, wildCardTopics);
+  var match: String = "";
   var index = wildCardTopics.findIndex(function(wildcard) {
     if (mqttWildcard(topic, wildcard.topic)) {
-      return wildcard.topic;
+      // debug("getWildcardTopic - match", topic, wildcard.topic);
+      match = wildcard.topic;
     }
   });
   // debug("get-done", topic, wildCardTopics[index]);
-  return wildCardTopics[index].topic;
+  return match;
 }
 
 /*
