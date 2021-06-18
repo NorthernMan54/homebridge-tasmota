@@ -6,6 +6,8 @@ import { EventEmitter } from "events";
 const debug = createDebug('Tasmota:mqtt');
 var connection;
 
+var wildCardTopics: any = [];
+
 export class Mqtt extends EventEmitter {
   public emit: any;
 
@@ -78,6 +80,9 @@ export class Mqtt extends EventEmitter {
         default:
           // debug('emit', topic, message.toString());
           this.emit(topic, topic, message);
+          if (isWildcardTopic(topic)) {
+            this.emit(getWildcardTopic(topic), getWildcardTopic(topic), message);
+          }
           break;
       }
     });
@@ -91,6 +96,10 @@ export class Mqtt extends EventEmitter {
   statusSubscribe(topic) {
     // debug('statusSubscribe', topic);
     connection.subscribe(topic);
+    // fix for openmqttgateway
+    if (topic.match('/\+|#/g')) {
+      wildCardTopics.push({ "topic": topic });
+    }
   }
 
   sendMessage(topic, message) {
@@ -101,4 +110,72 @@ export class Mqtt extends EventEmitter {
       throw new Error('sendMessage no message ' + topic);
     }
   }
+}
+
+function isWildcardTopic(topic) {
+  // debug("isWildcardTopic", topic, wildCardTopics);
+  var index = wildCardTopics.findIndex((wildcard) => {
+    // debug("mqttWildcard", topic, wildcard.topic);
+    if (mqttWildcard(topic, wildcard.topic)) {
+      // debug("match", topic, wildcard.topic);
+      return true;
+    }
+  });
+  debug("done", topic, index);
+  return index;
+}
+
+function getWildcardTopic(topic) {
+  var index = wildCardTopics.findIndex(function(wildcard) {
+    if (mqttWildcard(topic, wildcard.topic)) {
+      return wildcard.topic;
+    }
+  });
+  // debug("get-done", topic, wildCardTopics[index]);
+  return wildCardTopics[index].topic;
+}
+
+/*
+ * mqttWildcard('test/foo/bar', 'test/foo/bar'); // []
+ * mqttWildcard('test/foo/bar', 'test/+/bar'); // ['foo']
+ * mqttWildcard('test/foo/bar', 'test/#'); // ['foo/bar']
+ * mqttWildcard('test/foo/bar/baz', 'test/+/#'); // ['foo', 'bar/baz']
+ * mqttWildcard('test/foo/bar/baz', 'test/+/+/baz'); // ['foo', 'bar']
+
+ * mqttWildcard('test', 'test/#'); // []
+ * mqttWildcard('test/', 'test/#'); // ['']
+
+ * mqttWildcard('test/foo/bar', 'test/+'); // null
+ * mqttWildcard('test/foo/bar', 'test/nope/bar'); // null
+*/
+
+function mqttWildcard(topic, wildcard) {
+  if (topic === wildcard) {
+    return [];
+  } else if (wildcard === '#') {
+    return [topic];
+  }
+
+  var res: any = [];
+
+  var t = String(topic).split('/');
+  var w = String(wildcard).split('/');
+
+  var i = 0;
+  for (var lt = t.length; i < lt; i++) {
+    if (w[i] === '+') {
+      res.push(t[i]);
+    } else if (w[i] === '#') {
+      res.push(t.slice(i).join('/'));
+      return res;
+    } else if (w[i] !== t[i]) {
+      return null;
+    }
+  }
+
+  if (w[i] === '#') {
+    i += 1;
+  }
+
+  return (i === w.length) ? res : null;
 }

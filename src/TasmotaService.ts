@@ -95,13 +95,17 @@ export class TasmotaService {
 
   deviceClassToHKCharacteristic(device_class: string) {
     switch (device_class) {
+      case '-dt24-amp':
       case '_energy_current': // Amps
         return (this.CustomCharacteristic.ElectricCurrent);
       case '_energy_voltage': // Voltage
+      case '-dt24-volt':  // dt24
         return (this.CustomCharacteristic.Voltage);
       case '_energy_power': // Watts
+      case '-dt24-watt': // dt24
         return (this.CustomCharacteristic.CurrentConsumption);
       case '_energy_total': // Total Kilowatts
+      case '-dt24-watt-hour':
         return (this.CustomCharacteristic.TotalConsumption);
         break;
     }
@@ -109,7 +113,8 @@ export class TasmotaService {
 
   refresh() {
     // Get current status for accessory/service on startup
-    if (this.accessory.context.device[this.uniq_id].stat_t && ! this.accessory.context.device[this.uniq_id].stat_t.includes('+/+/')) {
+    // Wild cards in topic break this
+    if (this.accessory.context.device[this.uniq_id].stat_t && !this.accessory.context.device[this.uniq_id].stat_t.match('/\+|#/g')) {
       const teleperiod = this.accessory.context.device[this.uniq_id].stat_t.substr(0, this.accessory.context.device[this.uniq_id].stat_t.lastIndexOf('/') + 1).replace('tele', 'cmnd') + 'teleperiod';
       this.accessory.context.mqttHost.sendMessage(teleperiod, this.platform.teleperiod.toString());
     }
@@ -206,9 +211,9 @@ export class TasmotaService {
       }
     }
     catch (err) {
-      this.platform.log.error('ERROR: Template Parsing error', err.message);
-      debug('ERROR: Template Parsing error', valueTemplate, value);
-      return (err);
+//      this.platform.log.error('ERROR: Template Parsing error', err.message);
+//      debug('ERROR: Template Parsing error', valueTemplate, value);
+//      return (err);
     }
   }
 }

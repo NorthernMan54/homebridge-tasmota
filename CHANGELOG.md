@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. This project uses [Semantic Versioning](https://semver.org/).
 
+
+## 0.0.117 (2021-06-18)
+
+## [Version 0.0.115](https://github.com/northernman54/homebridge-tasmota/compare/v0.0.115...v0.0.117)
+
+#### Changes
+
+- Added support OpenMQTTGateway DT24 Bluetooth Voltmeter
+
 ## 0.0.115 (2021-05-20)
 
 ## [Version 0.0.115](https://github.com/northernman54/homebridge-tasmota/compare/v0.0.112...v0.0.115)

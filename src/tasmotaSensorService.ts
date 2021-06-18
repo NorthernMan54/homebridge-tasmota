@@ -128,6 +128,7 @@ export class tasmotaSensorService extends TasmotaService {
       case 'power':
         switch (this.uniq_id.replace(accessory.context.identifier, '').toLowerCase()) {
           case '_energy_power': // Watts
+          case '-dt24-watt': // dt24
             if (this.platform.config.history) {
               this.fakegato = 'custom';
             }
@@ -143,6 +144,9 @@ export class tasmotaSensorService extends TasmotaService {
           case '_energy_voltage': // Voltage
           case '_energy_current': // Amps
           case '_energy_total': // Total Kilowatts
+          case '-dt24-volt':  // dt24
+          case '-dt24-amp':
+          case '-dt24-watt-hour':
             this.service = this.accessory.getService(this.platform.Service.Switch) ||
               this.accessory.addService(this.platform.Service.Switch, accessory.context.device[this.uniq_id].name, this.uuid);
             // debug('this.service', this.service);
@@ -224,15 +228,17 @@ export class tasmotaSensorService extends TasmotaService {
           break;
       }
 
-      if (this.characteristic.value != value && this.delta(this.characteristic.value, value)) {
-        this.platform.log.info('Updating \'%s:%s\' to %s', this.service.displayName, this.characteristic.displayName ?? '',
-          value);
-      } else {
-        this.platform.log.debug('Updating \'%s:%s\' to %s', this.service.displayName, this.characteristic.displayName ?? '',
-          value);
-      }
+      if (value) {
+        if (this.characteristic.value != value && this.delta(this.characteristic.value, value)) {
+          this.platform.log.info('Updating \'%s:%s\' to %s', this.service.displayName, this.characteristic.displayName ?? '',
+            value);
+        } else {
+          this.platform.log.debug('Updating \'%s:%s\' to %s', this.service.displayName, this.characteristic.displayName ?? '',
+            value);
+        }
 
-      this.characteristic.updateValue(value);
+        this.characteristic.updateValue(value);
+      }
 
       // debug('fakegato', this.platform.config.history, this.fakegato, this.device_class);
       if (this.platform.config.history && this.fakegato) {
