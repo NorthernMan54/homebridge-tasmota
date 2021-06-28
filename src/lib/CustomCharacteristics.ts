@@ -65,7 +65,7 @@ module.exports = function(Service, Characteristic) {
     this.setProps({
       format: Characteristic.Formats.UINT16,
       unit: "hPa",
-      minValue: 700,
+      minValue: 300,
       maxValue: 1100,
       minStep: 1,
       perms: [Characteristic.Perms.READ, Characteristic.Perms.NOTIFY]

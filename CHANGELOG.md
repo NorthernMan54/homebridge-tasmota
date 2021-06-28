@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. This project uses [Semantic Versioning](https://semver.org/).
 
+## 0.0.120 (2021-06-28)
+
+## [Version 0.0.119](https://github.com/northernman54/homebridge-tasmota/compare/v0.0.117...v0.0.120)
+
+#### Changes
+
+- Changed valid minimum value for a BME280 Pressure sensor to 300 in alignment with datasheet.
 
 ## 0.0.117 (2021-06-18)
 
@@ -9,7 +16,7 @@ All notable changes to this project will be documented in this file. This projec
 
 #### Changes
 
-- Added support OpenMQTTGateway DT24 Bluetooth Voltmeter
+- Added support for OpenMQTTGateway DT24 Bluetooth Voltmeter
 
 ## 0.0.115 (2021-05-20)
 
