@@ -6,6 +6,7 @@ import {
 import { PLATFORM_NAME, PLUGIN_NAME } from './settings';
 // import { tasmotaAccessory } from './platformAccessory';
 import { tasmotaSwitchService } from './tasmotaSwitchService';
+import { tasmotaGarageService } from './tasmotaGarageService';
 import { tasmotaLightService } from './tasmotaLightService';
 import { tasmotaFanService } from './tasmotaFanService';
 import { tasmotaSensorService } from './tasmotaSensorService';
@@ -31,7 +32,7 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
 
   // this is used to track restored cached accessories
   public readonly accessories: PlatformAccessory[] = [];
-  public readonly services: tasmotaSwitchService[] | tasmotaLightService[] | tasmotaSensorService[] |
+  public readonly services: tasmotaGarageService[] | tasmotaSwitchService[] | tasmotaLightService[] | tasmotaSensorService[] |
     tasmotaBinarySensorService[] | tasmotaFanService[] = [];
 
   private discoveryTopicMap: DiscoveryTopicMap[] = [];
@@ -276,6 +277,10 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
                   this.services[uniq_id] = new tasmotaSwitchService(this, existingAccessory, uniq_id);
                   this.discoveryTopicMap[topic] = { topic: topic, type: 'Service', uniq_id: uniq_id, uuid: uuid };
                   break;
+                case 'garageDoor':
+                  this.services[uniq_id] = new tasmotaGarageService(this, existingAccessory, uniq_id);
+                  this.discoveryTopicMap[topic] = { topic: topic, type: 'Service', uniq_id: uniq_id, uuid: uuid };
+                  break;
                 case 'binary_sensor':
                   this.services[uniq_id] = new tasmotaBinarySensorService(this, existingAccessory, uniq_id);
                   this.discoveryTopicMap[topic] = { topic: topic, type: 'Service', uniq_id: uniq_id, uuid: uuid };
@@ -307,6 +312,10 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
             switch (message.tasmotaType) {
               case 'switch':
                 this.services[uniq_id] = new tasmotaSwitchService(this, accessory, uniq_id);
+                this.discoveryTopicMap[topic] = { topic: topic, type: 'Service', uniq_id: uniq_id, uuid: uuid };
+                break;
+              case 'garageDoor':
+                this.services[uniq_id] = new tasmotaGarageService(this, accessory, uniq_id);
                 this.discoveryTopicMap[topic] = { topic: topic, type: 'Service', uniq_id: uniq_id, uuid: uuid };
                 break;
               case 'light':
@@ -467,7 +476,7 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
   }
 }
 
-function setConfiguredName(this: tasmotaSwitchService | tasmotaLightService | tasmotaFanService | tasmotaSensorService | tasmotaBinarySensorService, value, callback: CharacteristicSetCallback) {
+function setConfiguredName(this: tasmotaSwitchService | tasmotaGarageService | tasmotaLightService | tasmotaFanService | tasmotaSensorService | tasmotaBinarySensorService, value, callback: CharacteristicSetCallback) {
   // debug('this', this.service.displayName);
   // this.platform.log.debug('setConfiguredName', value, this.service.displayName);
   this.service.displayName = value;

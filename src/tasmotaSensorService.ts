@@ -162,20 +162,24 @@ export class tasmotaSensorService extends TasmotaService {
         break;
       case undefined:
         // This is this Device status object
-        hostname = os.hostname().replace(/[^-_ a-zA-Z0-9]/gi, '');
-        this.platform.log.debug('Setting accessory information', accessory.context.device[this.uniq_id].name);
-        if (accessory.context.device[this.uniq_id].dev.mf && accessory.context.device[this.uniq_id].dev.mdl &&
-          accessory.context.device[this.uniq_id].dev.sw) {
-          this.accessory.getService(this.platform.Service.AccessoryInformation)!
-            .setCharacteristic(this.platform.Characteristic.Name, accessory.context.device[this.uniq_id].dev.name)
-            .setCharacteristic(this.platform.Characteristic.Manufacturer, (accessory.context.device[this.uniq_id].dev.mf ??
-              'undefined').replace(/[^-_ a-zA-Z0-9]/gi, ''))
-            .setCharacteristic(this.platform.Characteristic.Model, (accessory.context.device[this.uniq_id].dev.mdl ??
-              'undefined').replace(/[^-_ a-zA-Z0-9]/gi, ''))
-            .setCharacteristic(this.platform.Characteristic.FirmwareRevision, (accessory.context.device[this.uniq_id].dev.sw
-              ?? 'undefined').replace(/[^-_. a-zA-Z0-9]/gi, ''))
-            .setCharacteristic(this.platform.Characteristic.SerialNumber, accessory.context.device[this.uniq_id].dev.ids[0] +
-              '-' + hostname); // A unique fakegato ID
+        if (this.uniq_id.replace(accessory.context.identifier, '').toLowerCase() === '_status') {
+          hostname = os.hostname().replace(/[^-_ a-zA-Z0-9]/gi, '');
+          this.platform.log.debug('Setting accessory information', accessory.context.device[this.uniq_id].name);
+          if (accessory.context.device[this.uniq_id].dev.mf && accessory.context.device[this.uniq_id].dev.mdl &&
+            accessory.context.device[this.uniq_id].dev.sw) {
+            this.accessory.getService(this.platform.Service.AccessoryInformation)!
+              .setCharacteristic(this.platform.Characteristic.Name, accessory.context.device[this.uniq_id].dev.name)
+              .setCharacteristic(this.platform.Characteristic.Manufacturer, (accessory.context.device[this.uniq_id].dev.mf ??
+                'undefined').replace(/[^-_ a-zA-Z0-9]/gi, ''))
+              .setCharacteristic(this.platform.Characteristic.Model, (accessory.context.device[this.uniq_id].dev.mdl ??
+                'undefined').replace(/[^-_ a-zA-Z0-9]/gi, ''))
+              .setCharacteristic(this.platform.Characteristic.FirmwareRevision, (accessory.context.device[this.uniq_id].dev.sw
+                ?? 'undefined').replace(/[^-_. a-zA-Z0-9]/gi, ''))
+              .setCharacteristic(this.platform.Characteristic.SerialNumber, accessory.context.device[this.uniq_id].dev.ids[0] +
+                '-' + hostname); // A unique fakegato ID
+          }
+        } else {
+          this.platform.log.warn('Warning: missing dev_cla', accessory.context.device[this.uniq_id].name);
         }
         break;
       default:

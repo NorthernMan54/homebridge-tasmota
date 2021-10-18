@@ -260,16 +260,80 @@ DimmerRange 100,255
 
 ## Trailer Relay Board
 
+* Tasmota configuration
+
+```
 backlog webbutton1 Ceiling; webbutton2 Flood; webbutton3 Porch; webbutton4 Step
+```
 
 ## Gowfeel EN71 Water Valve
 
-Flashing required opening the case and using a FTDI connected to the TYWE3S.  Flashed with Tasmota 9.2 
+Flashing required opening the case and using a FTDI connected to the TYWE3S.  Flashed with Tasmota 9.2
 
 * Tasmota configuration
 
 ```
 backlog template  {"NAME":"SmartValve","GPIO":[224,0,0,0,0,0,0,0,32,288,0,0,0,0],"FLAG":0,"BASE":18}; module 0; MqttHost mqtt.local; topic tasmota_%06X; setoption19 1; setoption57 1
+```
+
+## Homebrew Garage Door Opener
+
+This is to document my efforts with my Chamberlain Garage Door Opener, which uses Security 2.0 on local control.  Technical details are here [MCUIOT](docs/GarageDoor.md)
+
+* Test Device Wiring
+
+GPIO 2 - LED_i 1
+GPIO 12 - Switch 2 ( Open Contact Sensor )
+GPIO 14 - Switch 3 ( Closed Contact Sensor )
+GPIO 16 - Relay_i 1 ( Using nodemcu to simulate relay )
+
+* Tasmota configuration for Test Device
+
+```
+backlog template {"NAME":"Garage Door Test","GPIO":[0,1,320,1,0,1,1,1,161,0,162,1,256,1],"FLAG":0,"BASE":18}; module 0; SetOption114 0; PulseTime1 1; MqttHost mqtt.local; topic tasmota_%06X; setoption57 1; switchmode2 1; switchmode3 1; setoption19 1
+```
+
+```
+Backlog Rule1
+  ON Switch2#state=0 DO publish %topic%/stat/DOOR OPEN endon
+  ON Switch2#state=1 DO Publish %topic%/stat/DOOR CLOSING endon
+  ON Switch3#state=0 DO publish %topic%/stat/DOOR CLOSED endon
+  ON Switch3#state=1 DO Publish %topic%/stat/DOOR OPENING endon
+; rule1 1
+```
+
+* Production Wiring
+
+GPIO 0 - Button 1
+GPIO X - Button 2
+GPIO X - LED 1
+GPIO X - LED 2
+GPIO 4 - Open Contact Sensor
+GPIO 12 - Relay
+GPIO 14 - Closed Contact Sensor
+
+* Tasmota configuration for Production Device ( Template has different GPIO settings )
+
+```
+backlog template {"NAME":"Garage Door","GPIO":[0,1,320,1,0,1,1,1,161,0,162,1,256,1],"FLAG":0,"BASE":18}; module 0; SetOption114 0; PulseTime1 1; MqttHost mqtt.local; topic tasmota_%06X; setoption57 1; switchmode2 1; switchmode3 1; setoption19 1
+```
+
+```
+Backlog Rule1
+  ON Switch2#state=0 DO publish %topic%/stat/DOOR OPEN endon
+  ON Switch2#state=1 DO Publish %topic%/stat/DOOR CLOSING endon
+  ON Switch3#state=0 DO publish %topic%/stat/DOOR CLOSED endon
+  ON Switch3#state=1 DO Publish %topic%/stat/DOOR OPENING endon
+; rule1 1
+```
+
+* homerbidge-tasmota config.json
+
+```
+"override": {
+  "FB6A07_RL_1": {
+     "tasmotaType": "garageDoor"
+  }
 ```
 
 

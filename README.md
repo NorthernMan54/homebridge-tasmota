@@ -24,6 +24,7 @@ Homebridge Plugin for Tasmota Devices that leverage's the Home Assistant Auto Di
 * PIR Motion sensor ( requires minor configuration )
 * Wipro Next 20W Smart LED Batten (White) Light
 * WemosDB - Doorbell device
+* Homebrew Garage Door Controller - [Details are here](docs/GarageDoor.md)
 
 ## Sensor types supported
 

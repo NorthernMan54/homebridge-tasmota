@@ -63,6 +63,7 @@ export class Mqtt extends EventEmitter {
                 case "binary_sensor":
                 case "light":
                 case "fan":
+                case "garageDoor":
                   // debug("emit", subject[1], this);
                   this.emit('Discovered', topic, device);
                   break;
