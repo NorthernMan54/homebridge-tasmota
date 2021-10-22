@@ -505,6 +505,7 @@ function normalizeMessage(message) {
     manufacturer: 'mf',
     identifiers: 'ids',
     value_template: 'val_tpl',
+    state_value_template: 'stat_val_tpl',
     unit_of_measurement: 'unit_of_meas',
     state_topic: 'stat_t',
     availability_topic: 'avty_t',

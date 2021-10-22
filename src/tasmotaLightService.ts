@@ -124,18 +124,18 @@ export class tasmotaLightService extends TasmotaService {
       // Tasmota effects schemes for ws2812 lights
 
       const schemes: { name: string, id: number, TVinput?: any }[] = [{ name: 'None', id: 0 },
-        { name: 'Wakeup', id: 1 },
-        { name: 'Cycle Up', id: 2 },
-        { name: 'Cycle Down', id: 3 },
-        { name: 'Random', id: 4 },
-        { name: 'Clock', id: 5 },
-        { name: 'Candlelight', id: 6 },
-        { name: 'RGB', id: 7 },
-        { name: 'Christmas', id: 8 },
-        { name: 'Hanukkah', id: 9 },
-        { name: 'Kwanzaa', id: 10 },
-        { name: 'Rainbow', id: 11 },
-        { name: 'Fire', id: 12 }];
+      { name: 'Wakeup', id: 1 },
+      { name: 'Cycle Up', id: 2 },
+      { name: 'Cycle Down', id: 3 },
+      { name: 'Random', id: 4 },
+      { name: 'Clock', id: 5 },
+      { name: 'Candlelight', id: 6 },
+      { name: 'RGB', id: 7 },
+      { name: 'Christmas', id: 8 },
+      { name: 'Hanukkah', id: 9 },
+      { name: 'Kwanzaa', id: 10 },
+      { name: 'Rainbow', id: 11 },
+      { name: 'Fire', id: 12 }];
 
       for (const element of schemes) {
         debug('element', element);
@@ -186,8 +186,13 @@ export class tasmotaLightService extends TasmotaService {
     this.accessory.context.timeout = this.platform.autoCleanup(this.accessory);
 
     try {
-      const value = this.parseValue(this.accessory.context.device[this.uniq_id].val_tpl, message.toString());
-
+      var value;
+      if (this.accessory.context.device[this.uniq_id].stat_val_tpl) {
+        value = this.parseValue(this.accessory.context.device[this.uniq_id].stat_val_tpl, message.toString());
+      } else {
+        value = this.parseValue(this.accessory.context.device[this.uniq_id].val_tpl, message.toString());
+      }
+      // debug('val_tpl', this.accessory.context.device[this.uniq_id].stat_val_tpl);
       if (this.service.getCharacteristic(this.platform.Characteristic.On).value !== (value ===
         this.accessory.context.device[this.uniq_id].pl_on ? true : false)) {
 
@@ -227,13 +232,13 @@ export class tasmotaLightService extends TasmotaService {
           this.parseValue(this.accessory.context.device[this.uniq_id].rgb_val_tpl, message.toString()).split(',')[2],
           RGBtoScaledHSV(this.parseValue(this.accessory.context.device[this.uniq_id].rgb_val_tpl,
             message.toString()).split(',')[0], this.parseValue(this.accessory.context.device[this.uniq_id].rgb_val_tpl,
-            message.toString()).split(',')[1], this.parseValue(this.accessory.context.device[this.uniq_id].rgb_val_tpl,
-            message.toString()).split(',')[2]), JSON.parse(message.toString()).HSBColor);
+              message.toString()).split(',')[1], this.parseValue(this.accessory.context.device[this.uniq_id].rgb_val_tpl,
+                message.toString()).split(',')[2]), JSON.parse(message.toString()).HSBColor);
 
         const hsb = RGBtoScaledHSV(this.parseValue(this.accessory.context.device[this.uniq_id].rgb_val_tpl,
           message.toString()).split(',')[0], this.parseValue(this.accessory.context.device[this.uniq_id].rgb_val_tpl,
-          message.toString()).split(',')[1], this.parseValue(this.accessory.context.device[this.uniq_id].rgb_val_tpl,
-          message.toString()).split(',')[2]);
+            message.toString()).split(',')[1], this.parseValue(this.accessory.context.device[this.uniq_id].rgb_val_tpl,
+              message.toString()).split(',')[2]);
 
 
         // Use debug logging for no change updates, and info when a change occurred
@@ -495,7 +500,7 @@ function rgb2hsv(r, g, b) {
   const gabs = g / 255;
   const babs = b / 255;
   v = Math.max(rabs, gabs, babs),
-  diff = v - Math.min(rabs, gabs, babs);
+    diff = v - Math.min(rabs, gabs, babs);
   const diffc = c => (v - c) / 6 / diff + 1 / 2;
   //    percentRoundFn = num => Math.round(num * 100) / 100;
   const percentRoundFn = num => Math.round(num);
