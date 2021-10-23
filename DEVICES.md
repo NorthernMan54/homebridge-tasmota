@@ -278,7 +278,7 @@ backlog template  {"NAME":"SmartValve","GPIO":[224,0,0,0,0,0,0,0,32,288,0,0,0,0]
 
 ## Homebrew Garage Door Opener
 
-This is to document my efforts with my Chamberlain Garage Door Opener, which uses Security 2.0 on local control.  Technical details are here [MCUIOT](docs/GarageDoor.md)
+This is to document my efforts with my Chamberlain Garage Door Opener, which uses Security 2.0 on local control.  Technical details are here [MCUIOT](docs/GarageDoor.md).
 
 * Test Device Wiring
 
@@ -290,15 +290,15 @@ GPIO 16 - Relay_i 1 ( Using nodemcu to simulate relay )
 * Tasmota configuration for Test Device
 
 ```
-backlog template {"NAME":"Garage Door Test","GPIO":[0,1,320,1,0,1,1,1,161,0,162,1,256,1],"FLAG":0,"BASE":18}; module 0; SetOption114 0; PulseTime1 1; MqttHost mqtt.local; topic tasmota_%06X; setoption57 1; switchmode2 1; switchmode3 1; setoption19 1
+backlog template {"NAME":"Test Door","GPIO":[0,1,320,1,0,1,1,1,161,0,162,1,256,1],"FLAG":0,"BASE":18}; module 0; SetOption114 0; PulseTime1 1; MqttHost mqtt.local; topic tasmota_%06X; setoption57 1; switchmode2 1; switchmode3 1; setoption19 1
 ```
 
 ```
 Backlog Rule1
-  ON Switch2#state=0 DO publish %topic%/stat/DOOR OPEN endon
-  ON Switch2#state=1 DO Publish %topic%/stat/DOOR CLOSING endon
-  ON Switch3#state=0 DO publish %topic%/stat/DOOR CLOSED endon
-  ON Switch3#state=1 DO Publish %topic%/stat/DOOR OPENING endon
+  ON Switch2#state=0 DO publish tele/%topic%/DOOR OPEN endon
+  ON Switch2#state=1 DO Publish tele/%topic%/DOOR CLOSING endon
+  ON Switch3#state=0 DO publish tele/%topic%/DOOR CLOSED endon
+  ON Switch3#state=1 DO Publish tele/%topic%/DOOR OPENING endon
 ; rule1 1
 ```
 
@@ -315,15 +315,15 @@ GPIO 14 - Closed Contact Sensor
 * Tasmota configuration for Production Device ( Template has different GPIO settings )
 
 ```
-backlog template {"NAME":"Garage Door","GPIO":[0,1,320,1,0,1,1,1,161,0,162,1,256,1],"FLAG":0,"BASE":18}; module 0; SetOption114 0; PulseTime1 1; MqttHost mqtt.local; topic tasmota_%06X; setoption57 1; switchmode2 1; switchmode3 1; setoption19 1
+backlog template {"NAME":"Garage Door","GPIO":[32,1,1,1,161,1,1,1,224,288,162,1,1,1],"FLAG":0,"BASE":18}; module 0; SetOption114 0; PulseTime1 1; MqttHost mqtt.local; topic tasmota_%06X; setoption57 1; switchmode2 1; switchmode3 1; setoption19 1
 ```
 
 ```
 Backlog Rule1
-  ON Switch2#state=0 DO publish %topic%/stat/DOOR OPEN endon
-  ON Switch2#state=1 DO Publish %topic%/stat/DOOR CLOSING endon
-  ON Switch3#state=0 DO publish %topic%/stat/DOOR CLOSED endon
-  ON Switch3#state=1 DO Publish %topic%/stat/DOOR OPENING endon
+  ON Switch2#state=0 DO publish tele/%topic%/DOOR OPEN endon
+  ON Switch2#state=1 DO Publish tele/%topic%/DOOR CLOSING endon
+  ON Switch3#state=0 DO publish tele/%topic%/DOOR CLOSED endon
+  ON Switch3#state=1 DO Publish tele/%topic%/DOOR OPENING endon
 ; rule1 1
 ```
 

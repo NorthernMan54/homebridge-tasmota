@@ -46,9 +46,8 @@ export class tasmotaGarageService extends TasmotaService {
     }
     this.enableStatus();
 
-    this.doorStatusTopic = 'tasmota_5673B2/stat/DOOR';
+    this.doorStatusTopic = this.accessory.context.device[this.uniq_id].stat_t.replace('STATE', 'DOOR');
 
-    // this.statusSubscribe = { event: doorStatusTopic, callback: this.statusUpdate.bind(this) };
     this.accessory.context.mqttHost.on(this.doorStatusTopic, this.statusUpdate.bind(this));
     this.accessory.context.mqttHost.statusSubscribe(this.doorStatusTopic);
   }
