@@ -96,6 +96,7 @@ export class tasmotaGarageService extends TasmotaService {
 
       switch (topic) {
         case this.doorStatusTopic:
+          debug('doorStatusTopic \'%s:%s\'', this.service.displayName, this.characteristic.displayName);
           switch (value) {
             case 'CLOSED':
               value = this.platform.Characteristic.CurrentDoorState.CLOSED;
@@ -112,39 +113,62 @@ export class tasmotaGarageService extends TasmotaService {
             default:
               this.platform.log.error('Unhandled Garage Door Status', value);
           }
+
+          if (this.characteristic.value !== value) {
+            this.platform.log.info('Updating \'%s:%s\' to %s', this.service.displayName, this.characteristic.displayName, value);
+
+          } else {
+
+            this.platform.log.debug('Updating \'%s\' to %s', this.service.displayName, value);
+          }
+
+          this.characteristic.updateValue(value);
+
+          if (topic === this.doorStatusTopic || topic === this.doorSensorTopic) {
+            this.service.getCharacteristic(this.platform.Characteristic.TargetDoorState).updateValue(value % 2);
+          }
           break;
         case this.doorSensorTopic:
+          debug('doorSensorTopic \'%s:%s\'', this.service.displayName, this.characteristic.displayName);
           value = JSON.parse(value);
           debug('doorSensorTopic %s', value);
-          if ( value.Switch2 === 'OFF') {
+          if (value.Switch2 === 'OFF') {
             value = this.platform.Characteristic.CurrentDoorState.OPEN;
-          } else if ( value.Switch3 === 'OFF') {
+            if (this.characteristic.value !== value) {
+              this.platform.log.info('Updating \'%s:%s\' to %s', this.service.displayName, this.characteristic.displayName, value);
+
+            } else {
+
+              this.platform.log.debug('Updating \'%s\' to %s', this.service.displayName, value);
+            }
+
+            this.characteristic.updateValue(value);
+
+            if (topic === this.doorStatusTopic || topic === this.doorSensorTopic) {
+              this.service.getCharacteristic(this.platform.Characteristic.TargetDoorState).updateValue(value % 2);
+            }
+          } else if (value.Switch3 === 'OFF') {
             value = this.platform.Characteristic.CurrentDoorState.CLOSED;
+            if (this.characteristic.value !== value) {
+              this.platform.log.info('Updating \'%s:%s\' to %s', this.service.displayName, this.characteristic.displayName, value);
+
+            } else {
+
+              this.platform.log.debug('Updating \'%s\' to %s', this.service.displayName, value);
+            }
+
+            this.characteristic.updateValue(value);
+
+            if (topic === this.doorStatusTopic || topic === this.doorSensorTopic) {
+              this.service.getCharacteristic(this.platform.Characteristic.TargetDoorState).updateValue(value % 2);
+            }
           } else {
-            this.platform.log.info('No Update \'%s:%s\'', this.service.displayName, this.characteristic.displayName);
+            this.platform.log.info('Not open or closed \'%s:%s\'', this.service.displayName, this.characteristic.displayName);
           }
+
           break;
         default:
 
-          if (this.accessory.context.device[this.uniq_id].val_tpl) {
-            value = this.parseValue(this.accessory.context.device[this.uniq_id].val_tpl, value);
-          }
-
-          value = (value === this.accessory.context.device[this.uniq_id].pl_on ? 1 : 0);
-      }
-
-      if (this.characteristic.value !== value) {
-        this.platform.log.info('Updating \'%s:%s\' to %s', this.service.displayName, this.characteristic.displayName, value);
-
-      } else {
-
-        this.platform.log.debug('Updating \'%s\' to %s', this.service.displayName, value);
-      }
-
-      this.characteristic.updateValue(value);
-
-      if (topic === this.doorStatusTopic || topic === this.doorSensorTopic) {
-        this.service.getCharacteristic(this.platform.Characteristic.TargetDoorState).updateValue(value % 2);
       }
 
     } catch (err) {

@@ -52,6 +52,8 @@ Another shot of the closed reed switch.  The reed switch is just drilled thru th
 
 This is the open reed switch and the magnet on the door block.
 
+For the final wiring, GPIO4/Switch2 is wired to the OPEN Reed Switch, and GPIO14/Switch3 is wired to the CLOSED reed switch.
+
 ## Circuit diagram
 
 ![Circuit](diagrams/GarageDoorCircuit.jpeg)

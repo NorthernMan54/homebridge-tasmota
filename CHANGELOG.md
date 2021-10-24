@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. This project uses [Semantic Versioning](https://semver.org/).
 
+## 0.0.124 (2021-10-28)
+
+## [Version 0.0.124](https://github.com/northernman54/homebridge-tasmota/compare/v0.0.120...v0.0.124)
+
+#### Changes
+
+- Add support for a Homebrew Garage Door controller based on a esp8266 relay Board
+- Fix for power control of Lights with Tasmota 9.5.0
+
 ## 0.0.120 (2021-06-28)
 
 ## [Version 0.0.119](https://github.com/northernman54/homebridge-tasmota/compare/v0.0.117...v0.0.120)
