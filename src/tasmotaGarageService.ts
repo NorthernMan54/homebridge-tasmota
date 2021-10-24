@@ -13,6 +13,7 @@ const debug = createDebug('Tasmota:garage');
 
 export class tasmotaGarageService extends TasmotaService {
   private doorStatusTopic: string;
+  private doorSensorTopic: string;
 
   constructor(
     public readonly platform: tasmotaPlatform,
@@ -50,6 +51,11 @@ export class tasmotaGarageService extends TasmotaService {
 
     this.accessory.context.mqttHost.on(this.doorStatusTopic, this.statusUpdate.bind(this));
     this.accessory.context.mqttHost.statusSubscribe(this.doorStatusTopic);
+
+    this.doorSensorTopic = this.accessory.context.device[this.uniq_id].stat_t.replace('STATE', 'SENSOR');
+
+    this.accessory.context.mqttHost.on(this.doorSensorTopic, this.statusUpdate.bind(this));
+    this.accessory.context.mqttHost.statusSubscribe(this.doorSensorTopic);
   }
 
   /**
@@ -88,31 +94,43 @@ export class tasmotaGarageService extends TasmotaService {
       this.accessory.context.timeout = this.platform.autoCleanup(this.accessory);
       let value = message.toString();
 
-      if (topic === this.doorStatusTopic) {
-        switch (value) {
-          case 'CLOSED':
-            value = this.platform.Characteristic.CurrentDoorState.CLOSED;
-            break;
-          case 'OPEN':
+      switch (topic) {
+        case this.doorStatusTopic:
+          switch (value) {
+            case 'CLOSED':
+              value = this.platform.Characteristic.CurrentDoorState.CLOSED;
+              break;
+            case 'OPEN':
+              value = this.platform.Characteristic.CurrentDoorState.OPEN;
+              break;
+            case 'CLOSING':
+              value = this.platform.Characteristic.CurrentDoorState.CLOSING;
+              break;
+            case 'OPENING':
+              value = this.platform.Characteristic.CurrentDoorState.OPENING;
+              break;
+            default:
+              this.platform.log.error('Unhandled Garage Door Status', value);
+          }
+          break;
+        case this.doorSensorTopic:
+          value = JSON.parse(value);
+          debug('doorSensorTopic %s', value);
+          if ( value.Switch2 === 'OFF') {
             value = this.platform.Characteristic.CurrentDoorState.OPEN;
-            break;
-          case 'CLOSING':
-            value = this.platform.Characteristic.CurrentDoorState.CLOSING;
-            break;
-          case 'OPENING':
-            value = this.platform.Characteristic.CurrentDoorState.OPENING;
-            break;
-          default:
-            this.platform.log.error('Unhandled Garage Door Status', value);
-        }
+          } else if ( value.Switch3 === 'OFF') {
+            value = this.platform.Characteristic.CurrentDoorState.CLOSED;
+          } else {
+            this.platform.log.info('No Update \'%s:%s\'', this.service.displayName, this.characteristic.displayName);
+          }
+          break;
+        default:
 
-      } else {
+          if (this.accessory.context.device[this.uniq_id].val_tpl) {
+            value = this.parseValue(this.accessory.context.device[this.uniq_id].val_tpl, value);
+          }
 
-        if (this.accessory.context.device[this.uniq_id].val_tpl) {
-          value = this.parseValue(this.accessory.context.device[this.uniq_id].val_tpl, value);
-        }
-
-        value = (value === this.accessory.context.device[this.uniq_id].pl_on ? 1 : 0);
+          value = (value === this.accessory.context.device[this.uniq_id].pl_on ? 1 : 0);
       }
 
       if (this.characteristic.value !== value) {
@@ -125,7 +143,7 @@ export class tasmotaGarageService extends TasmotaService {
 
       this.characteristic.updateValue(value);
 
-      if (topic === this.doorStatusTopic) {
+      if (topic === this.doorStatusTopic || topic === this.doorSensorTopic) {
         this.service.getCharacteristic(this.platform.Characteristic.TargetDoorState).updateValue(value % 2);
       }
 

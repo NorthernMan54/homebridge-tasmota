@@ -320,10 +320,10 @@ backlog template {"NAME":"Garage Door","GPIO":[32,1,1,1,161,1,1,1,224,288,162,1,
 
 ```
 Backlog Rule1
-  ON Switch2#state=0 DO publish tele/%topic%/DOOR OPEN endon
-  ON Switch2#state=1 DO Publish tele/%topic%/DOOR CLOSING endon
-  ON Switch3#state=0 DO publish tele/%topic%/DOOR CLOSED endon
-  ON Switch3#state=1 DO Publish tele/%topic%/DOOR OPENING endon
+  ON Switch2#state=0 DO publish2 tele/%topic%/DOOR OPEN endon
+  ON Switch2#state=1 DO Publish2 tele/%topic%/DOOR CLOSING endon
+  ON Switch3#state=0 DO publish2 tele/%topic%/DOOR CLOSED endon
+  ON Switch3#state=1 DO Publish2 tele/%topic%/DOOR OPENING endon
 ; rule1 1
 ```
 
