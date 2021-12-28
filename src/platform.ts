@@ -32,6 +32,7 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
 
   // this is used to track restored cached accessories
   public readonly accessories: PlatformAccessory[] = [];
+  private readonly defunctAccessories: PlatformAccessory[] = [];
   public readonly services: tasmotaGarageService[] | tasmotaSwitchService[] | tasmotaLightService[] | tasmotaSensorService[] |
     tasmotaBinarySensorService[] | tasmotaFanService[] = [];
 
@@ -82,6 +83,10 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
     this.api.on('didFinishLaunching', () => {
       log.debug('Executed didFinishLaunching callback');
       // run the method to discover / register your devices as accessories
+      debug('%d accessories for cleanup', this.defunctAccessories.length);
+      if (this.defunctAccessories.length > 0) {
+        this.cleanupDefunctAccessories();
+      }
       this.discoverDevices();
 
       if (this.config.history) {
@@ -109,11 +114,18 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
   configureAccessory(accessory: PlatformAccessory) {
     this.log.info('Loading accessory from cache:', accessory.displayName);
 
-    // debug('context', accessory.context);
-    accessory.context.timeout = this.autoCleanup(accessory);
+    debug('Load: "%s" %d services', accessory.displayName, accessory.services.length);
 
-    // add the restored accessory to the accessories cache so we can track if it has already been registered
-    this.accessories.push(accessory);
+    if (accessory.services.length > 1) {
+      // debug('context', accessory.context);
+      accessory.context.timeout = this.autoCleanup(accessory);
+
+      // add the restored accessory to the accessories cache so we can track if it has already been registered
+      this.accessories.push(accessory);
+    } else {
+      this.log.warn('Warning: Removing incomplete accessory definition from cache:', accessory.displayName);
+      this.defunctAccessories.push(accessory);
+    }
   }
 
   /* Check the topic against the configuration's filterList.
@@ -290,7 +302,7 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
               }
             }
 
-            debug('discoveryDevices - this.api.updatePlatformAccessories');
+            debug('discoveryDevices - this.api.updatePlatformAccessories - %d', existingAccessory.services.length);
             this.api.updatePlatformAccessories([existingAccessory]);
 
           } else {
@@ -341,9 +353,13 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
               default:
                 this.log.warn('Warning: Unhandled Tasmota device type', message.tasmotaType);
             }
-            debug('discovery devices - this.api.registerPlatformAccessories');
-            this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
-            this.accessories.push(accessory);
+            debug('discovery devices - this.api.registerPlatformAccessories - %d', accessory.services.length);
+            if (accessory.services.length > 1) {
+              this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
+              this.accessories.push(accessory);
+            } else {
+              this.log.warn('Warning: incomplete HASS Discovery message and device definition', topic, config.name);
+            }
           }
 
           if (this.services[uniq_id] && this.services[uniq_id].service && this.services[uniq_id].service.getCharacteristic(this.Characteristic.ConfiguredName).listenerCount('set') < 1) {
@@ -474,6 +490,16 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
     this.api.unregisterPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [existingAccessory]);
     // debug('this.timeouts - after', this.timeouts);
   }
+
+  // Remove defunct accessories discovered during startup
+
+  cleanupDefunctAccessories() {
+    this.defunctAccessories.forEach(accessory => {
+      debug('Removing', accessory.displayName);
+      this.accessoryCleanup(accessory);
+    });
+  }
+
 }
 
 function setConfiguredName(this: tasmotaSwitchService | tasmotaGarageService | tasmotaLightService | tasmotaFanService | tasmotaSensorService | tasmotaBinarySensorService, value, callback: CharacteristicSetCallback) {

@@ -40,6 +40,9 @@
 
 ## Schematic
 ![CLED](diagrams/mculed_v2_perf_schem.jpg)
+
+* During use found that I was getting noise / flashes on the LED's during start up D4/GPIO2 connected to WS2812 LED Data, so I moved it D6/GPIO12 in all production units.
+
 ## Breadboard layout
 ![CLED](diagrams/mculed_v2_perf_bb.jpg)
 ## Actual Breadboard layout

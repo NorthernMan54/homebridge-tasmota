@@ -2,15 +2,26 @@
 
 All notable changes to this project will be documented in this file. This project uses [Semantic Versioning](https://semver.org/).
 
-## 0.0.125 (2021-12-28)
+## 0.0.126 (2021-12-28)
 
-## [Version 0.0.125](https://github.com/northernman54/homebridge-tasmota/compare/v0.0.124...v0.0.125)
+## [Version 0.0.124](https://github.com/northernman54/homebridge-tasmota/compare/v0.0.125...v0.0.126)
 
 #### Changes
 
 - Fix for incorrect temperature historical graphs #40
 - Improved handling of OpenMQTTGateway devices and corrected system information service
 - Fix for duplicated historical graphs from devices with the same name
+
+## 0.0.125 (2021-12-12)
+
+## [Version 0.0.124](https://github.com/northernman54/homebridge-tasmota/compare/v0.0.124...v0.0.125)
+
+#### Changes
+
+- Made changes to the new device discovery routine, and stopped the adding of accessories without any services
+- Added a malformed accessory cleanup routine that is triggered on startup, any accessory without services will be removed from the Configuration.  The accessories being removed would should up in the HomeApp as 'Not Supported'
+- These changes were as a result of my work with OpenMQTTGateway and the accidental creation of several hundred malformed IBEACON accessories.
+- Changes to the documentation of MCULED ( Was tweaking my Christmas Configuration )
 
 ## 0.0.124 (2021-10-28)
 

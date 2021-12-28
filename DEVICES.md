@@ -139,7 +139,8 @@ SwitchMode 1
 "override":
   "869815_SW_1": {             <--- This is the unique_id of the discovery message you want to override
     "device_class": "motion",  <--- This is the key and property you want to override
-    "name": "Motion Sensor"    <--- You can overwrite an existing value
+    "name": "Motion Sensor",    <--- You can overwrite an existing value
+    "tasmotaType": "binary_sensor"
  }
  ```
 
@@ -163,7 +164,8 @@ SwitchMode 1
  "override":
    "869815_SW_1": {             <--- This is the unique_id of the discovery message you want to override
      "device_class": "motion",  <--- This is the key and property you want to override
-     "name": "Motion Sensor"    <--- You can overwrite an existing value
+     "name": "Motion Sensor",    <--- You can overwrite an existing value
+     "tasmotaType": "binary_sensor"
   }
   ```
 
