@@ -45,6 +45,14 @@ Backlog Rule1 on FanSpeed#Data do teleperiod break; rule1 1
 }
 ```
 
+## Slave a FEIT Wifi Dimmer Wall Switch
+
+Configure FEIT WiFi dimmer as per normal, then
+
+```
+backlog SetOption85 1; DevGroupName1 Master; DevGroupName2 Null; DevGroupShare 1,1; SetOption88 1
+```
+
 ## [MCUIOT](docs/MCUIOT.md) BME280 Temperature Sensor
 
 * Tasmota Configuration

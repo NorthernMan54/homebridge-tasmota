@@ -1,6 +1,7 @@
 import { Service, PlatformAccessory, Characteristic, CharacteristicValue, Nullable } from 'homebridge';
 import { tasmotaPlatform } from './platform';
 import nunjucks from 'nunjucks';
+import os from 'os';
 
 import createDebug from 'debug';
 
@@ -63,10 +64,12 @@ export class TasmotaService {
     // Enable historical logging
 
     if (this.platform.config.history && this.fakegato && !this.accessory.context.fakegatoService ?.addEntry) {
+      var hostname = os.hostname().split(".")[0];
       this.accessory.context.fakegatoService = new this.platform.FakeGatoHistoryService('custom', this.accessory, {
         storage: 'fs',
         minutes: this.platform.config.historyInterval ?? 10,
         log: this.platform.log,
+        filename: hostname + "_" + this.uniq_id + '_persist.json',
       });
       this.platform.log.debug('Creating fakegato service for %s %s', this.accessory.context.device[this.uniq_id].stat_t, this.accessory.context.device[this.uniq_id].name, this.accessory.context.device[this.uniq_id].uniq_id);
     } else {

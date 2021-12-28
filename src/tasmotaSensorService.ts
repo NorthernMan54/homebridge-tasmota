@@ -162,7 +162,8 @@ export class tasmotaSensorService extends TasmotaService {
         break;
       case undefined:
         // This is this Device status object
-        if (this.uniq_id.replace(accessory.context.identifier, '').toLowerCase() === '_status') {
+        // _status is a Tasmota device, and rssi is an OpenMQTTGateway
+        if (this.uniq_id.replace(accessory.context.identifier, '').toLowerCase() === '_status' || this.uniq_id.replace(accessory.context.identifier, '').toLowerCase() === 'rssi') {
           hostname = os.hostname().replace(/[^-_ a-zA-Z0-9]/gi, '');
           this.platform.log.debug('Setting accessory information', accessory.context.device[this.uniq_id].name);
           if (accessory.context.device[this.uniq_id].dev.mf && accessory.context.device[this.uniq_id].dev.mdl &&
@@ -215,6 +216,8 @@ export class tasmotaSensorService extends TasmotaService {
         case 'temperature':
           if (this.accessory.context.device[this.uniq_id].unit_of_meas.toUpperCase() === 'F') {
             value = Math.round((value - 32) * 5 / 9 * 10) / 10;
+          } else {
+            value = Math.round(value * 10) / 10;
           }
           break;
         case 'illuminance':

@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. This project uses [Semantic Versioning](https://semver.org/).
 
+## 0.0.125 (2021-12-28)
+
+## [Version 0.0.125](https://github.com/northernman54/homebridge-tasmota/compare/v0.0.124...v0.0.125)
+
+#### Changes
+
+- Fix for incorrect temperature historical graphs #40
+- Improved handling of OpenMQTTGateway devices and corrected system information service
+- Fix for duplicated historical graphs from devices with the same name
+
 ## 0.0.124 (2021-10-28)
 
 ## [Version 0.0.124](https://github.com/northernman54/homebridge-tasmota/compare/v0.0.120...v0.0.124)
