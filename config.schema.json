@@ -2,12 +2,11 @@
   "pluginAlias": "Tasmota",
   "pluginType": "platform",
   "singular": true,
-  "headerDisplay": "Please ensure that your Tasmota device has HASS Auto Discovey enabled ( setOption19 1 )",
+  "headerDisplay": "Automatic discovery and creation of Tasmota devices in your Homebridge environment.  To enable discovery please ensure that your Tasmota device has HASS Auto Discovey enabled ( setOption19 1 ).",
   "footerDisplay": "For further details please see the [README](https://github.com/NorthernMan54/homebridge-tasmota/blob/master/README.md). To manage your Tasmota devices [click here](http://tasui.shantur.com/#/findDevices)",
   "schema": {
     "type": "object",
     "properties": {
-
       "name": {
         "title": "Name",
         "type": "string",
@@ -26,63 +25,69 @@
         "title": "Username",
         "type": "string",
         "required": false,
-        "default": "",
+        "placeholder": "",
         "description": "This is the Username for your MQTT Broker."
       },
       "mqttPassword": {
         "title": "Password",
         "type": "string",
         "required": false,
-        "default": "",
+        "placeholder": "",
         "description": "This is the Password for your MQTT Broker."
       },
       "cleanup": {
         "title": "Disconnected Device Cleanup Timing",
         "type": "number",
         "required": false,
-        "default": 24,
+        "placeholder": 24,
         "description": "Cleanup of devices no longer connected too or responding on the network.  Time is in hours, defaults to 1 Day."
       },
       "debug": {
         "title": "Debug Logging",
         "type": "boolean",
         "required": false,
-        "default": false,
+        "placeholder": false,
         "description": "Enable verbose DEBUG logging."
       },
       "history": {
-        "title": "History logging of sensor and other data.",
+        "title": "Enable support for sensor data history logging",
         "type": "boolean",
         "required": false,
-        "default": false,
-        "description": "Enable logging of historical sensor information."
+        "placeholder": false,
+        "description": "Enable logging and graphing of historical sensor information. Must use a HomeKit app that supports data graphing to see charts."
       },
       "historyInterval": {
         "title": "Update interval for historical data.",
         "type": "number",
         "required": false,
-        "default": 10,
-        "description": "Update interval for the logging of history data.  Time is in minutes, defaults to 10 minutes."
+        "placeholder": 10,
+        "description": "Update interval for the logging of history data.  Time is in minutes, defaults to 10 minutes. ( Development testing only. )",
+        "condition": {
+          "functionBody": "return false;"
+        }
       },
       "filter": {
-        "title": "Filter device discovery topic",
+        "title": "Filter device discovery topic ( Deprecated, please use filter allow )",
         "type": "string",
         "required": false,
-        "default": "",
-        "description": "Regular expression to filter discovery topic messages against. ie \"F52066|00F861\" limit discovery to these two devices."
+        "placeholder": "",
+        "description": "Regular expression to filter discovery topic messages against. ie \"F52066|00F861\" limit discovery to these two devices.",
+        "condition": {
+          "functionBody": "return model.filter != null;"
+        }
       },
       "filterAllow": {
-        "title": "List of allowed topics for discovery",
+        "title": "List discovery message topics allowed from discovery",
         "type": "array",
         "required": false,
-        "default": "",
+        "placeholder": "",
         "description": "A list of regex's specifying allowed disocvery topics. If this is non-empty all non-specified topics will be blocked.",
         "items": {
           "type": "string"
         }
       },
       "filterDeny": {
-        "title": "List of denied topics for discovery",
+        "title": "List discovery message topics removed from discovery",
         "type": "array",
         "required": false,
         "default": "",
@@ -97,7 +102,123 @@
         "required": false,
         "default": false,
         "description": "Enable ability to select RGB light effects.  Requires adding an additional accessory/UI widget for each RGB light."
+      },
+      "injections": {
+        "required": false,
+        "type": "array",
+        "title": " ",
+        "buttonText": "Add additional topic to inject or overide.",
+        "items": {
+          "type": "object",
+          "properties": {
+            "topic": {
+              "title": "Message Topic to apply override to.",
+              "type": "string",
+              "description": "Unique portion of the discovery topic. ie from this topic `homeassistant/binary_sensor/00FF8D_BTN_1/config` `00FF8D_BTN_1` is unique"
+            },
+            "injection": {
+              "type": "array",
+              "default": [],
+              "buttonText": "Add additional keys and values.",
+              "title": "Key and Value to inject/over write in original discovery message",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "key": {
+                    "title": "Key to apply override to",
+                    "type": "string",
+                    "required": true
+                  },
+                  "value": {
+                    "title": "Replacement value",
+                    "type": "string",
+                    "required": true
+                  }
+                }
+              }
+            }
+          }
+        }
       }
     }
-  }
+  },
+  "form": [
+    "name",
+    "mqttHost",
+    {
+      "type": "fieldset",
+      "expandable": true,
+      "title": "Optional Settings",
+      "items": [{
+          "type": "flex",
+          "flex-flow": "row wrap",
+          "items": [
+            "mqttUsername",
+            "mqttPassword"
+          ]
+        },
+        "cleanup",
+        "debug",
+        "history",
+        "historyInterval",
+        "effects"
+      ]
+    },
+    {
+      "type": "fieldset",
+      "expandable": true,
+      "title": "Device Discovery Filtering",
+      "description": "Control which devices are discovered and included with Homebridge.",
+      "items": [{
+          "key": "filterAllow",
+          "type": "array",
+          "required": false,
+          "items": {
+            "title": "Topic regex to allow",
+            "description": "A list of regex's specifying allowed disocvery topics. If this is non-empty all non-specified topics will be blocked.",
+            "type": "string"
+          }
+        },
+        {
+          "key": "filterDeny",
+          "type": "array",
+          "required": false,
+          "items": {
+            "title": "Topic regex to filter/deny",
+            "description": "A list of regex's specifying topics to skip. Any matching mqtt topic will always be skipped, even if it matches a filterAllow rule.",
+            "type": "string"
+          }
+        },
+        "filter"
+      ]
+    },
+    {
+      "type": "fieldset",
+      "expandable": true,
+      "title": "MQTT Discovery Message Injection",
+      "description": "Ability to inject/over write portions of a MQTT Discovery message.",
+      "items": [{
+          "key": "injections",
+          "type": "array",
+
+          "items": [
+            "injections[].topic",
+            {
+              "key": "injections[].injection",
+              "type": "array",
+              "items": [{
+                "type": "flex",
+                "flex-flow": "row wrap",
+                "items": [
+                  "injections[].injection[].key",
+                  "injections[].injection[].value"
+                ]
+              }]
+            }
+          ]
+        },
+        "filter"
+      ]
+    }
+  ]
 }

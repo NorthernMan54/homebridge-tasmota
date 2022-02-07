@@ -214,7 +214,7 @@ export class tasmotaSensorService extends TasmotaService {
 
       switch (this.device_class) {
         case 'temperature':
-          if (this.accessory.context.device[this.uniq_id].unit_of_meas.toUpperCase() === 'F') {
+          if (this.accessory.context.device[this.uniq_id].unit_of_meas.toUpperCase() === '°F') {
             value = Math.round((value - 32) * 5 / 9 * 10) / 10;
           } else {
             value = Math.round(value * 10) / 10;

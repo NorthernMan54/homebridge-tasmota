@@ -73,6 +73,25 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
       debugEnable.enable(namespaces);
     }
 
+    if (this.config.override) {
+      interface Injection { key: string, value: any }
+      interface Injections { topic: string, injection: Injection[] }
+      const injections: Injections[] = [];
+      Object.keys(this.config.override).forEach((topic) => {
+        const inject: Injection[] = [];
+        Object.entries(this.config.override[topic]).forEach(
+          ([key, value]) => {
+            // debug("topic: %s, key: %s, value: %s", topic, key, value);
+            const injection: Injection = { key: key, value: value };
+            inject.push(injection);
+          },
+        );
+        injections.push({ topic: topic, injection: inject });
+      });
+      debug('This is your override reformated to injections.');
+      debug('"injections": %s\n', JSON.stringify(injections, null, 2));
+    }
+
     /* eslint-disable */
     this.CustomCharacteristic = require('./lib/CustomCharacteristics')(this.Service, this.Characteristic);
 
@@ -282,6 +301,7 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
                   this.discoveryTopicMap[topic] = { topic: topic, type: 'Service', uniq_id: uniq_id, uuid: uuid };
                   break;
                 case 'fan':
+                case 'fanFixed':
                   this.services[uniq_id] = new tasmotaFanService(this, existingAccessory, uniq_id);
                   this.discoveryTopicMap[topic] = { topic: topic, type: 'Service', uniq_id: uniq_id, uuid: uuid };
                   break;
@@ -381,7 +401,7 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
   discoveryOveride(uniq_id: string, message: any) {
     /* eslint-disable */
 
-    if (this.config.override) {
+    if (this.config.override) { // pre version 0.1.0 override configuration
       // debug('override', this.config.override);
       var overrides = [];
       for (const [key, value] of Object.entries(this.config.override)) {
@@ -394,6 +414,15 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
         // debug('Merged', merged);
         return normalizeMessage(merged);
       }
+    } else if (this.config.injections) {
+      // debug('injections', this.config.injections);
+      this.config.injections.forEach(overide => {
+        if (overide.topic === uniq_id) {
+          overide.injection.forEach(inject => {
+            message[inject.key] = inject.value;
+          });
+        }
+      });
     }
     return normalizeMessage(message);
   }
@@ -514,6 +543,30 @@ function setConfiguredName(this: tasmotaSwitchService | tasmotaGarageService | t
 /* The various Tasmota firmware's have a slightly different flavors of the message. */
 
 function normalizeMessage(message) {
+
+  switch (message.tasmotaType) {
+    case 'fanFixed':  // SonOff iFan03
+      message = {
+        ...message, ...{
+          "payload_high_speed": "3",
+          "payload_medium_speed": "2",
+          "payload_low_speed": "1",
+          "pl_off": "0",
+          "pl_on": "1",
+          "val_tpl": "{% if value_json.FanSpeed == 0 -%}0{%- elif value_json.FanSpeed > 0 -%}1{%- endif %}",
+          "bri_val_tpl": "{{value_json.FanSpeed*1/3*100}}",
+          "speeds": [
+            "off",
+            "low",
+            "medium",
+            "high"
+          ]
+        }
+      };
+      message.cmd_t = message.cmd_t.replace("POWER2", "FanSpeed");
+      break;
+    default:
+  }
 
   const translation = {
     // from: --> 'to'

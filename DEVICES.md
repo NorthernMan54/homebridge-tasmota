@@ -15,7 +15,23 @@ Backlog MqttHost mqtt.local; topic tasmota_%06X; setoption57 1; module 71; webbu
 Backlog Rule1 on FanSpeed#Data do teleperiod break; rule1 1
 ```
 
-* configuration override of discovery object to create a FAN
+* configuration override of discovery object to create a FAN ( post version 0.1.0 )
+
+`302F1B` is the Tasmota ID
+
+`Message Topic to apply override to` - `302F1B_LI_2`
+`Key:` - `tasmotaType`
+`Value:` - `fanFixed`
+
+`Message Topic to apply override to` - `302F1B_LI_3`
+`Key:` - `tasmotaType`
+`Value:` - `other`
+
+`Message Topic to apply override to` - `302F1B_LI_4`
+`Key:` - `tasmotaType`
+`Value:` - `other`
+
+* configuration override of discovery object to create a FAN ( pre version 0.1.0 )
 
 `302F1B` is the Tasmota ID
 

@@ -86,23 +86,21 @@ SetOption19 0
 
 ## Discovery Overrides
 
-### Fan
-
-If you override the tasmotaType with the value of `fan` a fan device will be created.  Tested with a Tuya Dimmer.  The first field `EF159D_LI_1` is the unique_id of the device.
-
-```
-"override": {
-  "EF159D_LI_1": {
-    "tasmotaType": "fan"
-  }
-}
-```
+Please see[DEVICES.md](DEVICES.md) for examples.
 
 ## Technical Details
 
 Under the covers this plugin leverages the Home Assistant Auto Discovery Function (setOption19) built into the Tasmota firmware and the [MQTT Discovery](https://www.home-assistant.io/docs/mqtt/discovery/) feature built into Home Assistant.  And uses the information provided by the Tasmota device to configure the HomeKit Accessory automatically without requiring within Homebridge.  
 
 ## Known issues
+
+### RGB Lights and Tasmota Versions greater 9.5.0
+
+Identified that with Tasmota versions greater than 9.5.0 that ability to control RGB light colours is not working.
+
+### Override settings removed from config.json by Homebridge UI
+
+Identified that the Homebridge UI removes the config.json setting `override`.  If your using the `override` setting don't use Homebridge UI or switch to the new setting `injections`.
 
 ### Accessory Names Doubled
 

@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. This project uses [Semantic Versioning](https://semver.org/).
 
+## 0.1.0 (2021-02-04)
+
+## [Version 0.1.0](https://github.com/northernman54/homebridge-tasmota/compare/v0.0.126...v0.1.0)
+
+#### Changes
+
+- Updated Tasmota settings gui in the Homebridge UI to support injecting configuration options into the MQTT Discovery message.  This new setting `MQTT Discovery Message Injection` replaces the existing setting `override` with a format that works with Homebridge UI.
+- Please note that you can use either injection or override but not both at the same time.
+- When implementing this change, identified a latent defect that the existing override settings are removed by the Homebridge UI.  If your using an override, do not use the Homebridge UI to edit your config.json.
+- To ease moving from overide to injections, if debug logging is enabled the plugin will convert your override to an injection during inital startup of homebridge ( prior to the scan code being displayed. )
+- Fix for issue #33, fahrenheit not being respected by homebridge
+- Added a `tasmotaType` `fanFixed` as a simplified macro for a Sonoff iFan03 configuration.  Updated DEVICES.md to reflect this.
+- Added preliminary support for device_class contact sensors.  Further details on device configuration to come.
+
 ## 0.0.126 (2021-12-28)
 
 ## [Version 0.0.124](https://github.com/northernman54/homebridge-tasmota/compare/v0.0.125...v0.0.126)

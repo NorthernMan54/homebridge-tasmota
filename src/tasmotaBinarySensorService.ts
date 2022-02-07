@@ -55,6 +55,23 @@ export class tasmotaBinarySensorService extends TasmotaService {
           debug('adding', this.fakegato);
         }
         break;
+      case 'contact':
+        this.platform.log.debug('Creating %s binary sensor %s', accessory.context.device[this.uniq_id].dev_cla,
+          accessory.context.device[this.uniq_id].name);
+
+        this.service = this.accessory.getService(this.uuid) || this.accessory.addService(this.platform.Service.ContactSensor,
+          accessory.context.device[this.uniq_id].name, this.uuid);
+
+        if (!this.service.displayName) {
+          this.service.setCharacteristic(this.platform.Characteristic.Name, accessory.context.device[this.uniq_id].name);
+        }
+        this.characteristic = this.service.getCharacteristic(this.platform.Characteristic.ContactSensorState);
+        if (this.platform.config.history) {
+          this.fakegato = 'contact';
+          this.service.addOptionalCharacteristic(this.CustomCharacteristic.LastActivation);
+          debug('adding', this.fakegato);
+        }
+        break;
       case 'door':
         this.platform.log.debug('Creating %s binary sensor %s', accessory.context.device[this.uniq_id].dev_cla,
           accessory.context.device[this.uniq_id].name);
@@ -142,6 +159,12 @@ export class tasmotaBinarySensorService extends TasmotaService {
           // boolean
           value = (this.accessory.context.device[this.uniq_id].pl_on === value ? true : false);
           break;
+        case 'contact':
+          // boolean
+          value = (this.accessory.context.device[this.uniq_id].pl_on === value ?
+            this.platform.Characteristic.ContactSensorState.CONTACT_NOT_DETECTED :
+            this.platform.Characteristic.ContactSensorState.CONTACT_DETECTED);
+          break;
       }
 
       if (this.characteristic.value !== value) {
@@ -156,6 +179,7 @@ export class tasmotaBinarySensorService extends TasmotaService {
           /* eslint-disable */
           case 'moisture':
           case 'motion':
+          case 'contact':
             if (this.platform.config.history) {
               const now = Math.round(new Date().valueOf() / 1000);
               const lastActivation = now - this.accessory.context.fakegatoService.getInitialTime();
