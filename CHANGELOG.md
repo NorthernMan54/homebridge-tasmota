@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. This project uses [Semantic Versioning](https://semver.org/).
 
+## 0.1.3 (2021-04-01)
+
+## [Version 0.1.3](https://github.com/northernman54/homebridge-tasmota/compare/v0.1.0...v0.1.3)
+
+#### Changes
+
+- Support for Tasmota 10.x.x and RGB bulbs #43
+
 ## 0.1.0 (2021-02-04)
 
 ## [Version 0.1.0](https://github.com/northernman54/homebridge-tasmota/compare/v0.0.126...v0.1.0)
