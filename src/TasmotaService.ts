@@ -196,14 +196,14 @@ export class TasmotaService {
   }
 
 
-  parseValue(valueTemplate, value) {
+  parseValue(valueTemplate: string, value: string) {
     try {
       if (valueTemplate) {
         // debug('nunjucksEnvironment', this, this.nunjucksEnvironment);
         var template = nunjucks.compile(valueTemplate, this.nunjucksEnvironment);
         // debug('nunjucksEnvironment', template, this.nunjucksEnvironment, value);
-        const result = template.render({ value_json: JSON.parse(value), });
-
+        const result = template.render({ value_json: JSON.parse(value) });
+        // debug('nunjucksEnvironment-result', valueTemplate, value, result);
         if (result) {
           return result;
         } else {
