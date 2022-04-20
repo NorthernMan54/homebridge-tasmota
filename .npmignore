@@ -2,6 +2,7 @@
 src
 docs
 test
+dist
 
 # ------------- Defaults ------------- #
 
