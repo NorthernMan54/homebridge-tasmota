@@ -191,7 +191,7 @@ SwitchMode 1
 * Tasmota configuration
 
 ```
-Backlog module 54; SetOption66 1; TuyaMCU 0,17; TuyaMCU 32,18; TuyaMCU 31,19; TuyaMCU 33,20; SetOption59 1; MqttHost mqtt.local; topic tasmota_%06X;
+Backlog module 54; SetOption66 1; TuyaMCU 0,17; TuyaMCU 32,18; TuyaMCU 31,19; TuyaMCU 33,20; SetOption59 1; MqttHost mqtt.local; topic tasmota_%06X; SetOption57 1;
 Rule1 on System#Boot do RuleTimer1 5 endon on Rules#Timer=1 do backlog SerialSend5 55aa0001000000; RuleTimer1 5 endon
 ```
 
