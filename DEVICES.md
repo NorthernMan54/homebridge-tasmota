@@ -9,9 +9,11 @@
       * [configuration override of discovery object to create a FAN ( post version 0.1.0 )](#configuration-override-of-discovery-object-to-create-a-fan--post-version-010-)
       * [configuration override of discovery object to create a FAN ( pre version 0.1.0 )](#configuration-override-of-discovery-object-to-create-a-fan--pre-version-010-)
       * [Slave a FEIT Wifi Dimmer Wall Switch to an iFan as a light switch](#slave-a-feit-wifi-dimmer-wall-switch-to-an-ifan-as-a-light-switch)
-   * [<a href="docs/MCUIOT.md">MCUIOT</a> BME280 Temperature Sensor](#mcuiot-bme280-temperature-sensor)
-   * [<a href="docs/MCUIOT.md">MCUIOT</a> DHT11 Temperature Sensor](#mcuiot-dht11-temperature-sensor)
+   * [BME280 Temperature Sensor - <a href="docs/MCUIOT.md">MCUIOT</a>](#bme280-temperature-sensor---mcuiot)
+   * [DHT11 Temperature Sensor - <a href="docs/MCUIOT.md">MCUIOT</a>](#dht11-temperature-sensor---mcuiot)
    * [Water Leak Sensor with On/Off control](#water-leak-sensor-with-onoff-control)
+      * [LEAK Tasmota configuration - <a href="docs/MCUIOT.md#dht-yl">DHT11</a>](#leak-tasmota-configuration---dht11)
+      * [Leak Tasmota configuration - <a href="docs/MCUIOT.md#dht-yl">BME280</a>](#leak-tasmota-configuration---bme280)
    * [Motion   BME280 Temperature Sensor](#motion--bme280-temperature-sensor)
    * [PIR Motion   BME280 Temperature Sensor   BH1750 Lux Illuminance Sensor](#pir-motion--bme280-temperature-sensor--bh1750-lux-illuminance-sensor)
    * [ZMAi-90 Current Sensor Switch](#zmai-90-current-sensor-switch)
@@ -109,7 +111,7 @@ Configure FEIT WiFi dimmer as per normal without setoption19, then apply this to
 backlog SetOption85 1; DevGroupName1 Master; DevGroupName2 Null; DevGroupShare 1,1; SetOption88 1
 ```
 
-# [MCUIOT](docs/MCUIOT.md) BME280 Temperature Sensor
+# BME280 Temperature Sensor - [MCUIOT](docs/MCUIOT.md)
 
 * Tasmota Configuration
 
@@ -121,7 +123,7 @@ D4 - GPIO2 -> LedLink
 Template: {"NAME":"BME","GPIO":[255,255,157,255,255,255,255,255,6,255,5,255,255],"FLAG":15,"BASE":18}
 ```
 
-# [MCUIOT](docs/MCUIOT.md) DHT11 Temperature Sensor
+# DHT11 Temperature Sensor - [MCUIOT](docs/MCUIOT.md)
 
 * Tasmota Configuration
 
@@ -134,7 +136,7 @@ Template: {"NAME":"DHT-D2/GPIO4","GPIO":[255,255,158,255,2,255,255,255,255,255,2
 
 # Water Leak Sensor with On/Off control
 
-* [DHT11](docs/MCUIOT.md#dht-yl) / LEAK Tasmota configuration
+##  LEAK Tasmota configuration - [DHT11](docs/MCUIOT.md#dht-yl)
 
 
 ```
@@ -154,7 +156,7 @@ Rule3 on Tele-ANALOG#Moisture>=10 DO backlog publish tasmota_18A6B3/stat/Moistur
 on Tele-ANALOG#Moisture<10 do backlog publish tasmota_18A6B3/stat/Moisture {"Leak":"OFF"} ; power off endon
 ```
 
-* [BME280](docs/MCUIOT.md#dht-yl) / Leak Tasmota configuration
+## Leak Tasmota configuration - [BME280](docs/MCUIOT.md#dht-yl)
 
 ```
 gpio2 - ledlink
