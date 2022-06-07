@@ -1,4 +1,4 @@
-<H1>Sample Device Configurations ( My personal collection )
+<H1>Sample Device Configurations ( My personal collection )</H1>
 ----------------------------------------------------------
 
 <!--ts-->
