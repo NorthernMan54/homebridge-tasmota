@@ -1,13 +1,50 @@
-# Sample Device Configurations ( My personal collection )
+<!--ts-->
+   * [Sonoff IFAN03](#sonoff-ifan03)
+      * [Tasmota Configuration](#tasmota-configuration)
+      * [configuration override of discovery object to create a FAN ( post version 0.1.0 )](#configuration-override-of-discovery-object-to-create-a-fan--post-version-010-)
+      * [configuration override of discovery object to create a FAN ( pre version 0.1.0 )](#configuration-override-of-discovery-object-to-create-a-fan--pre-version-010-)
+      * [Slave a FEIT Wifi Dimmer Wall Switch](#slave-a-feit-wifi-dimmer-wall-switch)
+   * [<a href="docs/MCUIOT.md">MCUIOT</a> BME280 Temperature Sensor](#mcuiot-bme280-temperature-sensor)
+   * [<a href="docs/MCUIOT.md">MCUIOT</a> DHT11 Temperature Sensor](#mcuiot-dht11-temperature-sensor)
+   * [Water Leak Sensor with On/Off control](#water-leak-sensor-with-onoff-control)
+   * [Motion   BME280 Temperature Sensor](#motion--bme280-temperature-sensor)
+   * [PIR Motion   BME280 Temperature Sensor   BH1750 Lux Illuminance Sensor](#pir-motion--bme280-temperature-sensor--bh1750-lux-illuminance-sensor)
+   * [ZMAi-90 Current Sensor Switch](#zmai-90-current-sensor-switch)
+   * [MCULED Device with RGB W Strip](#mculed-device-with-rgbw-strip)
+   * [MCULED Device with RGB W Strip - Version 2 ( Basement )](#mculed-device-with-rgbw-strip---version-2--basement-)
+   * [MCULED Device with RGB W Strip - Version 2 ( Cottage Sink )](#mculed-device-with-rgbw-strip---version-2--cottage-sink-)
+   * [Tuya Dimmer Module as a FAN](#tuya-dimmer-module-as-a-fan)
+   * [Trailer Relay Board](#trailer-relay-board)
+   * [Gowfeel EN71 Water Valve](#gowfeel-en71-water-valve)
+   * [Homebrew Garage Door Opener](#homebrew-garage-door-opener)
+   * [CE SMART Wifi Dimmer](#ce-smart-wifi-dimmer)
+   * [FEIT Wifi Dimmer](#feit-wifi-dimmer)
+   * [Hampton Bay Fan/Light RF Remote Control ( 303.9 Mhz )](#hampton-bay-fanlight-rf-remote-control--3039-mhz-)
+   * [Valor Fireplace Remote ( 315 Mhz )](#valor-fireplace-remote--315-mhz-)
+   * [Treatlife DS03 Fan Controller and Light Dimmer](#treatlife-ds03-fan-controller-and-light-dimmer)
+   * [OpenMQTTGateway devices](#openmqttgateway-devices)
+   * [Hampton Bay Light](#hampton-bay-light)
+   * [Hampton Bay FAN](#hampton-bay-fan)
+   * [openMQTTGateway / PiLight temperature sensor](#openmqttgateway--pilight-temperature-sensor)
 
-My standard config after setting name and device configuration
+<!-- Added by: sgracey, at:  -->
+
+<!--te-->
+
+
+Sample Device Configurations ( My personal collection )
+
+# My standard config after setting name and device configuration
+
+## Tasmota Configuration
+
 ```
 Backlog MqttHost mqtt.local; topic tasmota_%06X; setoption57 1; setoption19 1
 ```
 
-## Sonoff IFAN03
+# Sonoff IFAN03
 
-* Tasmota Configuration
+## Tasmota Configuration
 
 ```
 Backlog MqttHost mqtt.local; topic tasmota_%06X; setoption57 1; module 71; webbutton1 Light; webbutton2 Off; webbutton3 Fan Low; webbutton4 Fan Med; webbutton5 Fan High; SetOption30 1; devicename Master Light; friendlyname1 Master Light; friendlyname2 Master Fan; setoption19 1;
@@ -15,7 +52,7 @@ Backlog MqttHost mqtt.local; topic tasmota_%06X; setoption57 1; module 71; webbu
 Backlog Rule1 on FanSpeed#Data do teleperiod break; rule1 1
 ```
 
-* configuration override of discovery object to create a FAN ( post version 0.1.0 )
+## configuration override of discovery object to create a FAN ( post version 0.1.0 )
 
 `302F1B` is the Tasmota ID
 
@@ -31,7 +68,7 @@ Backlog Rule1 on FanSpeed#Data do teleperiod break; rule1 1
 `Key:` - `tasmotaType`
 `Value:` - `other`
 
-* configuration override of discovery object to create a FAN ( pre version 0.1.0 )
+## configuration override of discovery object to create a FAN ( pre version 0.1.0 )
 
 `302F1B` is the Tasmota ID
 
@@ -61,15 +98,15 @@ Backlog Rule1 on FanSpeed#Data do teleperiod break; rule1 1
 }
 ```
 
-## Slave a FEIT Wifi Dimmer Wall Switch
+## Slave a FEIT Wifi Dimmer Wall Switch to an iFan as a light switch
 
-Configure FEIT WiFi dimmer as per normal, then
+Configure FEIT WiFi dimmer as per normal without setoption19, then apply this to both devices.
 
 ```
 backlog SetOption85 1; DevGroupName1 Master; DevGroupName2 Null; DevGroupShare 1,1; SetOption88 1
 ```
 
-## [MCUIOT](docs/MCUIOT.md) BME280 Temperature Sensor
+# [MCUIOT](docs/MCUIOT.md) BME280 Temperature Sensor
 
 * Tasmota Configuration
 
@@ -81,7 +118,7 @@ D4 - GPIO2 -> LedLink
 Template: {"NAME":"BME","GPIO":[255,255,157,255,255,255,255,255,6,255,5,255,255],"FLAG":15,"BASE":18}
 ```
 
-## [MCUIOT](docs/MCUIOT.md) DHT11 Temperature Sensor
+# [MCUIOT](docs/MCUIOT.md) DHT11 Temperature Sensor
 
 * Tasmota Configuration
 
@@ -92,7 +129,7 @@ D4 - GPIO2 -> LedLinki
 Template: {"NAME":"DHT-D2/GPIO4","GPIO":[255,255,158,255,2,255,255,255,255,255,255,255,255],"FLAG":15,"BASE":18}
 ```
 
-## Water Leak Sensor with On/Off control
+# Water Leak Sensor with On/Off control
 
 * [DHT11](docs/MCUIOT.md#dht-yl) / LEAK Tasmota configuration
 
@@ -135,7 +172,7 @@ Rule3 on Tele-ANALOG#Moisture>=20 DO backlog publish tasmota_860695/stat/Moistur
 on Tele-ANALOG#Moisture<20 do backlog publish tasmota_860695/stat/Moisture {"Leak":"OFF"} ; power off endon
 ```
 
-## Motion + BME280 Temperature Sensor
+# Motion + BME280 Temperature Sensor
 
 * Tasmota Configuration
 
@@ -160,7 +197,7 @@ SwitchMode 1
  }
  ```
 
- ## PIR Motion + BME280 Temperature Sensor + BH1750 Lux Illuminance Sensor
+ # PIR Motion + BME280 Temperature Sensor + BH1750 Lux Illuminance Sensor
 
  * Tasmota Configuration
 
@@ -186,7 +223,7 @@ SwitchMode 1
   ```
 
 
-## ZMAi-90 Current Sensor Switch
+# ZMAi-90 Current Sensor Switch
 
 * Tasmota configuration
 
@@ -195,7 +232,7 @@ Backlog module 54; SetOption66 1; TuyaMCU 0,17; TuyaMCU 32,18; TuyaMCU 31,19; Tu
 Rule1 on System#Boot do RuleTimer1 5 endon on Rules#Timer=1 do backlog SerialSend5 55aa0001000000; RuleTimer1 5 endon
 ```
 
-## MCULED Device with RGB+W Strip
+# MCULED Device with RGB+W Strip
 
 ```
 D4 - GPIO 2 - ledlinki ( Blue LED )
@@ -225,7 +262,7 @@ rule2 on Power1#State=1 do backlog power1 off; power2 off; rule2 0; rule3 1; set
 rule3 on Power1#State=1 do backlog power1 off; dimmer2 0; power2 off; rule3 0; rule2 1; setoption37 0; template  {"NAME":"PWM Mode","GPIO":[0,0,157,0,18,10,0,0,22,17,37,0,0],"FLAG":0,"BASE":18}; power2 on; endon
 ```
 
-## MCULED Device with RGB+W Strip - Version 2 ( Basement )
+# MCULED Device with RGB+W Strip - Version 2 ( Basement )
 
 ```
 D4 - GPIO 2 - ledlinki ( Blue LED )
@@ -247,7 +284,7 @@ Unit 2 - this is a slave unit using device groups to sync status
 backlog DevGroupName basement_led; power1 off; power2 off; Fade 1; setoption37 24; SetOption85 1; webbutton1 White; webbutton2 LED; friendlyname1 Basement White 2;  friendlyname2 Basement LED 2; MqttHost mqtt.local; topic tasmota_%06X; Module 0; setoption19 0; rule2 0; template  {"NAME":"MCULED","GPIO":[0,0,0,0,0,0,0,0,1376,0,224,0,544,0],"FLAG":0,"BASE":18}
 ```
 
-## MCULED Device with RGB+W Strip - Version 2 ( Cottage Sink )
+# MCULED Device with RGB+W Strip - Version 2 ( Cottage Sink )
 
 ```
 D4 - GPIO 2 - ledlinki ( Blue LED )
@@ -266,7 +303,7 @@ rule2 on Power1#State=1 do backlog power2 off endon
 ```
 
 
-## Tuya Dimmer Module as a FAN
+# Tuya Dimmer Module as a FAN
 
 * Tasmota configuration
 
@@ -284,7 +321,7 @@ DimmerRange 100,255
   }
 ```
 
-## Trailer Relay Board
+# Trailer Relay Board
 
 * Tasmota configuration
 
@@ -292,7 +329,7 @@ DimmerRange 100,255
 backlog webbutton1 Ceiling; webbutton2 Flood; webbutton3 Porch; webbutton4 Step
 ```
 
-## Gowfeel EN71 Water Valve
+# Gowfeel EN71 Water Valve
 
 Flashing required opening the case and using a FTDI connected to the TYWE3S.  Flashed with Tasmota 9.2
 
@@ -302,7 +339,7 @@ Flashing required opening the case and using a FTDI connected to the TYWE3S.  Fl
 backlog template  {"NAME":"SmartValve","GPIO":[224,0,0,0,0,0,0,0,32,288,0,0,0,0],"FLAG":0,"BASE":18}; module 0; MqttHost mqtt.local; topic tasmota_%06X; setoption19 1; setoption57 1
 ```
 
-## Homebrew Garage Door Opener
+# Homebrew Garage Door Opener
 
 This is to document my efforts with my Chamberlain Garage Door Opener, which uses Security 2.0 on local control.  Technical details are here [MCUIOT](docs/GarageDoor.md).
 
@@ -363,7 +400,7 @@ Backlog Rule1
 ```
 
 
-## CE SMART Wifi Dimmer
+# CE SMART Wifi Dimmer
 
 * Tasmota configuration
 
@@ -371,7 +408,7 @@ Backlog Rule1
 backlog template {"NAME":"CE-WF500D","GPIO":[0,0,0,0,0,0,0,0,0,108,0,107,0],"FLAG":0,"BASE":54}; module 0; TuyaMCU 21,3; MqttHost mqtt.local; topic tasmota_%06X; setoption19 1; setoption57 1
 ```
 
-## FEIT Wifi Dimmer
+# FEIT Wifi Dimmer
 
 * Tasmota configuration
 
@@ -389,7 +426,11 @@ rule1 on Power1#State do tuyasend2 2,1440 endon
 rule1 1
 ```
 
-## Hampton Bay Fan/Light RF Remote Control ( 303.9 Mhz )
+# Turn off after 30 minutes
+
+backlog pulsetime 1900
+
+# Hampton Bay Fan/Light RF Remote Control ( 303.9 Mhz )
 
 FCCID: CHQ7083T / CHQ9050H 303.9 Mhz RF Remote Control
 
@@ -429,7 +470,7 @@ Rule3 on Power1#State do rfsend {"Data":"0x67E","Bits":12,"Protocol":6,"Pulse":3
   }
 ```
 
-## Valor Fireplace Remote ( 315 Mhz )
+# Valor Fireplace Remote ( 315 Mhz )
 
 ```
 Off
@@ -453,7 +494,7 @@ irsend raw,0,300,001011101110111000101110001000100010111000101110111011100010001
 ```
 
 
-## Treatlife DS03 Fan Controller and Light Dimmer
+# Treatlife DS03 Fan Controller and Light Dimmer
 
 * Tasmota configuration - from https://newadventuresinwi-fi.blogspot.com/2019/12/brilliant-smart-ceiling-fan-remote-in-home-assistant.html
 
@@ -510,7 +551,7 @@ tuyamcu 62,3 --> 62 for 4 speeds fan controller (possible values 0,1,2,3)
 
 I have been working on utilizing an OpenMQTTGateway device configured with a cc1101 RF Transceiver and the GatewayRF module.  The goal is to control my Hampton Bay ( 303 Mhz ), and GE Fans ( 315 Mhz ) and other RF devices.
 
-## Hampton Bay Light
+# Hampton Bay Light
 
 msg.payload =
 ```
@@ -543,7 +584,7 @@ homeassistant/light/9e0770_LI_1/config
 
 msg.retain = true
 
-## Hampton Bay FAN
+# Hampton Bay FAN
 
 msg.payload =
 ```
@@ -584,7 +625,7 @@ homeassistant/fan/9e0770_F1_1/config
 
 msg.retain = true
 
-## openMQTTGateway / PiLight temperature sensor
+# openMQTTGateway / PiLight temperature sensor
 
 Sensor Message
 
