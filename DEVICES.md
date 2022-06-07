@@ -1,3 +1,6 @@
+# Sample Device Configurations ( My personal collection )
+----------------------------------------------------------
+
 <!--ts-->
    * [Sonoff IFAN03](#sonoff-ifan03)
       * [Tasmota Configuration](#tasmota-configuration)
@@ -30,9 +33,6 @@
 <!-- Added by: sgracey, at:  -->
 
 <!--te-->
-
-
-Sample Device Configurations ( My personal collection )
 
 # My standard config after setting name and device configuration
 
