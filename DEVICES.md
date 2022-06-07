@@ -1,12 +1,12 @@
 <H1>Sample Device Configurations ( My personal collection )</H1>
-----------------------------------------------------------
 
 <!--ts-->
+   * [Sample Device Configurations ( My personal collection )](#sample-device-configurations--my-personal-collection-)
    * [My standard config after setting name and device configuration](#my-standard-config-after-setting-name-and-device-configuration)
       * [Tasmota Configuration](#tasmota-configuration)
    * [Sonoff IFAN03](#sonoff-ifan03)
       * [Tasmota Configuration](#tasmota-configuration-1)
-   * [configuration override of discovery object to create a FAN ( post version 0.1.0 )</h2>](#configuration-override-of-discovery-object-to-create-a-fan--post-version-010-)
+      * [configuration override of discovery object to create a FAN ( post version 0.1.0 )](#configuration-override-of-discovery-object-to-create-a-fan--post-version-010-)
       * [configuration override of discovery object to create a FAN ( pre version 0.1.0 )](#configuration-override-of-discovery-object-to-create-a-fan--pre-version-010-)
       * [Slave a FEIT Wifi Dimmer Wall Switch to an iFan as a light switch](#slave-a-feit-wifi-dimmer-wall-switch-to-an-ifan-as-a-light-switch)
    * [<a href="docs/MCUIOT.md">MCUIOT</a> BME280 Temperature Sensor](#mcuiot-bme280-temperature-sensor)
