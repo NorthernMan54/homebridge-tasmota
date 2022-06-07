@@ -1,4 +1,4 @@
-# Sample Device Configurations ( My personal collection )
+Sample Device Configurations ( My personal collection )
 ----------------------------------------------------------
 
 <!--ts-->
