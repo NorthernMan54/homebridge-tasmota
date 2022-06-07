@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. This project uses [Semantic Versioning](https://semver.org/).
 
+## 0.1.4 (2021-06-07)
+
+## [Version 0.1.3](https://github.com/northernman54/homebridge-tasmota/compare/v0.1.3...v0.1.4)
+
+#### Changes
+
+- Added TOC to DEVICES.md
+
 ## 0.1.3 (2021-04-01)
 
 ## [Version 0.1.3](https://github.com/northernman54/homebridge-tasmota/compare/v0.1.0...v0.1.3)

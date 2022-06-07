@@ -3,8 +3,8 @@
 npm audit
 npm audit fix
 #if npm audit; then
-#  npm run-script document
-#  rm *orig* *toc\.*
+npm run-script document
+rm *orig* *toc\.*
 if  npm run lint; then
 if npm run build; then
   git add .
