@@ -2,6 +2,10 @@
 
 Homebridge Plugin for Tasmota Devices that leverage's the Home Assistant Auto Discovery Function to configure and add devices.  And remove the need to manually configure Tasmota devices with Homebridge.  So far this has been tested with Switches/Outlets, Dimmers/Light's and temperature sensors ymmv for other devices.
 
+# Note: With the release of Tasmota 12, the feature 'Home Assistant discovery' this plugin has been using to discover Tasmota devices has been depricated.
+
+Over the next few months I will be working on a update to support version 12, but until that is ready please use versions less than 12.
+
 ## Features
 
 * Automatic discovery and configuration of supported Tasmota devices in Homebridge/Homekit.
