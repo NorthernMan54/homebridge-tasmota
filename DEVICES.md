@@ -108,7 +108,7 @@ Backlog Rule1 on FanSpeed#Data do teleperiod break; rule1 1
 Configure FEIT WiFi dimmer as per normal without setoption19, then apply this to both devices.
 
 ```
-backlog SetOption85 1; DevGroupName1 Master; DevGroupName2 Null; DevGroupShare 1,1; SetOption88 1
+backlog SetOption85 1; DevGroupName1 Master; DevGroupShare 1,1
 ```
 
 # BME280 Temperature Sensor - [MCUIOT](docs/MCUIOT.md)
