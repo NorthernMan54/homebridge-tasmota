@@ -410,7 +410,7 @@ Backlog Rule1
 * Tasmota configuration
 
 ```
-backlog template {"NAME":"CE-WF500D","GPIO":[0,0,0,0,0,0,0,0,0,108,0,107,0],"FLAG":0,"BASE":54}; module 0; TuyaMCU 21,3; MqttHost mqtt.local; topic tasmota_%06X; setoption19 1; setoption57 1
+backlog template {"NAME":"CE-WF500D","GPIO":[0,0,0,0,0,0,0,0,0,108,0,107,0],"FLAG":0,"BASE":54}; module 0; TuyaMCU 21,3; MqttHost mqtt.local; topic tasmota_%06X; setoption19 1; dimmerrange 30,255; setoption57 1
 ```
 
 # FEIT Wifi Dimmer
