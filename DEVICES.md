@@ -418,7 +418,7 @@ backlog template {"NAME":"CE-WF500D","GPIO":[0,0,0,0,0,0,0,0,0,108,0,107,0],"FLA
 * Tasmota configuration
 
 ```
-backlog module 54; DimmerRange 10,1440; TuyaMCU 21,2; MqttHost mqtt.local; topic tasmota_%06X; setoption19 1
+backlog module 54; DimmerRange 10,1440; TuyaMCU 21,2; MqttHost mqtt.local; topic tasmota_%06X; setoption57 1; setoption19 1
 ```
 
 * Tasmota configuration with Dimming removed
