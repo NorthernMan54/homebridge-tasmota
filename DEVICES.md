@@ -418,7 +418,7 @@ backlog template {"NAME":"CE-WF500D","GPIO":[0,0,0,0,0,0,0,0,0,108,0,107,0],"FLA
 * Tasmota configuration
 
 ```
-backlog module 54; DimmerRange 10,1440; TuyaMCU 21,2; MqttHost mqtt.local; topic tasmota_%06X; setoption57 1; setoption19 1
+backlog module 54; DimmerRange 10,1000; TuyaMCU 21,2; MqttHost mqtt.local; topic tasmota_%06X; setoption57 1; setoption19 1
 ```
 
 * Tasmota configuration with Dimming removed
@@ -426,7 +426,7 @@ backlog module 54; DimmerRange 10,1440; TuyaMCU 21,2; MqttHost mqtt.local; topic
 I have one installed on a non-dimmable light.  This removes the dimmer functionality from HomeKit only, unfortunately local control is still available, and if used will reset to 100% after turning off/on.
 
 ```
-backlog module 54; DimmerRange 10,1440; MqttHost mqtt.local; topic tasmota_%06X; setoption19 1
+backlog module 54; DimmerRange 10,1000; MqttHost mqtt.local; topic tasmota_%06X; setoption19 1
 rule1 on Power1#State do tuyasend2 2,1440 endon
 rule1 1
 ```
