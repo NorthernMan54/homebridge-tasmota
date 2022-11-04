@@ -435,6 +435,13 @@ rule1 1
 
 backlog pulsetime 1900
 
+Or
+
+```
+rule1 on System#Boot do pulsetime 1900 endon
+rule1 1
+```
+
 # Hampton Bay Fan/Light RF Remote Control ( 303.9 Mhz )
 
 FCCID: CHQ7083T / CHQ9050H 303.9 Mhz RF Remote Control
