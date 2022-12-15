@@ -120,7 +120,7 @@ The Home Assistant MQTT Auto Discovery messages live under the topic 'homeassist
 
 If you change the configuration in Tasmota of an existing device, and the old characteristics are still visible, you will need to clean up the 'Home Assistant MQTT Auto Discovery' messages for the device then disconnect the device for the cleanup period.  You can temporarily change the cleanup period to 0.125 which is approx 10 minutes if your in a hurry.
 
-To cleanup and remove all the retained homeassistant discovery messages.  This will remove all your discovered tasmota devices, and you will need to restart each device for the them to be discovered again.
+To cleanup and remove all the retained homeassistant discovery messages ( This will remove all your discovered tasmota devices, and you will need to restart each device for the them to be discovered again).
 ```
 mosquitto_sub -t 'homeassistant/#' --remove-retained --retained-only
 ```
