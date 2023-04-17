@@ -143,8 +143,13 @@
     }
   },
   "form": [
-    "name",
-    "mqttHost",
+    {
+      "type": "fieldset",
+      "title": "Required Settings",
+      "items": [
+          "mqttHost"
+      ]
+    },
     {
       "type": "fieldset",
       "expandable": true,

@@ -70,10 +70,10 @@ export class Mqtt extends EventEmitter {
 
               }
             } catch (error) {
-              debug("Error:", error);
-              debug("Triggerd by:", message.toString());
+              debug('Error:', error);
+              debug('Triggerd by:', message.toString());
             }
-          } else if (topic.endsWith("config")) {
+          } else if (topic.endsWith('config')) {
             this.emit('Remove', topic);
             // debug('Remove', topic);
           }

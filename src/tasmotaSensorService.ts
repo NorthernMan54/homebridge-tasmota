@@ -132,13 +132,16 @@ export class tasmotaSensorService extends TasmotaService {
             if (this.platform.config.history) {
               this.fakegato = 'custom';
             }
-            this.service = this.accessory.getService(this.platform.Service.Switch) ||
-              this.accessory.addService(this.platform.Service.Switch, accessory.context.device[this.uniq_id].name, this.uuid);
+            this.service = this.accessory.getService(this.platform.Service.Outlet) ||
+              this.accessory.addService(this.platform.Service.Outlet);
             // debug('this.service', this.service);
 
             this.characteristic =
               this.service.getCharacteristic(this.deviceClassToHKCharacteristic(this.uniq_id.replace(accessory.context.identifier,
                 '').toLowerCase()));
+
+            this.service.getCharacteristic(this.platform.Characteristic.OutletInUse) ||
+              this.service.addCharacteristic(this.platform.Characteristic.OutletInUse);
             // this.characteristic = this.service.getCharacteristic(this.CustomCharacteristic.ResetTotal);
             break;
           case '_energy_voltage': // Voltage
@@ -147,8 +150,8 @@ export class tasmotaSensorService extends TasmotaService {
           case '-dt24-volt':  // dt24
           case '-dt24-amp':
           case '-dt24-watt-hour':
-            this.service = this.accessory.getService(this.platform.Service.Switch) ||
-              this.accessory.addService(this.platform.Service.Switch, accessory.context.device[this.uniq_id].name, this.uuid);
+            this.service = this.accessory.getService(this.platform.Service.Outlet) ||
+              this.accessory.addService(this.platform.Service.Outlet, accessory.context.device[this.uniq_id].name, this.uuid);
             // debug('this.service', this.service);
 
             this.characteristic =
@@ -163,7 +166,8 @@ export class tasmotaSensorService extends TasmotaService {
       case undefined:
         // This is this Device status object
         // _status is a Tasmota device, and rssi is an OpenMQTTGateway
-        if (this.uniq_id.replace(accessory.context.identifier, '').toLowerCase() === '_status' || this.uniq_id.replace(accessory.context.identifier, '').toLowerCase() === 'rssi') {
+        if (this.uniq_id.replace(accessory.context.identifier, '').toLowerCase() === '_status' ||
+          this.uniq_id.replace(accessory.context.identifier, '').toLowerCase() === 'rssi') {
           hostname = os.hostname().replace(/[^-_ a-zA-Z0-9]/gi, '');
           this.platform.log.debug('Setting accessory information', accessory.context.device[this.uniq_id].name);
           if (accessory.context.device[this.uniq_id].dev.mf && accessory.context.device[this.uniq_id].dev.mdl &&

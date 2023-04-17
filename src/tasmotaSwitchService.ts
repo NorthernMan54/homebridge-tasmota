@@ -20,9 +20,22 @@ export class tasmotaSwitchService extends TasmotaService {
   ) {
     super(platform, accessory, uniq_id);
 
-    this.service = this.accessory.getService(this.uuid) || this.accessory.addService(this.platform.Service.Switch,
+    if (this.accessory.getService(this.uuid)) {
+      this.service = this.accessory.getService(this.uuid)!;
+    } else if (this.accessory.getService(this.platform.Service.Outlet)) {
+      const temp = this.accessory.getService(this.platform.Service.Outlet)!;
+      if (temp.name === null) {
+        this.service = temp!;
+        this.service.name = accessory.context.device[this.uniq_id].name;
+        this.service.displayName = accessory.context.device[this.uniq_id].name;
+        this.service.setCharacteristic(this.platform.Characteristic.Name, accessory.context.device[this.uniq_id].name)!;
+        this.service.subtype = this.uuid;
+      }
+    }
+    this.service = this.service || this.accessory.addService(this.platform.Service.Outlet,
       accessory.context.device[this.uniq_id].name, this.uuid);
 
+    this.service.setPrimaryService(true);
     // set the service name, this is what is displayed as the default name on the Home app
     // in this example we are using the name we stored in the `accessory.context` in the `discoverDevices` method.
     if (!this.service.displayName) {
@@ -72,7 +85,7 @@ export class tasmotaSwitchService extends TasmotaService {
       if (this.characteristic.value !== value) {
         this.platform.log.info('Updating \'%s:%s\' to %s', this.service.displayName, this.characteristic.displayName, value);
 
-        if (this.platform.config.history && this.accessory.context.fakegatoService ?.addEntry) {
+        if (this.platform.config.history && this.accessory.context.fakegatoService?.addEntry) {
           debug('Updating fakegato \'%s:%s\'', this.service.displayName, this.characteristic.displayName, {
             status: (value ? 1 : 0),
           });
@@ -113,7 +126,7 @@ export class tasmotaSwitchService extends TasmotaService {
           this.accessory.context.device[this.uniq_id].pl_on : this.accessory.context.device[this.uniq_id].pl_off));
       }
 
-      if (this.platform.config.history && this.accessory.context.fakegatoService ?.addEntry) {
+      if (this.platform.config.history && this.accessory.context.fakegatoService?.addEntry) {
         debug('Updating fakegato', this.service.displayName, {
           status: (value ? 1 : 0),
         });

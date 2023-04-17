@@ -1,16 +1,16 @@
-var inherits = require('util').inherits;
-var Service, Characteristic;
+const inherits = require('util').inherits;
+let Service, Characteristic;
 
 module.exports = function(Service, Characteristic) {
 
-  var CustomCharacteristic: any = {};
+  const CustomCharacteristic: any = {};
 
   CustomCharacteristic.Voltage = function() {
     Characteristic.call(this, 'Voltage', CustomCharacteristic.Voltage.UUID);
     this.setProps({
       format: Characteristic.Formats.FLOAT,
-      unit: "V",
-      perms: [Characteristic.Perms.READ, Characteristic.Perms.NOTIFY]
+      unit: 'V',
+      perms: [Characteristic.Perms.READ, Characteristic.Perms.NOTIFY],
     });
     this.value = this.getDefaultValue();
   };
@@ -23,8 +23,8 @@ module.exports = function(Service, Characteristic) {
     Characteristic.call(this, 'Electric Current', CustomCharacteristic.ElectricCurrent.UUID);
     this.setProps({
       format: Characteristic.Formats.FLOAT,
-      unit: "A",
-      perms: [Characteristic.Perms.READ, Characteristic.Perms.NOTIFY]
+      unit: 'A',
+      perms: [Characteristic.Perms.READ, Characteristic.Perms.NOTIFY],
     });
     this.value = this.getDefaultValue();
   };
@@ -37,8 +37,8 @@ module.exports = function(Service, Characteristic) {
     Characteristic.call(this, 'Current Consumption', CustomCharacteristic.CurrentConsumption.UUID);
     this.setProps({
       format: Characteristic.Formats.FLOAT,
-      unit: "W",
-      perms: [Characteristic.Perms.READ, Characteristic.Perms.NOTIFY]
+      unit: 'W',
+      perms: [Characteristic.Perms.READ, Characteristic.Perms.NOTIFY],
     });
     this.value = this.getDefaultValue();
   };
@@ -51,8 +51,8 @@ module.exports = function(Service, Characteristic) {
     Characteristic.call(this, 'Total Consumption', CustomCharacteristic.TotalConsumption.UUID);
     this.setProps({
       format: Characteristic.Formats.FLOAT,
-      unit: "kWh",
-      perms: [Characteristic.Perms.READ, Characteristic.Perms.NOTIFY]
+      unit: 'kWh',
+      perms: [Characteristic.Perms.READ, Characteristic.Perms.NOTIFY],
     });
     this.value = this.getDefaultValue();
   };
@@ -64,11 +64,11 @@ module.exports = function(Service, Characteristic) {
     Characteristic.call(this, 'Air Pressure', CustomCharacteristic.AtmosphericPressureLevel.UUID);
     this.setProps({
       format: Characteristic.Formats.UINT16,
-      unit: "hPa",
-      minValue: 300,
+      unit: 'hPa',
+      minValue: 100,      // Issue #45
       maxValue: 1100,
       minStep: 1,
-      perms: [Characteristic.Perms.READ, Characteristic.Perms.NOTIFY]
+      perms: [Characteristic.Perms.READ, Characteristic.Perms.NOTIFY],
     });
     this.value = this.getDefaultValue();
   };
@@ -98,7 +98,7 @@ module.exports = function(Service, Characteristic) {
     this.setProps({
       format: Characteristic.Formats.UINT8,
       unit: Characteristic.Units.PERCENTAGE,
-      perms: [Characteristic.Perms.READ, Characteristic.Perms.NOTIFY]
+      perms: [Characteristic.Perms.READ, Characteristic.Perms.NOTIFY],
     });
     this.value = this.getDefaultValue();
   };
@@ -108,7 +108,7 @@ module.exports = function(Service, Characteristic) {
     Characteristic.call(this, 'Program command', 'E863F12C-079E-48FF-8F27-9C2605A29F52');
     this.setProps({
       format: Characteristic.Formats.DATA,
-      perms: [Characteristic.Perms.WRITE, Characteristic.Perms.NOTIFY]
+      perms: [Characteristic.Perms.WRITE, Characteristic.Perms.NOTIFY],
     });
     this.value = this.getDefaultValue();
   };
@@ -118,7 +118,7 @@ module.exports = function(Service, Characteristic) {
     Characteristic.call(this, 'Program data', 'E863F12F-079E-48FF-8F27-9C2605A29F52');
     this.setProps({
       format: Characteristic.Formats.DATA,
-      perms: [Characteristic.Perms.READ, Characteristic.Perms.NOTIFY]
+      perms: [Characteristic.Perms.READ, Characteristic.Perms.NOTIFY],
     });
     this.value = this.getDefaultValue();
   };
@@ -129,7 +129,7 @@ module.exports = function(Service, Characteristic) {
     this.setProps({
       format: Characteristic.Formats.UINT32,
       unit: Characteristic.Units.SECONDS,
-      perms: [Characteristic.Perms.READ, Characteristic.Perms.NOTIFY]
+      perms: [Characteristic.Perms.READ, Characteristic.Perms.NOTIFY],
     });
     this.value = this.getDefaultValue();
   };
@@ -141,7 +141,7 @@ module.exports = function(Service, Characteristic) {
     this.setProps({
       format: Characteristic.Formats.UINT32,
       unit: Characteristic.Units.SECONDS,
-      perms: [Characteristic.Perms.READ, Characteristic.Perms.NOTIFY]
+      perms: [Characteristic.Perms.READ, Characteristic.Perms.NOTIFY],
     });
     this.value = this.getDefaultValue();
   };
@@ -152,7 +152,7 @@ module.exports = function(Service, Characteristic) {
     Characteristic.call(this, 'Times Opened', CustomCharacteristic.TimesOpened.UUID);
     this.setProps({
       format: Characteristic.Formats.UINT32,
-      perms: [Characteristic.Perms.READ, Characteristic.Perms.NOTIFY]
+      perms: [Characteristic.Perms.READ, Characteristic.Perms.NOTIFY],
     });
     this.value = this.getDefaultValue();
   };

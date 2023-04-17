@@ -16,7 +16,8 @@
     "strict": true,
     "esModuleInterop": true,
     "noImplicitAny": false,
-    "strictPropertyInitialization": false
+    "strictPropertyInitialization": false,
+    "useUnknownInCatchVariables": false
   },
   "include": [
     "src/"

@@ -30,7 +30,7 @@
     ],
     "ext": "ts",
     "ignore": [],
-    "exec": "DEBUG= tsc && homebridge -T -D -P ..",
+    "exec": "tsc && DEBUG=-mqtt-packet:*,-mqttjs:*,-engine*,-avvio,-follow-redirects,-socket.io:*,-socket.io-parser,* homebridge -I -T -D -P ..",
     "signal": "SIGTERM",
     "env": {
       "NODE_OPTIONS": "--trace-warnings"
@@ -47,15 +47,15 @@
     "nunjucks": "^3.2.x"
   },
   "devDependencies": {
-    "@types/node": "^14.0.27",
+    "@types/node": "^14.18.42",
     "@typescript-eslint/eslint-plugin": "^3.9.0",
     "@typescript-eslint/parser": "^3.9.0",
+    "documentation": "^14.0.1",
     "eslint": "^7.22.0",
-    "homebridge": "^1.3.4",
+    "homebridge": "^1.3.9",
     "nodemon": "^2.0.7",
     "rimraf": "^3.0.2",
     "ts-node": "^9.1.1",
-    "typescript": "^4.2.3",
-    "documentation": "^13.2.5"
+    "typescript": "^4.2.3"
   }
 }
