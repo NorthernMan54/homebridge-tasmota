@@ -18,6 +18,7 @@ export class tasmotaSensorService extends TasmotaService {
     public readonly platform: tasmotaPlatform,
     public readonly accessory: PlatformAccessory,
     protected readonly uniq_id: string,
+    protected readonly outletInUse: boolean = false,
   ) {
     super(platform, accessory, uniq_id);
 
@@ -140,6 +141,7 @@ export class tasmotaSensorService extends TasmotaService {
               this.service.getCharacteristic(this.deviceClassToHKCharacteristic(this.uniq_id.replace(accessory.context.identifier,
                 '').toLowerCase()));
 
+            this.outletInUse = true;
             this.service.getCharacteristic(this.platform.Characteristic.OutletInUse) ||
               this.service.addCharacteristic(this.platform.Characteristic.OutletInUse);
             // this.characteristic = this.service.getCharacteristic(this.CustomCharacteristic.ResetTotal);
@@ -202,7 +204,7 @@ export class tasmotaSensorService extends TasmotaService {
   // Override base statusUpdate
 
   statusUpdate(topic, message) {
-    debug('statusUpdate', this.service.displayName, topic, message.toString());
+    debug('statusUpdate', this.service.displayName, topic, this.device_class, message.toString());
 
     this.accessory.context.timeout = this.platform.autoCleanup(this.accessory);
 
@@ -239,13 +241,17 @@ export class tasmotaSensorService extends TasmotaService {
           break;
       }
 
-      if (value) {
+      if (value !== null) {
         if (this.characteristic.value != value && this.delta(this.characteristic.value, value)) {
           this.platform.log.info('Updating \'%s:%s\' to %s', this.service.displayName, this.characteristic.displayName ?? '',
             value);
         } else {
           this.platform.log.debug('Updating \'%s:%s\' to %s', this.service.displayName, this.characteristic.displayName ?? '',
             value);
+        }
+
+        if (this.outletInUse && this.service.getCharacteristic(this.platform.Characteristic.OutletInUse)) {
+          this.service.setCharacteristic(this.platform.Characteristic.OutletInUse, value > 0);
         }
 
         this.characteristic.updateValue(value);

@@ -30,7 +30,7 @@
     ],
     "ext": "ts",
     "ignore": [],
-    "exec": "tsc && DEBUG=-mqtt-packet:*,-mqttjs:*,-engine*,-avvio,-follow-redirects,-socket.io:*,-socket.io-parser,* homebridge -I -T -D -P ..",
+    "exec": "tsc && DEBUG=-mqtt-packet:*,-mqttjs:*,-engine*,-avvio,-follow-redirects,-socket.io:*,-socket.io-parser,Tasmota* homebridge -I -T -D -P ..",
     "signal": "SIGTERM",
     "env": {
       "NODE_OPTIONS": "--trace-warnings"
