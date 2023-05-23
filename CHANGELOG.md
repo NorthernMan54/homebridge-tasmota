@@ -8,7 +8,7 @@ All notable changes to this project will be documented in this file. This projec
 
 #### Changes
 
-- Fixed naming for devices with multpiple services.
+- Fixed naming for devices with multiple services.
 
 ## 0.1.7 (2023-05-15)
 
