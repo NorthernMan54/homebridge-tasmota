@@ -25,6 +25,8 @@ export class tasmotaGarageService extends TasmotaService {
     this.service = this.accessory.getService(this.uuid) || this.accessory.addService(this.platform.Service.GarageDoorOpener,
       accessory.context.device[this.uniq_id].name, this.uuid);
 
+    this.service.setCharacteristic(this.platform.Characteristic.ConfiguredName, accessory.context.device[this.uniq_id].name);
+
     // set the service name, this is what is displayed as the default name on the Home app
     // in this example we are using the name we stored in the `accessory.context` in the `discoverDevices` method.
     if (!this.service.displayName) {

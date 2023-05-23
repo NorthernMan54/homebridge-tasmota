@@ -27,6 +27,7 @@ export class tasmotaBinarySensorService extends TasmotaService {
 
         this.service = this.accessory.getService(this.uuid) || this.accessory.addService(this.platform.Service.ContactSensor,
           accessory.context.device[this.uniq_id].name, this.uuid);
+        this.service.setCharacteristic(this.platform.Characteristic.ConfiguredName, accessory.context.device[this.uniq_id].name);
 
         if (!this.service.displayName) {
           this.service.setCharacteristic(this.platform.Characteristic.Name, accessory.context.device[this.uniq_id].name);
@@ -44,6 +45,7 @@ export class tasmotaBinarySensorService extends TasmotaService {
 
         this.service = this.accessory.getService(this.uuid) || this.accessory.addService(this.platform.Service.MotionSensor,
           accessory.context.device[this.uniq_id].name, this.uuid);
+        this.service.setCharacteristic(this.platform.Characteristic.ConfiguredName, accessory.context.device[this.uniq_id].name);
 
         if (!this.service.displayName) {
           this.service.setCharacteristic(this.platform.Characteristic.Name, accessory.context.device[this.uniq_id].name);
@@ -61,6 +63,7 @@ export class tasmotaBinarySensorService extends TasmotaService {
 
         this.service = this.accessory.getService(this.uuid) || this.accessory.addService(this.platform.Service.ContactSensor,
           accessory.context.device[this.uniq_id].name, this.uuid);
+        this.service.setCharacteristic(this.platform.Characteristic.ConfiguredName, accessory.context.device[this.uniq_id].name);
 
         if (!this.service.displayName) {
           this.service.setCharacteristic(this.platform.Characteristic.Name, accessory.context.device[this.uniq_id].name);
@@ -78,6 +81,7 @@ export class tasmotaBinarySensorService extends TasmotaService {
 
         this.service = this.accessory.getService(this.uuid) || this.accessory.addService(this.platform.Service.ContactSensor,
           accessory.context.device[this.uniq_id].name, this.uuid);
+        this.service.setCharacteristic(this.platform.Characteristic.ConfiguredName, accessory.context.device[this.uniq_id].name);
 
         if (!this.service.displayName) {
           this.service.setCharacteristic(this.platform.Characteristic.Name, accessory.context.device[this.uniq_id].name);
@@ -95,6 +99,7 @@ export class tasmotaBinarySensorService extends TasmotaService {
 
         this.service = this.accessory.getService(this.uuid) || this.accessory.addService(this.platform.Service.LeakSensor,
           accessory.context.device[this.uniq_id].name, this.uuid);
+        this.service.setCharacteristic(this.platform.Characteristic.ConfiguredName, accessory.context.device[this.uniq_id].name);
 
         if (!this.service.displayName) {
           this.service.setCharacteristic(this.platform.Characteristic.Name, accessory.context.device[this.uniq_id].name);
@@ -194,7 +199,7 @@ export class tasmotaBinarySensorService extends TasmotaService {
 
       this.characteristic.updateValue(value);
 
-      if (this.platform.config.history && this.fakegato && this.accessory.context.fakegatoService ?.addEntry) {
+      if (this.platform.config.history && this.fakegato && this.accessory.context.fakegatoService?.addEntry) {
         debug('Updating fakegato', this.service.displayName, {
           [this.fakegato]: (this.characteristic.value ? 1 : 0),
         });

@@ -2,9 +2,17 @@
 
 All notable changes to this project will be documented in this file. This project uses [Semantic Versioning](https://semver.org/).
 
+## 0.1.9 (2023-05-21)
+
+## [Version 0.1.9](https://github.com/northernman54/homebridge-tasmota/compare/v0.1.7...v0.1.9)
+
+#### Changes
+
+- Fixed naming for devices with multpiple services.
+
 ## 0.1.7 (2023-05-15)
 
-## [Version 0.1.3](https://github.com/northernman54/homebridge-tasmota/compare/v0.1.4...v0.1.7)
+## [Version 0.1.7](https://github.com/northernman54/homebridge-tasmota/compare/v0.1.4...v0.1.7)
 
 #### Changes
 

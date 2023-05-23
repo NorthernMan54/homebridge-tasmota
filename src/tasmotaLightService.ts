@@ -27,6 +27,7 @@ export class tasmotaLightService extends TasmotaService {
 
     this.service = this.accessory.getService(this.uuid) || this.accessory.addService(this.platform.Service.Lightbulb,
       accessory.context.device[this.uniq_id].name, this.uuid);
+    this.service.setCharacteristic(this.platform.Characteristic.ConfiguredName, accessory.context.device[this.uniq_id].name);
 
     if (!this.service.displayName) {
       this.service.setCharacteristic(this.platform.Characteristic.Name, accessory.context.device[this.uniq_id].name);

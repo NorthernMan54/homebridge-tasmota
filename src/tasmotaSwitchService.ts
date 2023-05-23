@@ -34,6 +34,7 @@ export class tasmotaSwitchService extends TasmotaService {
     }
     this.service = this.service || this.accessory.addService(this.platform.Service.Outlet,
       accessory.context.device[this.uniq_id].name, this.uuid);
+    this.service.setCharacteristic(this.platform.Characteristic.ConfiguredName, accessory.context.device[this.uniq_id].name);
 
     this.service.setPrimaryService(true);
     // set the service name, this is what is displayed as the default name on the Home app

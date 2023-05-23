@@ -39,7 +39,7 @@
    * [Version 2](#version-2)
 
 <!-- Created by https://github.com/ekalinin/github-markdown-toc -->
-<!-- Added by: sgracey, at: Mon 15 May 2023 20:05:38 EDT -->
+<!-- Added by: sgracey, at: Mon 22 May 2023 20:20:27 EDT -->
 
 <!--te-->
 
@@ -56,7 +56,7 @@ Backlog MqttHost mqtt.local; topic tasmota_%06X; setoption57 1; setoption19 1
 ## Tasmota Configuration
 
 ```
-Backlog MqttHost mqtt.local; topic tasmota_%06X; setoption57 1; module 71; webbutton1 Light; webbutton2 Off; webbutton3 Fan Low; webbutton4 Fan Med; webbutton5 Fan High; SetOption30 1; devicename Master Light; friendlyname1 Master Light; friendlyname2 Master Fan; setoption19 1;
+Backlog MqttHost mqtt.local; topic tasmota_%06X; setoption57 1; module 71; webbutton1 Light; webbutton2 Off; webbutton3 Fan Low; webbutton4 Fan Med; webbutton5 Fan High; SetOption30 1; devicename Master; friendlyname1 Master; friendlyname2 Master Fan; setoption19 1;
 
 Backlog Rule1 on FanSpeed#Data do teleperiod break; rule1 1
 ```
