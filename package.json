@@ -12,8 +12,8 @@
     "url": "https://github.com/NorthernMan54/homebridge-tasmota/issues"
   },
   "engines": {
-    "node": ">=10.17.0",
-    "homebridge": ">0.4.53"
+    "homebridge": "^1.7.0",
+    "node": "^18 || ^20"
   },
   "main": "dist/index.js",
   "scripts": {
