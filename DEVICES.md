@@ -354,11 +354,13 @@ This is to document my replacement backend for a doorbell.  I have the button an
 
 * Device Wiring - based on a ESP8266 12-E NodeMCU Kit
 
- GPIO 2  - LEDLink
- GPIO 12 - BME280 SDA
- GPIO 13 - Switch 1 - This is wired to the button
- GPIO 14 - BME280 SCL
- GPIO 16 - Relay_i 1 - The second LED will turn on when the button is pressed
+```
+GPIO 2  - LEDLink
+GPIO 12 - BME280 SDA
+GPIO 13 - Switch 1 - This is wired to the button
+GPIO 14 - BME280 SCL
+GPIO 16 - Relay_i 1 - The second LED will turn on when the button is pressed
+```
 
 ```
 backlog template  {"NAME":"Doorbell Button","GPIO":[0,1,544,1,0,1,1,1,640,160,608,1,256,1],"FLAG":0,"BASE":18}; module 0; MqttHost mqtt.local; topic tasmota_%06X; setoption57 1; setoption19 1
@@ -370,10 +372,12 @@ This is to document my efforts with my Chamberlain Garage Door Opener, which use
 
 * Test Device Wiring
 
+```
  GPIO 2 - LED_i 1
  GPIO 12 - Switch 2 ( Open Contact Sensor )
  GPIO 14 - Switch 3 ( Closed Contact Sensor )
  GPIO 16 - Relay_i 1 ( Using nodemcu to simulate relay )
+```
 
 * Tasmota configuration for Test Device
 
