@@ -366,6 +366,8 @@ GPIO 16 - Relay_i 1 - The second LED will turn on when the button is pressed
 
 ```
 backlog template  {"NAME":"Doorbell Button","GPIO":[0,1,544,1,0,1,1,1,640,160,608,1,256,1],"FLAG":0,"BASE":18}; module 0; MqttHost mqtt.local; topic tasmota_%06X; setoption57 1; setoption19 1
+rule1 on System#Boot do pulsetime 10 endon
+rule1 1
 ```
 
 # Homebrew Garage Door Opener
