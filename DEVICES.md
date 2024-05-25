@@ -459,6 +459,14 @@ rule1 on Power1#State do tuyasend2 2,1440 endon
 rule1 1
 ```
 
+## Using a FEIT Wifi Dimmer as a remote switch to OpenBK RGBCCT Potlights
+
+* Tasmota configuration
+
+```
+backlog module 54;  TuyaMCU 21,2; TuyaMCU 23,3; TuyaMCU 24,4; MqttHost mqtt.local; topic tasmota_%06X; setoption57 1; DimmerRange 10,1000; setoption19 1; DevGroupShare 0,19; SetOption85 1; DevGroupName1 Master
+```
+
 # Turn off after 30 minutes
 
 backlog pulsetime 1900
