@@ -465,6 +465,8 @@ rule1 1
 
 ```
 backlog module 54;  TuyaMCU 21,2; TuyaMCU 23,3; TuyaMCU 24,4; MqttHost mqtt.local; topic tasmota_%06X; setoption57 1; DimmerRange 10,1000; setoption19 1; DevGroupShare 3,19; SetOption85 1; DevGroupName1 Master
+rule1 on Power1#State=1 do backlog CT 325 endon
+rule1 1
 ```
 
 # Turn off after 30 minutes
