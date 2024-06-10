@@ -114,7 +114,7 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
 
         // Only addEntries that match the expected profile of the function.
 
-        this.FakeGatoHistoryService.prototype.appendData = function(entry) {
+        this.FakeGatoHistoryService.prototype.appendData = function (entry) {
           entry.time = Math.round(new Date().valueOf() / 1000);
           switch (this.accessoryType) {
             default:
@@ -325,7 +325,7 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
             debug('discoveryDevices - this.api.updatePlatformAccessories - %d', existingAccessory.services.length);
             this.api.updatePlatformAccessories([existingAccessory]);
 
-          } else {
+          } else if (message.name) {
             // the accessory does not yet exist, so we need to create it
             this.log.info('Adding new accessory:', message.name);
 
@@ -381,6 +381,8 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
             } else {
               this.log.warn('Warning: incomplete HASS Discovery message and device definition', topic, config.name);
             }
+          } else {
+            this.log.warn('Warning: Missing accessory friendly name', topic, config.name);
           }
 
           if (this.services[uniq_id] && this.services[uniq_id].service && this.services[uniq_id].service.getCharacteristic(this.Characteristic.ConfiguredName).listenerCount('set') < 1) {
@@ -685,7 +687,7 @@ function renameKeys(o, mapShortToLong) {
 
 function findVal(object, key) {
   var value;
-  Object.keys(object).some(function(k) {
+  Object.keys(object).some(function (k) {
     if (k === key) {
       value = object[k];
       return true;
