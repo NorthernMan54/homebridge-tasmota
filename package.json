@@ -1,7 +1,7 @@
 {
   "displayName": "Tasmota",
   "name": "homebridge-tasmota",
-  "version": "0.1.12",
+  "version": "0.1.13",
   "description": "Homebridge plugin for Tasmota devices leveraging home assistant auto discovery.",
   "license": "Apache-2.0",
   "repository": {
@@ -22,7 +22,7 @@
     "watch": "nodemon",
     "build": "rimraf ./dist && tsc",
     "prepublishOnly": "npm run lint && npm run build",
-    "document": "./gh-md-toc --insert DEVICES.md"
+    "document": "./gh-md-toc --hide-footer DEVICES.md"
   },
   "nodemonConfig": {
     "watch": [
@@ -50,10 +50,10 @@
     "@types/node": "^14.18.42",
     "@typescript-eslint/eslint-plugin": "^3.9.0",
     "@typescript-eslint/parser": "^3.9.0",
-    "documentation": "^14.0.1",
+    "documentation": "^14.0.3",
     "eslint": "^7.22.0",
     "homebridge": "^1.3.9",
-    "nodemon": "^2.0.7",
+    "nodemon": "^3.1.3",
     "rimraf": "^3.0.2",
     "ts-node": "^9.1.1",
     "typescript": "^4.2.3"
