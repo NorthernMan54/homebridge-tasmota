@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. This project uses [Semantic Versioning](https://semver.org/).
 
+## 0.1.11 (2024-06-09)
+
+## [Version 0.1.11](https://github.com/northernman54/homebridge-tasmota/compare/v0.1.9...v0.1.11)
+
+#### Changes
+
+- Fix for iFan module
+
 ## 0.1.9 (2023-05-21)
 
 ## [Version 0.1.9](https://github.com/northernman54/homebridge-tasmota/compare/v0.1.7...v0.1.9)

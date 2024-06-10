@@ -355,6 +355,7 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
                 this.discoveryTopicMap[topic] = { topic: topic, type: 'Service', uniq_id: uniq_id, uuid: uuid };
                 break;
               case 'fan':
+              case 'fanFixed':
                 this.services[uniq_id] = new tasmotaFanService(this, accessory, uniq_id);
                 this.discoveryTopicMap[topic] = { topic: topic, type: 'Service', uniq_id: uniq_id, uuid: uuid };
                 break;
