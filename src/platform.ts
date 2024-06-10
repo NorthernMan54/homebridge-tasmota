@@ -285,7 +285,7 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
                 default:
                   this.discoveryTopicMap[topic] = { topic: topic, type: 'Service', uniq_id: uniq_id, uuid: uuid };
               }
-            } else {
+            } else if (message.name) {
               this.log.info('Creating service:', message.name, message.tasmotaType);
               switch (message.tasmotaType) {
                 case 'sensor':
@@ -320,6 +320,8 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
                 default:
                   this.log.warn('Warning: Unhandled Tasmota device type', message.tasmotaType);
               }
+            } else {
+              this.log.warn('Warning: missing friendly name for topic ', topic);
             }
 
             debug('discoveryDevices - this.api.updatePlatformAccessories - %d', existingAccessory.services.length);
