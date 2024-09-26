@@ -751,7 +751,7 @@ Rule1
 Backlog MqttHost mqtt.local; topic tasmota_%06X; setoption57 1; setoption19 1; rule1 1
 ```
 
-## Version 3
+## Version 3 - Do three checks before rebooting
 
 Rule 1 - Reboot router if internet connection fails 3 checks in a row, initial checks are 1 minute appart. If internet does not recover, double the test interval to a max of 4 hours.
 
