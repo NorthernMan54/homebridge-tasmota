@@ -753,15 +753,16 @@ Backlog MqttHost mqtt.local; topic tasmota_%06X; setoption57 1; setoption19 1; r
 
 ## Version 3
 
-Rule 1 - Reboot router if internet connection fails 3 times in 15 seconds.  Delay reboot for 5 seconds to allow mqtt message to publish
+Rule 1 - Reboot router if internet connection fails 3 checks in a row, initial checks are 1 minute appart. If internet does not recover, double the test interval to a max of 4 hours.
 
 ```
 Rule1
-  ON system#boot DO backlog Var1 3; Var2 0; poweronstate 5; pulsetime 130; Power1 1 ENDON
-  ON Var1#State>1439 DO Var1 1439 ENDON
-  ON Time#Minute|%var1% DO backlog Power1 1; websend [google.com] / ENDON
-  ON WebSend#Data$!Done DO backlog Add2 1; Delay 5; IF Var2>=3 DO backlog Mult1 3; Power1 0; Delay 10; Power1 1; Var2 0 ENDON ENDIF ENDON
-  ON WebSend#Data=Done DO backlog Var1 3; Var2 0 ENDON
+  ON system#boot DO backlog Var1 1; Var2 0 ENDON
+  ON Var1#State>240 DO Var1 240 ENDON
+  ON Time#Minute|%var1% DO backlog websend [google.com] / ENDON
+  ON WebSend#Data$!Done DO backlog Add2 1; Publish router/Internet_Status "Internet may be down" ENDON
+  ON Var2#state>=3 DO backlog Publish router/Internet_Status "Internet Down"; delay 5; Mult1 2; Var2 0; Power1 0; Delay 10; Power1 1 ENDON
+  ON WebSend#Data=Done DO backlog Publish router/Internet_Status "Internet OK"; backlog Var1 1; Var2 0 ENDON
 Backlog rule1 1
 
 ```
@@ -769,11 +770,11 @@ Rule 2 - Publish status to router/Internet_Status
 
 ```
 Rule2
-  ON system#boot DO backlog Var3 3; Var4 0 ENDON
-  ON Var3#State>1439 DO Var3 1439 ENDON
-  ON Time#Minute|%var3% DO backlog websend [brokegoogle.com] / ENDON
+  ON system#boot DO backlog Var3 1; Var4 0 ENDON
+  ON Var3#State>240 DO Var3 240 ENDON
+  ON Time#Minute|%var3% DO backlog websend [google.com] / ENDON
   ON WebSend#Data$!Done DO backlog Add4 1; Publish router/Internet_Status "Internet may be down" ENDON
-  ON Var4>=3 DO backlog Publish router/Internet_Status "Internet Down"; Var4 0 ENDON
-  ON WebSend#Data=Done DO backlog Publish router/Internet_Status "Internet OK"; backlog Var3 3; Var4 0 ENDON
+  ON Var4#state>=3 DO backlog Publish router/Internet_Status "Internet Down"; Mult3 2; Var4 0 ENDON
+  ON WebSend#Data=Done DO backlog Publish router/Internet_Status "Internet OK"; backlog Var3 1; Var4 0 ENDON
 Backlog rule2 1
 ```
