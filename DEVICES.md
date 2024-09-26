@@ -760,7 +760,7 @@ Rule1
   ON system#boot DO backlog Var1 3; Var2 0; poweronstate 5; pulsetime 130; Power1 1 ENDON
   ON Var1#State>1439 DO Var1 1439 ENDON
   ON Time#Minute|%var1% DO backlog Power1 1; websend [google.com] / ENDON
-  ON WebSend#Data$!Done DO backlog Var2 +1; Delay 5; IF Var2>=3 DO backlog Mult1 3; Power1 0; Delay 10; Power1 1; Var2 0 ENDON ENDIF ENDON
+  ON WebSend#Data$!Done DO backlog Add2 1; Delay 5; IF Var2>=3 DO backlog Mult1 3; Power1 0; Delay 10; Power1 1; Var2 0 ENDON ENDIF ENDON
   ON WebSend#Data=Done DO backlog Var1 3; Var2 0 ENDON
 Backlog rule1 1
 
@@ -771,8 +771,9 @@ Rule 2 - Publish status to router/Internet_Status
 Rule2
   ON system#boot DO backlog Var3 3; Var4 0 ENDON
   ON Var3#State>1439 DO Var3 1439 ENDON
-  ON Time#Minute|%var3% DO backlog websend [google.com] / ENDON
-  ON WebSend#Data$!Done DO backlog Var4 +1; Delay 5; Publish router/Internet_Status "Internet may be down"; IF Var4>=3 DO backlog Publish router/Internet_Status "Internet Down"; Var4 0 ENDON ENDIF ENDON
+  ON Time#Minute|%var3% DO backlog websend [brokegoogle.com] / ENDON
+  ON WebSend#Data$!Done DO backlog Add4 1; Publish router/Internet_Status "Internet may be down" ENDON
+  ON Var4>=3 DO backlog Publish router/Internet_Status "Internet Down"; Var4 0 ENDON
   ON WebSend#Data=Done DO backlog Publish router/Internet_Status "Internet OK"; backlog Var3 3; Var4 0 ENDON
 Backlog rule2 1
 ```
