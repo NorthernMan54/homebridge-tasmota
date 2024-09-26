@@ -760,9 +760,9 @@ Rule1
   ON system#boot DO backlog Var1 1; Var2 0 ENDON
   ON Var1#State>240 DO Var1 240 ENDON
   ON Time#Minute|%var1% DO backlog websend [google.com] / ENDON
-  ON WebSend#Data$!Done DO backlog Add2 1; Publish router/Internet_Status "Internet may be down" ENDON
-  ON Var2#state>=3 DO backlog Publish router/Internet_Status "Internet Down"; delay 5; Mult1 2; Var2 0; Power1 0; Delay 10; Power1 1 ENDON
-  ON WebSend#Data=Done DO backlog Publish router/Internet_Status "Internet OK"; backlog Var1 1; Var2 0 ENDON
+  ON WebSend#Data$!Done DO backlog Add2 1; Publish router/Internet_Status {"text":"Internet may be down","status":1} ENDON
+  ON Var2#state>=3 DO backlog Publish router/Internet_Status {"text":"Internet Down","status":0}; delay 5; Mult1 2; Var2 0; Power1 0; Delay 10; Power1 1 ENDON
+  ON WebSend#Data=Done DO backlog Publish router/Internet_Status {"text":"Internet Ok","status":2}; backlog Var1 1; Var2 0 ENDON
 Backlog rule1 1
 
 ```
@@ -773,8 +773,8 @@ Rule2
   ON system#boot DO backlog Var3 1; Var4 0 ENDON
   ON Var3#State>240 DO Var3 240 ENDON
   ON Time#Minute|%var3% DO backlog websend [google.com] / ENDON
-  ON WebSend#Data$!Done DO backlog Add4 1; Publish router/Internet_Status "Internet may be down" ENDON
-  ON Var4#state>=3 DO backlog Publish router/Internet_Status "Internet Down"; Mult3 2; Var4 0 ENDON
-  ON WebSend#Data=Done DO backlog Publish router/Internet_Status "Internet OK"; backlog Var3 1; Var4 0 ENDON
+  ON WebSend#Data$!Done DO backlog Add4 1; Publish router/Internet_Status {"text":"Internet may be down","status":1} ENDON
+  ON Var4#state>=3 DO backlog Publish router/Internet_Status {"text":"Internet Down","status":0} ; Mult3 2; Var4 0 ENDON
+  ON WebSend#Data=Done DO backlog Publish router/Internet_Status {"text":"Internet Ok","status":2}; backlog Var3 1; Var4 0 ENDON
 Backlog rule2 1
 ```
