@@ -39,6 +39,7 @@
 * [Internet Connection WatchDog](#internet-connection-watchdog)
    * [Version 1 ( Uses node-red to monitor google.com and turn off the plug )](#version-1--uses-node-red-to-monitor-googlecom-and-turn-off-the-plug-)
    * [Version 2](#version-2)
+   * [Version 3 - Do three checks before rebooting](#version-3---do-three-checks-before-rebooting)
 <!--te-->
 
 # My standard config after setting name and device configuration <!-- omit in toc -->
