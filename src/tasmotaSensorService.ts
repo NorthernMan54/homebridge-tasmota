@@ -248,8 +248,8 @@ export class tasmotaSensorService extends TasmotaService {
           break;
       }
 
-      if (value !== null || value !== undefined) {
-        if (this.characteristic.value != value && this.delta(this.characteristic.value, value)) {
+      if (value !== null || typeof value !== 'undefined') {
+        if (this.characteristic.value !== value && this.delta(this.characteristic.value, value)) {
           this.platform.log.info('Updating \'%s:%s\' to %s', this.service.displayName, this.characteristic.displayName ?? '',
             value);
         } else {

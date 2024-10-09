@@ -123,7 +123,8 @@ dist
 
 DEVICES.md.orig.*
 DEVICES.md.toc.*
-*.bak
+
 /hbconfig/persist
 hbconfig/.uix-secrets
 /hbconfig/accessories
+/hbconfig/*persist.json

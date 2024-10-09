@@ -1,23 +1,15 @@
 {
   "compilerOptions": {
-    "target": "ES2018", // ~node10
+    "target": "es2020",
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "baseUrl": "./",
     "module": "commonjs",
-    "lib": [
-      "es2015",
-      "es2016",
-      "es2017",
-      "es2018"
-    ],
     "declaration": true,
-    "declarationMap": true,
-    "sourceMap": true,
     "outDir": "./dist",
-    "rootDir": "./src",
-    "strict": true,
-    "esModuleInterop": true,
-    "noImplicitAny": false,
-    "strictPropertyInitialization": false,
-    "useUnknownInCatchVariables": false
+    "removeComments": true,
+    "sourceMap": true,
+    "esModuleInterop": true
   },
   "include": [
     "src/"

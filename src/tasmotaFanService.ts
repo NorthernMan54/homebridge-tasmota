@@ -1,4 +1,4 @@
-import { Service, PlatformAccessory, CharacteristicValue, CharacteristicSetCallback, Characteristic } from 'homebridge';
+import { PlatformAccessory, CharacteristicValue, CharacteristicSetCallback } from 'homebridge';
 import { TasmotaService } from './TasmotaService';
 import { tasmotaPlatform } from './platform';
 
@@ -80,7 +80,8 @@ export class tasmotaFanService extends TasmotaService {
       } else {
         this.platform.log.debug('Updating \'%s\' to %s', this.service.displayName, value);
       }
-      this.platform.log.debug('Updating \'%s\' to %s ? %s', this.service.displayName, value, this.accessory.context.device[this.uniq_id].pl_on);
+      this.platform.log.debug('Updating \'%s\' to %s ? %s', this.service.displayName, value,
+        this.accessory.context.device[this.uniq_id].pl_on);
       this.platform.log.debug('Updating \'%s\' to %s ? %s', this.service.displayName, value, (value ===
         this.accessory.context.device[this.uniq_id].pl_on ? true : false));
       this.service.getCharacteristic(this.platform.Characteristic.On).updateValue((value ===
@@ -93,7 +94,7 @@ export class tasmotaFanService extends TasmotaService {
         // Use debug logging for no change updates, and info when a change occurred
         const bri_val = this.parseValue(this.accessory.context.device[this.uniq_id].bri_val_tpl, message.toString());
 
-        if (this.service.getCharacteristic(this.platform.Characteristic.RotationSpeed).value != bri_val) {
+        if (this.service.getCharacteristic(this.platform.Characteristic.RotationSpeed).value !== bri_val) {
           this.platform.log.info('Updating \'%s\' RotationSpeed to %s', this.service.displayName, bri_val);
         } else {
           this.platform.log.debug('Updating \'%s\' RotationSpeed to %s', this.service.displayName, bri_val);
@@ -133,17 +134,21 @@ export class tasmotaFanService extends TasmotaService {
   setRotationSpeedFixed(value: CharacteristicValue, callback: CharacteristicSetCallback) {
     // debug('config', this.accessory.displayName, this.accessory.context.device[this.uniq_id]);
     this.platform.log.info('%s Set Characteristic RotationSpeedFixed ->', this.accessory.displayName, value);
-    if (value < 25) { // off
-      this.accessory.context.mqttHost.sendMessage(this.accessory.context.device[this.uniq_id].cmd_t, this.accessory.context.device[this.uniq_id].pl_off);
-    } else if (value < 50) {  // low
+    if (Number(value) < 25) { // off
+      this.accessory.context.mqttHost.sendMessage(this.accessory.context.device[this.uniq_id].cmd_t, 
+        this.accessory.context.device[this.uniq_id].pl_off);
+    } else if (Number(value) < 50) {  // low
       // debug('low', this.accessory.displayName, this.accessory.context.device[this.uniq_id].pl_lo_spd);
-      this.accessory.context.mqttHost.sendMessage(this.accessory.context.device[this.uniq_id].cmd_t, this.accessory.context.device[this.uniq_id].pl_lo_spd);
-    } else if (value < 75) {  // medium
+      this.accessory.context.mqttHost.sendMessage(this.accessory.context.device[this.uniq_id].cmd_t, 
+        this.accessory.context.device[this.uniq_id].pl_lo_spd);
+    } else if (Number(value) < 75) {  // medium
       // debug('medium', this.accessory.displayName, this.accessory.context.device[this.uniq_id].pl_med_spd);
-      this.accessory.context.mqttHost.sendMessage(this.accessory.context.device[this.uniq_id].cmd_t, this.accessory.context.device[this.uniq_id].pl_med_spd);
+      this.accessory.context.mqttHost.sendMessage(this.accessory.context.device[this.uniq_id].cmd_t, 
+        this.accessory.context.device[this.uniq_id].pl_med_spd);
     } else {  // high
       // debug('high', this.accessory.displayName, this.accessory.context.device[this.uniq_id].pl_hi_spd);
-      this.accessory.context.mqttHost.sendMessage(this.accessory.context.device[this.uniq_id].cmd_t, this.accessory.context.device[this.uniq_id].pl_hi_spd);
+      this.accessory.context.mqttHost.sendMessage(this.accessory.context.device[this.uniq_id].cmd_t, 
+        this.accessory.context.device[this.uniq_id].pl_hi_spd);
 
     }
     callback(null);

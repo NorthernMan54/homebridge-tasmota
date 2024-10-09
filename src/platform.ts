@@ -1,6 +1,6 @@
 import {
-  API, DynamicPlatformPlugin, Logger, PlatformAccessory, PlatformConfig, Service, Characteristic,
-  CharacteristicValue, CharacteristicSetCallback,
+  API, DynamicPlatformPlugin, Logger, PlatformAccessory, Service, Characteristic,
+  CharacteristicSetCallback,
 } from 'homebridge';
 
 import { PLATFORM_NAME, PLUGIN_NAME } from './settings';

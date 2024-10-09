@@ -1,81 +1,84 @@
 {
-    "bridge": {
-        "name": "Heisenberg",
-        "username": "AA:BB:CC:DD:EE:01",
-        "port": 51826,
-        "pin": "031-45-154"
+  "bridge": {
+    "name": "Heisenberg",
+    "username": "AA:BB:CC:DD:EE:01",
+    "port": 51826,
+    "pin": "031-45-154"
+  },
+  "description": "HomeBridge HTTP Status Control",
+  "plugins": [
+    "homebridge-tasmota",
+    "homebridge-config-ui-x"
+  ],
+  "platforms": [
+    {
+      "name": "Config",
+      "port": 8080,
+      "auth": "none",
+      "theme": "auto",
+      "tempUnits": "c",
+      "lang": "auto",
+      "sudo": false,
+      "platform": "config"
     },
-    "description": "HomeBridge HTTP Status Control",
-    "plugins": [
-        "homebridge-tasmota",
-        "homebridge-config-ui-x"
-    ],
-    "platforms": [
-        {
-            "name": "Config",
-            "port": 8080,
-            "auth": "none",
-            "theme": "auto",
-            "tempUnits": "c",
-            "lang": "auto",
-            "sudo": false,
-            "platform": "config"
+    {
+      "platform": "Tasmota",
+      "name": "Tasmota",
+      "mqttHost": "mqtt.local",
+      "cleanup": 0.1,
+      "history": false,
+      "debug": true,
+      "filterAllow": [
+        "AC5811"
+      ],
+      "filterDeny": [
+        "5673B2",
+        "240AC4EC20DC",
+        "IBEACON",
+        "erase|discovery|restart"
+      ],
+      "effects": true,
+      "override": {
+        "FB6A07_RL_1": {
+          "tasmotaType": "garageDoor"
         },
-        {
-            "platform": "Tasmota",
-            "name": "Tasmota",
-            "mqttHost": "mqtt.local",
-            "cleanup": 0.1,
-            "history": true,
-            "debug": true,
-            "filterDeny": [
-                "5673B2",
-                "240AC4EC20DC",
-                "IBEACON",
-                "erase|discovery|restart"
-            ],
-            "effects": true,
-            "override": {
-                "FB6A07_RL_1": {
-                    "tasmotaType": "garageDoor"
-                },
-                "5673B2_RL_1": {
-                    "tasmotaType": "garageDoor"
-                },
-                "0303DC_RL_1": {
-                    "cmd_t": "tasmota_0303DC/cmnd/EVENT"
-                },
-                "302F1B_LI_3": {
-                    "tasmotaType": "other"
-                },
-                "302F1B_LI_4": {
-                    "tasmotaType": "other"
-                },
-                "303057_LI_3": {
-                    "tasmotaType": "other"
-                },
-                "860695_RL_1": {
-                    "tasmotaType": "other"
-                },
-                "302F1B_LI_2": {
-                    "tasmotaType": "fan",
-                    "payload_high_speed": "3",
-                    "payload_medium_speed": "2",
-                    "payload_low_speed": "1",
-                    "pl_off": "0",
-                    "pl_on": "1",
-                    "val_tpl": "{% if value_json.FanSpeed == 0 -%}0{%- elif value_json.FanSpeed > 0 -%}1{%- endif %}",
-                    "bri_val_tpl": "{{value_json.FanSpeed*1/3*100}}",
-                    "cmd_t": "cmnd/tasmota_302F1B/FanSpeed",
-                    "speeds": [
-                        "off",
-                        "low",
-                        "medium",
-                        "high"
-                    ]
-                }
-            }
+        "5673B2_RL_1": {
+          "tasmotaType": "garageDoor"
+        },
+        "0303DC_RL_1": {
+          "cmd_t": "tasmota_0303DC/cmnd/EVENT"
+        },
+        "302F1B_LI_3": {
+          "tasmotaType": "other"
+        },
+        "302F1B_LI_4": {
+          "tasmotaType": "other"
+        },
+        "303057_LI_3": {
+          "tasmotaType": "other"
+        },
+        "860695_RL_1": {
+          "tasmotaType": "other"
+        },
+        "302F1B_LI_2": {
+          "tasmotaType": "fan",
+          "payload_high_speed": "3",
+          "payload_medium_speed": "2",
+          "payload_low_speed": "1",
+          "pl_off": "0",
+          "pl_on": "1",
+          "val_tpl": "{% if value_json.FanSpeed == 0 -%}0{%- elif value_json.FanSpeed > 0 -%}1{%- endif %}",
+          "bri_val_tpl": "{{value_json.FanSpeed*1/3*100}}",
+          "cmd_t": "cmnd/tasmota_302F1B/FanSpeed",
+          "speeds": [
+            "off",
+            "low",
+            "medium",
+            "high"
+          ]
         }
-    ],
-    "accessories": []
+      }
+    }
+  ],
+  "accessories": []
 }
