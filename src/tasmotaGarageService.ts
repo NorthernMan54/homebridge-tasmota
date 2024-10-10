@@ -1,9 +1,10 @@
-import { PlatformAccessory, CharacteristicValue, CharacteristicSetCallback } from 'homebridge';
-import { TasmotaService } from './TasmotaService';
-import { tasmotaPlatform } from './platform';
+import createDebug from 'debug'
+import { CharacteristicSetCallback, CharacteristicValue, PlatformAccessory } from 'homebridge'
+import { tasmotaPlatform } from './platform'
 
-import createDebug from 'debug';
-const debug = createDebug('Tasmota:garage');
+import { TasmotaService } from './TasmotaService'
+
+const debug = createDebug('Tasmota:garage')
 
 /**
  * Platform Accessory
@@ -12,80 +13,76 @@ const debug = createDebug('Tasmota:garage');
  */
 
 export class tasmotaGarageService extends TasmotaService {
-  private doorStatusTopic: string;
-  private doorSensorTopic: string;
+  private doorStatusTopic: string
+  private doorSensorTopic: string
 
   constructor(
     public readonly platform: tasmotaPlatform,
     public readonly accessory: PlatformAccessory,
     protected readonly uniq_id: string,
   ) {
-    super(platform, accessory, uniq_id);
+    super(platform, accessory, uniq_id)
 
-    this.service = this.accessory.getService(this.uuid) || this.accessory.addService(this.platform.Service.GarageDoorOpener,
-      accessory.context.device[this.uniq_id].name, this.uuid);
+    this.service = this.accessory.getService(this.uuid) || this.accessory.addService(this.platform.Service.GarageDoorOpener, accessory.context.device[this.uniq_id].name, this.uuid)
 
-    this.service.setCharacteristic(this.platform.Characteristic.ConfiguredName, accessory.context.device[this.uniq_id].name);
+    this.service.setCharacteristic(this.platform.Characteristic.ConfiguredName, accessory.context.device[this.uniq_id].name)
 
     // set the service name, this is what is displayed as the default name on the Home app
     // in this example we are using the name we stored in the `accessory.context` in the `discoverDevices` method.
     if (!this.service.displayName) {
-      this.service.setCharacteristic(this.platform.Characteristic.Name, accessory.context.device[this.uniq_id].name);
+      this.service.setCharacteristic(this.platform.Characteristic.Name, accessory.context.device[this.uniq_id].name)
     }
 
     // each service must implement at-minimum the "required characteristics" for the given service type
     // see https://developers.homebridge.io/#/service/Lightbulb
 
-    this.characteristic = this.service.getCharacteristic(this.platform.Characteristic.CurrentDoorState);
+    this.characteristic = this.service.getCharacteristic(this.platform.Characteristic.CurrentDoorState)
 
-    this.enableFakegato();
+    this.enableFakegato()
 
     // register handlers for the On/Off Characteristic
 
     if (this.service.getCharacteristic(this.platform.Characteristic.TargetDoorState).listenerCount('set') < 1) {
       this.service.getCharacteristic(this.platform.Characteristic.TargetDoorState)
-        .on('set', this.setDoorState.bind(this));                // SET - bind to the `setOn` method below
+        .on('set', this.setDoorState.bind(this)) // SET - bind to the `setOn` method below
       // .on('get', this.getOn.bind(this));               // GET - bind to the `getOn` method below
     }
-    this.enableStatus();
+    this.enableStatus()
 
-    this.doorStatusTopic = this.accessory.context.device[this.uniq_id].stat_t.replace('STATE', 'DOOR');
+    this.doorStatusTopic = this.accessory.context.device[this.uniq_id].stat_t.replace('STATE', 'DOOR')
 
-    this.accessory.context.mqttHost.on(this.doorStatusTopic, this.statusUpdate.bind(this));
-    this.accessory.context.mqttHost.statusSubscribe(this.doorStatusTopic);
+    this.accessory.context.mqttHost.on(this.doorStatusTopic, this.statusUpdate.bind(this))
+    this.accessory.context.mqttHost.statusSubscribe(this.doorStatusTopic)
 
-    this.doorSensorTopic = this.accessory.context.device[this.uniq_id].stat_t.replace('STATE', 'SENSOR');
+    this.doorSensorTopic = this.accessory.context.device[this.uniq_id].stat_t.replace('STATE', 'SENSOR')
 
-    this.accessory.context.mqttHost.on(this.doorSensorTopic, this.statusUpdate.bind(this));
-    this.accessory.context.mqttHost.statusSubscribe(this.doorSensorTopic);
+    this.accessory.context.mqttHost.on(this.doorSensorTopic, this.statusUpdate.bind(this))
+    this.accessory.context.mqttHost.statusSubscribe(this.doorSensorTopic)
   }
 
   /**
-    enableStatus() {
-      this.refresh();
-      if (this.characteristic) {
-        if (this.accessory.context.device[this.uniq_id].stat_t) {
-          this.platform.log.debug('Creating statusUpdate listener for %s %s', this.accessory.context.device[this.uniq_id].stat_t, 
-          this.accessory.context.device[this.uniq_id].name);
-          this.statusSubscribe = { event: this.accessory.context.device[this.uniq_id].stat_t, callback: this.statusUpdate.bind(this) };
-          this.accessory.context.mqttHost.on(this.accessory.context.device[this.uniq_id].stat_t, this.statusUpdate.bind(this));
-          this.accessory.context.mqttHost.statusSubscribe(this.accessory.context.device[this.uniq_id].stat_t);
-        }
-        if (this.accessory.context.device[this.uniq_id].avty_t) {
-          this.availabilitySubscribe = { event: this.accessory.context.device[this.uniq_id].avty_t, 
-            callback: this.availabilityUpdate.bind(this) };
-          this.accessory.context.mqttHost.on(this.accessory.context.device[this.uniq_id].avty_t, this.availabilityUpdate.bind(this));
-          this.availabilitySubscribe = 
-          this.accessory.context.mqttHost.availabilitySubscribe(this.accessory.context.device[this.uniq_id].avty_t);
-        } else {
-          this.platform.log.warn('Warning: Availability not supported for: %s', this.accessory.context.device[this.uniq_id].name);
-        }
+  enableStatus() {
+    this.refresh();
+    if (this.characteristic) {
+      if (this.accessory.context.device[this.uniq_id].stat_t) {
+        this.platform.log.debug('Creating statusUpdate listener for %s %s', this.accessory.context.device[this.uniq_id].stat_t,
+        this.accessory.context.device[this.uniq_id].name);
+        this.statusSubscribe = { event: this.accessory.context.device[this.uniq_id].stat_t, callback: this.statusUpdate.bind(this) };
+        this.accessory.context.mqttHost.on(this.accessory.context.device[this.uniq_id].stat_t, this.statusUpdate.bind(this));
+        this.accessory.context.mqttHost.statusSubscribe(this.accessory.context.device[this.uniq_id].stat_t);
+      }
+      if (this.accessory.context.device[this.uniq_id].avty_t) {
+        this.availabilitySubscribe = { event: this.accessory.context.device[this.uniq_id].avty_t,
+          callback: this.availabilityUpdate.bind(this) };
+        this.accessory.context.mqttHost.on(this.accessory.context.device[this.uniq_id].avty_t, this.availabilityUpdate.bind(this));
+        this.availabilitySubscribe =
+        this.accessory.context.mqttHost.availabilitySubscribe(this.accessory.context.device[this.uniq_id].avty_t);
+      } else {
+        this.platform.log.warn('Warning: Availability not supported for: %s', this.accessory.context.device[this.uniq_id].name);
       }
     }
-
-    */
-
-
+  }
+   */
 
   /**
    * Handle "STATE" messages from Tasmotastat_t:
@@ -93,92 +90,84 @@ export class tasmotaGarageService extends TasmotaService {
    */
 
   statusUpdate(topic, message) {
-    debug('MQTT', topic, message.toString());
+    debug('MQTT', topic, message.toString())
 
     try {
-      this.accessory.context.timeout = this.platform.autoCleanup(this.accessory);
-      let value = message.toString();
+      this.accessory.context.timeout = this.platform.autoCleanup(this.accessory)
+      let value = message.toString()
 
       switch (topic) {
         case this.doorStatusTopic:
-          debug('doorStatusTopic \'%s:%s\'', this.service.displayName, this.characteristic.displayName);
+          debug('doorStatusTopic \'%s:%s\'', this.service.displayName, this.characteristic.displayName)
           switch (value) {
             case 'CLOSED':
-              value = this.platform.Characteristic.CurrentDoorState.CLOSED;
-              break;
+              value = this.platform.Characteristic.CurrentDoorState.CLOSED
+              break
             case 'OPEN':
-              value = this.platform.Characteristic.CurrentDoorState.OPEN;
-              break;
+              value = this.platform.Characteristic.CurrentDoorState.OPEN
+              break
             case 'CLOSING':
-              value = this.platform.Characteristic.CurrentDoorState.CLOSING;
-              break;
+              value = this.platform.Characteristic.CurrentDoorState.CLOSING
+              break
             case 'OPENING':
-              value = this.platform.Characteristic.CurrentDoorState.OPENING;
-              break;
+              value = this.platform.Characteristic.CurrentDoorState.OPENING
+              break
             default:
-              this.platform.log.error('Unhandled Garage Door Status', value);
+              this.platform.log.error('Unhandled Garage Door Status', value)
           }
 
           if (this.characteristic.value !== value) {
-            this.platform.log.info('Updating \'%s:%s\' to %s', this.service.displayName, this.characteristic.displayName, value);
-
+            this.platform.log.info('Updating \'%s:%s\' to %s', this.service.displayName, this.characteristic.displayName, value)
           } else {
-
-            this.platform.log.debug('Updating \'%s\' to %s', this.service.displayName, value);
+            this.platform.log.debug('Updating \'%s\' to %s', this.service.displayName, value)
           }
 
-          this.characteristic.updateValue(value);
+          this.characteristic.updateValue(value)
 
           if (topic === this.doorStatusTopic || topic === this.doorSensorTopic) {
-            this.service.getCharacteristic(this.platform.Characteristic.TargetDoorState).updateValue(value % 2);
+            this.service.getCharacteristic(this.platform.Characteristic.TargetDoorState).updateValue(value % 2)
           }
-          break;
+          break
         case this.doorSensorTopic:
-          debug('doorSensorTopic \'%s:%s\'', this.service.displayName, this.characteristic.displayName);
-          value = JSON.parse(value);
-          debug('doorSensorTopic %s', value);
+          debug('doorSensorTopic \'%s:%s\'', this.service.displayName, this.characteristic.displayName)
+          value = JSON.parse(value)
+          debug('doorSensorTopic %s', value)
           if (value.Switch2 === 'OFF') {
-            value = this.platform.Characteristic.CurrentDoorState.OPEN;
+            value = this.platform.Characteristic.CurrentDoorState.OPEN
             if (this.characteristic.value !== value) {
-              this.platform.log.info('Updating \'%s:%s\' to %s', this.service.displayName, this.characteristic.displayName, value);
-
+              this.platform.log.info('Updating \'%s:%s\' to %s', this.service.displayName, this.characteristic.displayName, value)
             } else {
-
-              this.platform.log.debug('Updating \'%s\' to %s', this.service.displayName, value);
+              this.platform.log.debug('Updating \'%s\' to %s', this.service.displayName, value)
             }
 
-            this.characteristic.updateValue(value);
+            this.characteristic.updateValue(value)
 
             if (topic === this.doorStatusTopic || topic === this.doorSensorTopic) {
-              this.service.getCharacteristic(this.platform.Characteristic.TargetDoorState).updateValue(value % 2);
+              this.service.getCharacteristic(this.platform.Characteristic.TargetDoorState).updateValue(value % 2)
             }
           } else if (value.Switch3 === 'OFF') {
-            value = this.platform.Characteristic.CurrentDoorState.CLOSED;
+            value = this.platform.Characteristic.CurrentDoorState.CLOSED
             if (this.characteristic.value !== value) {
-              this.platform.log.info('Updating \'%s:%s\' to %s', this.service.displayName, this.characteristic.displayName, value);
-
+              this.platform.log.info('Updating \'%s:%s\' to %s', this.service.displayName, this.characteristic.displayName, value)
             } else {
-
-              this.platform.log.debug('Updating \'%s\' to %s', this.service.displayName, value);
+              this.platform.log.debug('Updating \'%s\' to %s', this.service.displayName, value)
             }
 
-            this.characteristic.updateValue(value);
+            this.characteristic.updateValue(value)
 
             if (topic === this.doorStatusTopic || topic === this.doorSensorTopic) {
-              this.service.getCharacteristic(this.platform.Characteristic.TargetDoorState).updateValue(value % 2);
+              this.service.getCharacteristic(this.platform.Characteristic.TargetDoorState).updateValue(value % 2)
             }
           } else {
-            this.platform.log.info('Not open or closed \'%s:%s\'', this.service.displayName, this.characteristic.displayName);
+            this.platform.log.info('Not open or closed \'%s:%s\'', this.service.displayName, this.characteristic.displayName)
           }
 
-          break;
+          break
         default:
-
       }
-
     } catch (err) {
-      debug('ERROR:', err.message);
-      this.platform.log.error('ERROR: message parsing error', this.service.displayName, topic, message.toString());
+      debug('ERROR:', err.message)
+      this.platform.log.error('ERROR: message parsing error', this.service.displayName, topic, message.toString())
     }
   }
 
@@ -187,24 +176,20 @@ export class tasmotaGarageService extends TasmotaService {
    * These are sent when the user changes the state of an accessory, for example, turning on a Light bulb.
    */
   setDoorState(value: CharacteristicValue, callback: CharacteristicSetCallback) {
-
     try {
       if (this.service.getCharacteristic(this.platform.Characteristic.TargetDoorState).value !== value) {
-        this.platform.log.info('%s Pushing Garage Door Button ->', this.service.displayName, value);
+        this.platform.log.info('%s Pushing Garage Door Button ->', this.service.displayName, value)
 
-        this.accessory.context.mqttHost.sendMessage(this.accessory.context.device[this.uniq_id].cmd_t,
-          this.accessory.context.device[this.uniq_id].pl_on);
+        this.accessory.context.mqttHost.sendMessage(this.accessory.context.device[this.uniq_id].cmd_t, this.accessory.context.device[this.uniq_id].pl_on)
       } else {
-        this.platform.log.error('%s Not Pushing Garage Door Button ->', this.service.displayName, value);
+        this.platform.log.error('%s Not Pushing Garage Door Button ->', this.service.displayName, value)
       }
-
     } catch (err) {
-      this.platform.log.error('ERROR:', err.message);
+      this.platform.log.error('ERROR:', err.message)
     }
     // you must call the callback function
-    callback(null);
+    callback(null)
   }
-
 }
 
 /*
