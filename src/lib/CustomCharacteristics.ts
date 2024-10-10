@@ -1,11 +1,12 @@
 import {
+  Characteristic,
+  Service,
   Formats, Perms
 } from 'homebridge';
 
 const inherits = require('util').inherits;
-let Service, Characteristic;
 
-module.exports = function (Service, Characteristic) {
+module.exports = function (Service: Service, Characteristic: Characteristic) {
 
   const CustomCharacteristic: any = {};
 
