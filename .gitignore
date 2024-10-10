@@ -128,3 +128,4 @@ DEVICES.md.toc.*
 hbconfig/.uix-secrets
 /hbconfig/accessories
 /hbconfig/*persist.json
+/hbconfig/backups
