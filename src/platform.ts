@@ -88,6 +88,7 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
     this.log.debug('Finished initializing platform:', this.config.name)
 
     this.CustomCharacteristics = require('./lib/customCharacteristics')(this.api.hap);
+    console.log('CustomCharacteristics', this.CustomCharacteristics)
 
     this.cleanup = this.config.cleanup || 24 // Default removal of defunct devices after 24 hours
     this.debug = this.config.debug || false
@@ -137,7 +138,7 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
     // to start discovery of new accessories.
     this.api.on('didFinishLaunching', () => {
       log.debug('Executed didFinishLaunching callback')
-      log.debug('this.accessories as loaded', this.accessories[0].services)
+      log.debug('this.accessories as loaded', this.accessories[0]?.services)
       // run the method to discover / register your devices as accessories
       debug('%d accessories for cleanup', this.defunctAccessories.length)
       if (this.defunctAccessories.length > 0) {
