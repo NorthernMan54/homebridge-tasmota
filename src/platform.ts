@@ -35,9 +35,33 @@ interface DiscoveryTopicMap {
   uuid: string
 }
 
+/**
+ * This is the tasmota{latform constructor interface
+ * 
+ * @interface tasmotaPlatform
+ * @extends {DynamicPlatformPlugin}
+ * @property {typeof Service} Service
+ * @property {typeof Characteristic} Characteristic
+ * @property {any} CustomCharacteristics
+ * @property {PlatformAccessory[]} accessories
+ * @property {tasmotaGarageService[] | tasmotaSwitchService[] | tasmotaLightService[] | tasmotaSensorService[] | tasmotaBinarySensorService[] | tasmotaFanService[]} services
+ * @property {any} FakeGatoHistoryService
+ * @property {number} teleperiod
+ */
+export interface tasmotaPlatform {
+  readonly Service: typeof Service
+  readonly Characteristic: typeof Characteristic
+  CustomCharacteristics: any
+  readonly accessories: PlatformAccessory[]
+  readonly services: tasmotaGarageService[] | tasmotaSwitchService[] | tasmotaLightService[] | tasmotaSensorService[] | tasmotaBinarySensorService[] | tasmotaFanService[]
+  FakeGatoHistoryService: any
+  teleperiod: number
+}
+
 export class tasmotaPlatform implements DynamicPlatformPlugin {
   public readonly Service: typeof Service = this.api.hap.Service
   public readonly Characteristic: typeof Characteristic = this.api.hap.Characteristic
+  public CustomCharacteristics: any
 
   // this is used to track restored cached accessories
   public readonly accessories: PlatformAccessory[] = []
@@ -46,7 +70,6 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
     tasmotaBinarySensorService[] | tasmotaFanService[] = []
 
   private discoveryTopicMap: DiscoveryTopicMap[] = []
-  private CustomCharacteristic
 
   // Auto removal of non responding devices
 
@@ -63,6 +86,8 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
     public readonly api: API,
   ) {
     this.log.debug('Finished initializing platform:', this.config.name)
+
+    this.CustomCharacteristics = require('./lib/customCharacteristics')(this.api.hap);
 
     this.cleanup = this.config.cleanup || 24 // Default removal of defunct devices after 24 hours
     this.debug = this.config.debug || false
@@ -106,15 +131,13 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
       debug('"injections": %s\n', JSON.stringify(injections, null, 2))
     }
 
-    /* eslint-disable  ts/no-require-imports */
-    this.CustomCharacteristic = require('./lib/CustomCharacteristics')(this.Service, this.Characteristic)
-
     // When this event is fired it means Homebridge has restored all cached accessories from disk.
     // Dynamic Platform plugins should only register new accessories after this event was fired,
     // in order to ensure they weren't added to homebridge already. This event can also be used
     // to start discovery of new accessories.
     this.api.on('didFinishLaunching', () => {
       log.debug('Executed didFinishLaunching callback')
+      log.debug('this.accessories as loaded', this.accessories[0].services)
       // run the method to discover / register your devices as accessories
       debug('%d accessories for cleanup', this.defunctAccessories.length)
       if (this.defunctAccessories.length > 0) {
@@ -263,7 +286,7 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
           if (existingAccessory) {
             // the accessory already exists
 
-            this.log.info('Found existing accessory:', message.name)
+            this.log.info('Found existing accessory: %s - %s', message.name, uniq_id)
             // if you need to update the accessory.context then you should run `api.updatePlatformAccessories`. eg.:
             // existingAccessory.context.device = device;
             // this.api.updatePlatformAccessories([existingAccessory]);
@@ -293,6 +316,8 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
                   this.discoveryTopicMap[topic] = { topic, type: 'Service', uniq_id, uuid }
               }
             } else if (message.name) {
+              // this.log.info('existingAccessory:', existingAccessory.displayName, existingAccessory)
+              // this.log.info('this.services:', this.services)
               this.log.info('Creating service:', message.name, message.tasmotaType)
               switch (message.tasmotaType) {
                 case 'sensor':

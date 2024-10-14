@@ -24,7 +24,6 @@ export class TasmotaService {
   protected device_class: string
   public statusSubscribe: Subscription
   public availabilitySubscribe: Subscription
-  protected CustomCharacteristic
   public fakegato: string
   public nunjucksEnvironment
   protected uuid: string
@@ -35,7 +34,6 @@ export class TasmotaService {
     protected readonly uniq_id: string,
   ) {
     /* eslint-disable ts/no-require-imports */
-    this.CustomCharacteristic = require('./lib/CustomCharacteristics')(platform.Service, platform.Characteristic)
     this.uuid = this.platform.api.hap.uuid.generate(this.accessory.context.device[this.uniq_id].uniq_id)
     this.device_class = accessory.context.device[this.uniq_id].dev_cla
 
@@ -100,16 +98,16 @@ export class TasmotaService {
     switch (device_class) {
       case '-dt24-amp':
       case '_energy_current': // Amps
-        return (this.CustomCharacteristic.ElectricCurrent)
+        return (this.platform.CustomCharacteristics.ElectricCurrent)
       case '_energy_voltage': // Voltage
       case '-dt24-volt': // dt24
-        return (this.CustomCharacteristic.Voltage)
+        return (this.platform.CustomCharacteristics.Voltage)
       case '_energy_power': // Watts
       case '-dt24-watt': // dt24
-        return (this.CustomCharacteristic.CurrentConsumption)
+        return (this.platform.CustomCharacteristics.CurrentConsumption)
       case '_energy_total': // Total Kilowatts
       case '-dt24-watt-hour':
-        return (this.CustomCharacteristic.TotalConsumption)
+        return (this.platform.CustomCharacteristics.TotalConsumption)
         break
     }
   }
