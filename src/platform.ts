@@ -87,7 +87,7 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
   ) {
     this.log.debug('Finished initializing platform:', this.config.name)
 
-    this.CustomCharacteristics = require('./lib/customCharacteristics')(this.api.hap);
+    this.CustomCharacteristics = require('./lib/customCharacteristicsBroke')(this.api.hap);
     console.log('CustomCharacteristics', this.CustomCharacteristics)
 
     this.cleanup = this.config.cleanup || 24 // Default removal of defunct devices after 24 hours

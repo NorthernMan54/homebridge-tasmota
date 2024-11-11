@@ -1,21 +1,21 @@
 {
   "compilerOptions": {
-    "target": "es2020",
-    "emitDecoratorMetadata": true,
-    "experimentalDecorators": true,
-    "baseUrl": "./",
     "module": "commonjs",
     "declaration": true,
-    "outDir": "./dist",
     "removeComments": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "target": "es6",
     "sourceMap": true,
+    "outDir": "./dist",
+    "baseUrl": "./",
     "esModuleInterop": true,
-    "types": ["node"],
+    "skipLibCheck": true
   },
-  "include": [
-    "src/"
-  ],
   "exclude": [
-    "**/*.spec.ts"
+    "scripts",
+    "homebridge-ui",
+    "node_modules",
+    "./dist",
   ]
-}
+}  
