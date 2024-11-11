@@ -1,15 +1,18 @@
 const inherits = require('util').inherits;
+import { Formats, Perms, Units } from 'homebridge';
 
-module.exports = function(Service, Characteristic) {
+let Service, Characteristic;
+
+module.exports = function (Service, Characteristic) {
 
   const CustomCharacteristic: any = {};
 
-  CustomCharacteristic.Voltage = function() {
+  CustomCharacteristic.Voltage = function () {
     Characteristic.call(this, 'Voltage', CustomCharacteristic.Voltage.UUID);
     this.setProps({
-      format: Characteristic.Formats.FLOAT,
+      format: Formats.FLOAT,
       unit: 'V',
-      perms: [Characteristic.Perms.READ, Characteristic.Perms.NOTIFY],
+      perms: [Perms.PAIRED_READ, Perms.NOTIFY],
     });
     this.value = this.getDefaultValue();
   };
@@ -18,12 +21,12 @@ module.exports = function(Service, Characteristic) {
 
   // Aka Amps
 
-  CustomCharacteristic.ElectricCurrent = function() {
+  CustomCharacteristic.ElectricCurrent = function () {
     Characteristic.call(this, 'Electric Current', CustomCharacteristic.ElectricCurrent.UUID);
     this.setProps({
-      format: Characteristic.Formats.FLOAT,
+      format: Formats.FLOAT,
       unit: 'A',
-      perms: [Characteristic.Perms.READ, Characteristic.Perms.NOTIFY],
+      perms: [Perms.PAIRED_READ, Perms.NOTIFY],
     });
     this.value = this.getDefaultValue();
   };
@@ -32,12 +35,12 @@ module.exports = function(Service, Characteristic) {
 
   // Aka watts
 
-  CustomCharacteristic.CurrentConsumption = function() {
+  CustomCharacteristic.CurrentConsumption = function () {
     Characteristic.call(this, 'Current Consumption', CustomCharacteristic.CurrentConsumption.UUID);
     this.setProps({
-      format: Characteristic.Formats.FLOAT,
+      format: Formats.FLOAT,
       unit: 'W',
-      perms: [Characteristic.Perms.READ, Characteristic.Perms.NOTIFY],
+      perms: [Perms.PAIRED_READ, Perms.NOTIFY],
     });
     this.value = this.getDefaultValue();
   };
@@ -46,12 +49,12 @@ module.exports = function(Service, Characteristic) {
 
   // Aka kilowatts
 
-  CustomCharacteristic.TotalConsumption = function() {
+  CustomCharacteristic.TotalConsumption = function () {
     Characteristic.call(this, 'Total Consumption', CustomCharacteristic.TotalConsumption.UUID);
     this.setProps({
-      format: Characteristic.Formats.FLOAT,
+      format: Formats.FLOAT,
       unit: 'kWh',
-      perms: [Characteristic.Perms.READ, Characteristic.Perms.NOTIFY],
+      perms: [Perms.PAIRED_READ, Perms.NOTIFY],
     });
     this.value = this.getDefaultValue();
   };
@@ -59,24 +62,90 @@ module.exports = function(Service, Characteristic) {
   inherits(CustomCharacteristic.TotalConsumption, Characteristic);
 
 
-  CustomCharacteristic.AtmosphericPressureLevel = function() {
+  CustomCharacteristic.AtmosphericPressureLevel = function () {
     Characteristic.call(this, 'Air Pressure', CustomCharacteristic.AtmosphericPressureLevel.UUID);
     this.setProps({
-      format: Characteristic.Formats.UINT16,
+      format: Formats.UINT16,
       unit: 'hPa',
       minValue: 100,      // Issue #45
       maxValue: 1100,
       minStep: 1,
-      perms: [Characteristic.Perms.READ, Characteristic.Perms.NOTIFY],
+      perms: [Perms.PAIRED_READ, Perms.NOTIFY],
     });
     this.value = this.getDefaultValue();
   };
   CustomCharacteristic.AtmosphericPressureLevel.UUID = 'E863F10F-079E-48FF-8F27-9C2605A29F52';
   inherits(CustomCharacteristic.AtmosphericPressureLevel, Characteristic);
 
+  CustomCharacteristic.ValvePosition = function () {
+    Characteristic.call(this, 'Valve position', 'E863F12E-079E-48FF-8F27-9C2605A29F52');
+    this.setProps({
+      format: Formats.UINT8,
+      unit: Characteristic.Units.PERCENTAGE,
+      perms: [Perms.PAIRED_READ, Perms.NOTIFY],
+    });
+    this.value = this.getDefaultValue();
+  };
+  inherits(CustomCharacteristic.ValvePosition, Characteristic);
+
+  CustomCharacteristic.LastActivation = function () {
+    Characteristic.call(this, 'Last Activation', CustomCharacteristic.LastActivation.UUID);
+    this.setProps({
+      format: Formats.UINT32,
+      unit: Characteristic.Units.SECONDS,
+      perms: [Perms.PAIRED_READ, Perms.NOTIFY],
+    });
+    this.value = this.getDefaultValue();
+  };
+  CustomCharacteristic.LastActivation.UUID = 'E863F11A-079E-48FF-8F27-9C2605A29F52';
+  inherits(CustomCharacteristic.LastActivation, Characteristic);
+
+  CustomCharacteristic.ResetTotal = function () {
+    Characteristic.call(this, 'Reset Total', CustomCharacteristic.ResetTotal.UUID);
+    this.setProps({
+      format: Formats.UINT32,
+      unit: Characteristic.Units.SECONDS,
+      perms: [Perms.PAIRED_READ, Perms.NOTIFY],
+    });
+    this.value = this.getDefaultValue();
+  };
+  CustomCharacteristic.ResetTotal.UUID = 'E863F112-079E-48FF-8F27-9C2605A29F52';
+  inherits(CustomCharacteristic.LastActivation, Characteristic);
+
+  CustomCharacteristic.TimesOpened = function () {
+    Characteristic.call(this, 'Times Opened', CustomCharacteristic.TimesOpened.UUID);
+    this.setProps({
+      format: Formats.UINT32,
+      perms: [Perms.PAIRED_READ, Perms.NOTIFY],
+    });
+    this.value = this.getDefaultValue();
+  };
+  CustomCharacteristic.TimesOpened.UUID = 'E863F129-079E-48FF-8F27-9C2605A29F52';
+  inherits(CustomCharacteristic.TimesOpened, Characteristic);
+
+  CustomCharacteristic.ProgramData = function () {
+    Characteristic.call(this, 'Program data', 'E863F12F-079E-48FF-8F27-9C2605A29F52');
+    this.setProps({
+      format: Formats.DATA,
+      perms: [Perms.PAIRED_WRITE, Perms.NOTIFY],
+    });
+    this.value = this.getDefaultValue();
+  };
+  inherits(CustomCharacteristic.ProgramData, Characteristic);
+
+  CustomCharacteristic.ProgramCommand = function () {
+    Characteristic.call(this, 'Program command', 'E863F12C-079E-48FF-8F27-9C2605A29F52');
+    console.log(this.setProps);
+    this.setProps({
+      format: Formats.DATA,
+      perms: [Perms.WRITE, Perms.NOTIFY],
+    });
+    this.value = this.getDefaultValue();
+  };
+  inherits(CustomCharacteristic.ProgramCommand, Characteristic);
 
   // courtesy of https://github.com/robi-van-kinobi/homebridge-cubesensors
-  CustomCharacteristic.AtmosphericPressureSensor = function(displayName, subtype) {
+  CustomCharacteristic.AtmosphericPressureSensor = function (displayName, subtype) {
     Service.call(this, displayName, CustomCharacteristic.AtmosphericPressureSensor.UUID, subtype);
 
     // Required Characteristics
@@ -91,72 +160,6 @@ module.exports = function(Service, Characteristic) {
   };
   CustomCharacteristic.AtmosphericPressureSensor.UUID = 'B77831FD-D66A-46A4-B66D-FD7EE8DFE3CE';
   inherits(CustomCharacteristic.AtmosphericPressureSensor, Service);
-
-  CustomCharacteristic.ValvePosition = function() {
-    Characteristic.call(this, 'Valve position', 'E863F12E-079E-48FF-8F27-9C2605A29F52');
-    this.setProps({
-      format: Characteristic.Formats.UINT8,
-      unit: Characteristic.Units.PERCENTAGE,
-      perms: [Characteristic.Perms.READ, Characteristic.Perms.NOTIFY],
-    });
-    this.value = this.getDefaultValue();
-  };
-  inherits(CustomCharacteristic.ValvePosition, Characteristic);
-
-  CustomCharacteristic.ProgramCommand = function() {
-    Characteristic.call(this, 'Program command', 'E863F12C-079E-48FF-8F27-9C2605A29F52');
-    this.setProps({
-      format: Characteristic.Formats.DATA,
-      perms: [Characteristic.Perms.WRITE, Characteristic.Perms.NOTIFY],
-    });
-    this.value = this.getDefaultValue();
-  };
-  inherits(CustomCharacteristic.ProgramCommand, Characteristic);
-
-  CustomCharacteristic.ProgramData = function() {
-    Characteristic.call(this, 'Program data', 'E863F12F-079E-48FF-8F27-9C2605A29F52');
-    this.setProps({
-      format: Characteristic.Formats.DATA,
-      perms: [Characteristic.Perms.READ, Characteristic.Perms.NOTIFY],
-    });
-    this.value = this.getDefaultValue();
-  };
-  inherits(CustomCharacteristic.ProgramData, Characteristic);
-
-  CustomCharacteristic.LastActivation = function() {
-    Characteristic.call(this, 'Last Activation', CustomCharacteristic.LastActivation.UUID);
-    this.setProps({
-      format: Characteristic.Formats.UINT32,
-      unit: Characteristic.Units.SECONDS,
-      perms: [Characteristic.Perms.READ, Characteristic.Perms.NOTIFY],
-    });
-    this.value = this.getDefaultValue();
-  };
-  CustomCharacteristic.LastActivation.UUID = 'E863F11A-079E-48FF-8F27-9C2605A29F52';
-  inherits(CustomCharacteristic.LastActivation, Characteristic);
-
-  CustomCharacteristic.ResetTotal = function() {
-    Characteristic.call(this, 'Reset Total', CustomCharacteristic.ResetTotal.UUID);
-    this.setProps({
-      format: Characteristic.Formats.UINT32,
-      unit: Characteristic.Units.SECONDS,
-      perms: [Characteristic.Perms.READ, Characteristic.Perms.NOTIFY],
-    });
-    this.value = this.getDefaultValue();
-  };
-  CustomCharacteristic.ResetTotal.UUID = 'E863F112-079E-48FF-8F27-9C2605A29F52';
-  inherits(CustomCharacteristic.LastActivation, Characteristic);
-
-  CustomCharacteristic.TimesOpened = function() {
-    Characteristic.call(this, 'Times Opened', CustomCharacteristic.TimesOpened.UUID);
-    this.setProps({
-      format: Characteristic.Formats.UINT32,
-      perms: [Characteristic.Perms.READ, Characteristic.Perms.NOTIFY],
-    });
-    this.value = this.getDefaultValue();
-  };
-  CustomCharacteristic.TimesOpened.UUID = 'E863F129-079E-48FF-8F27-9C2605A29F52';
-  inherits(CustomCharacteristic.TimesOpened, Characteristic);
 
   return CustomCharacteristic;
 };

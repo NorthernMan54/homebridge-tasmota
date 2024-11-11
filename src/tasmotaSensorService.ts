@@ -70,7 +70,6 @@ export class tasmotaSensorService extends TasmotaService {
         break
       case 'pressure':
         this.platform.log.debug('Creating "%s" sensor %s', accessory.context.device[this.uniq_id].dev_cla, accessory.context.device[this.uniq_id].name, this.uuid)
-        this.platform.log.debug('this.accessory', this.accessory);
         this.service = this.accessory.getService(this.uuid)
         || this.accessory.addService(this.platform.CustomCharacteristics.AtmosphericPressureSensor, accessory.context.device[this.uniq_id].name, this.uuid)
         this.service.setCharacteristic(this.platform.Characteristic.ConfiguredName, accessory.context.device[this.uniq_id].name)
