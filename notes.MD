@@ -1,0 +1,1 @@
+      CurrentConsumption: [Characteristic],

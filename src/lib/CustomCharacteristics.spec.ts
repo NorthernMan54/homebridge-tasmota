@@ -1,17 +1,19 @@
 import { expect } from '@jest/globals';
 import { Formats, Perms, Units } from 'homebridge';
 import { Characteristic, Service } from 'hap-nodejs';
-import customCharacteristics from './CustomCharacteristics';
+const CustomCharacteristics = require('./CustomCharacteristics')(Service, Characteristic);
 
-describe('CustomCharacteristic', () => {
+describe('Custom Characteristics', () => {
+
+
 
   test('CustomCharacteristic object is defined', () => {
-    expect(customCharacteristics).toBeDefined();
+    expect(CustomCharacteristics).toBeDefined();
   });
 
   test.only('Voltage characteristic has correct properties', () => {
-    console.log(customCharacteristics);
-    const voltage = new customCharacteristics.Voltage();
+    console.log(CustomCharacteristics);
+    const voltage = new CustomCharacteristics.Voltage();
     expect(voltage.displayName).toBe('Voltage');
     expect(voltage.UUID).toBe('E863F10A-079E-48FF-8F27-9C2605A29F52');
     expect(voltage.props).toEqual({
@@ -23,7 +25,7 @@ describe('CustomCharacteristic', () => {
   });
 
   test('Electric Current characteristic has correct properties', () => {
-    const electricCurrent = new customCharacteristics.ElectricCurrent();
+    const electricCurrent = new CustomCharacteristics.ElectricCurrent();
     expect(electricCurrent.displayName).toBe('Electric Current');
     expect(electricCurrent.UUID).toBe('E863F126-079E-48FF-8F27-9C2605A29F52');
     expect(electricCurrent.props).toEqual({
@@ -35,7 +37,7 @@ describe('CustomCharacteristic', () => {
   });
 
   test('Current Consumption characteristic has correct properties', () => {
-    const currentConsumption = new customCharacteristics.CurrentConsumption();
+    const currentConsumption = new CustomCharacteristics.CurrentConsumption();
     expect(currentConsumption.displayName).toBe('Current Consumption');
     expect(currentConsumption.UUID).toBe('E863F10D-079E-48FF-8F27-9C2605A29F52');
     expect(currentConsumption.props).toEqual({
@@ -47,7 +49,7 @@ describe('CustomCharacteristic', () => {
   });
 
   test('Total Consumption characteristic has correct properties', () => {
-    const totalConsumption = new customCharacteristics.TotalConsumption();
+    const totalConsumption = new CustomCharacteristics.TotalConsumption();
     expect(totalConsumption.displayName).toBe('Total Consumption');
     expect(totalConsumption.UUID).toBe('E863F10C-079E-48FF-8F27-9C2605A29F52');
     expect(totalConsumption.props).toEqual({
@@ -59,7 +61,7 @@ describe('CustomCharacteristic', () => {
   });
 
   test('Atmospheric Pressure Level characteristic has correct properties', () => {
-    const pressureLevel = new customCharacteristics.AtmosphericPressureLevel();
+    const pressureLevel = new CustomCharacteristics.AtmosphericPressureLevel();
     expect(pressureLevel.displayName).toBe('Air Pressure');
     expect(pressureLevel.UUID).toBe('E863F10F-079E-48FF-8F27-9C2605A29F52');
     expect(pressureLevel.props).toEqual({
@@ -74,7 +76,7 @@ describe('CustomCharacteristic', () => {
   });
 
   test('Valve Position characteristic has correct properties', () => {
-    const valvePosition = new customCharacteristics.ValvePosition();
+    const valvePosition = new CustomCharacteristics.ValvePosition();
     expect(valvePosition.displayName).toBe('Valve position');
     expect(valvePosition.UUID).toBe('E863F12E-079E-48FF-8F27-9C2605A29F52');
     expect(valvePosition.props).toEqual({
@@ -86,7 +88,7 @@ describe('CustomCharacteristic', () => {
   });
 
   test('Program Command characteristic has correct properties', () => {
-    const programCommand = new customCharacteristics.ProgramCommand();
+    const programCommand = new CustomCharacteristics.ProgramCommand();
     expect(programCommand.displayName).toBe('Program command');
     expect(programCommand.UUID).toBe('E863F12C-079E-48FF-8F27-9C2605A29F52');
     expect(programCommand.props).toEqual({
@@ -97,7 +99,7 @@ describe('CustomCharacteristic', () => {
   });
 
   test('Last Activation characteristic has correct properties', () => {
-    const lastActivation = new customCharacteristics.LastActivation();
+    const lastActivation = new CustomCharacteristics.LastActivation();
     expect(lastActivation.displayName).toBe('Last Activation');
     expect(lastActivation.UUID).toBe('E863F11A-079E-48FF-8F27-9C2605A29F52');
     expect(lastActivation.props).toEqual({
@@ -109,7 +111,7 @@ describe('CustomCharacteristic', () => {
   });
 
   test('Reset Total characteristic has correct properties', () => {
-    const resetTotal = new customCharacteristics.ResetTotal();
+    const resetTotal = new CustomCharacteristics.ResetTotal();
     expect(resetTotal.displayName).toBe('Reset Total');
     expect(resetTotal.UUID).toBe('E863F112-079E-48FF-8F27-9C2605A29F52');
     expect(resetTotal.props).toEqual({
@@ -121,7 +123,7 @@ describe('CustomCharacteristic', () => {
   });
 
   test('Times Opened characteristic has correct properties', () => {
-    const timesOpened = new customCharacteristics.TimesOpened();
+    const timesOpened = new CustomCharacteristics.TimesOpened();
     expect(timesOpened.displayName).toBe('Times Opened');
     expect(timesOpened.UUID).toBe('E863F129-079E-48FF-8F27-9C2605A29F52');
     expect(timesOpened.props).toEqual({
