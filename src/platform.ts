@@ -36,32 +36,12 @@ interface DiscoveryTopicMap {
 }
 
 /**
- * This is the tasmota{latform constructor interface
- * 
- * @interface tasmotaPlatform
- * @extends {DynamicPlatformPlugin}
- * @property {typeof Service} Service
- * @property {typeof Characteristic} Characteristic
- * @property {any} CustomCharacteristics
- * @property {PlatformAccessory[]} accessories
- * @property {tasmotaGarageService[] | tasmotaSwitchService[] | tasmotaLightService[] | tasmotaSensorService[] | tasmotaBinarySensorService[] | tasmotaFanService[]} services
- * @property {any} FakeGatoHistoryService
- * @property {number} teleperiod
+ * TasmotaPlatform
  */
-export interface tasmotaPlatform {
-  readonly Service: typeof Service
-  readonly Characteristic: typeof Characteristic
-  CustomCharacteristics: any
-  readonly accessories: PlatformAccessory[]
-  readonly services: tasmotaGarageService[] | tasmotaSwitchService[] | tasmotaLightService[] | tasmotaSensorService[] | tasmotaBinarySensorService[] | tasmotaFanService[]
-  FakeGatoHistoryService: any
-  teleperiod: number
-}
 
 export class tasmotaPlatform implements DynamicPlatformPlugin {
   public readonly Service: typeof Service = this.api.hap.Service
   public readonly Characteristic: typeof Characteristic = this.api.hap.Characteristic
-  public CustomCharacteristics: any
 
   // this is used to track restored cached accessories
   public readonly accessories: PlatformAccessory[] = []
@@ -86,9 +66,6 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
     public readonly api: API,
   ) {
     this.log.debug('Finished initializing platform:', this.config.name)
-
-    this.CustomCharacteristics = require('./lib/CustomCharacteristics')(this.api.hap.Service, this.api.hap.Characteristic);
-    console.log('CustomCharacteristics', this.CustomCharacteristics)
 
     this.cleanup = this.config.cleanup || 24 // Default removal of defunct devices after 24 hours
     this.debug = this.config.debug || false
@@ -138,7 +115,7 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
     // to start discovery of new accessories.
     this.api.on('didFinishLaunching', () => {
       log.debug('Executed didFinishLaunching callback')
-      log.debug('this.accessories as loaded', this.accessories[0]?.services)
+      // log.debug('this.accessories as loaded', this.accessories[0]?.services)
       // run the method to discover / register your devices as accessories
       debug('%d accessories for cleanup', this.defunctAccessories.length)
       if (this.defunctAccessories.length > 0) {

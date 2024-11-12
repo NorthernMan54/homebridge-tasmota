@@ -1,165 +1,188 @@
-const inherits = require('util').inherits;
-import { Formats, Perms, Units } from 'homebridge';
+import { inherits } from 'util';
+import { Characteristic, Service, Formats, Perms, Units } from 'hap-nodejs';
 
-let Service, Characteristic;
+export namespace CustomCharacteristics {
 
-module.exports = function (Service, Characteristic) {
+  export class Voltage extends Characteristic {
+    static readonly UUID: string = 'E863F10A-079E-48FF-8F27-9C2605A29F52';
 
-  const CustomCharacteristic: any = {};
+    constructor() {
+      super('Voltage', CustomCharacteristics.Voltage.UUID, {
+        format: Formats.FLOAT,
+        unit: 'V',
+        perms: [Perms.PAIRED_READ, Perms.NOTIFY],
+      });
+      this.value = this.getDefaultValue();
+    }
+  }
 
-  CustomCharacteristic.Voltage = function () {
-    Characteristic.call(this, 'Voltage', CustomCharacteristic.Voltage.UUID);
-    this.setProps({
-      format: Formats.FLOAT,
-      unit: 'V',
-      perms: [Perms.PAIRED_READ, Perms.NOTIFY],
-    });
-    this.value = this.getDefaultValue();
-  };
-  CustomCharacteristic.Voltage.UUID = 'E863F10A-079E-48FF-8F27-9C2605A29F52';
-  inherits(CustomCharacteristic.Voltage, Characteristic);
+  inherits(CustomCharacteristics.Voltage, Characteristic);
 
-  // Aka Amps
+  export class ElectricCurrent extends Characteristic {
+    static readonly UUID: string = 'E863F126-079E-48FF-8F27-9C2605A29F52';
 
-  CustomCharacteristic.ElectricCurrent = function () {
-    Characteristic.call(this, 'Electric Current', CustomCharacteristic.ElectricCurrent.UUID);
-    this.setProps({
-      format: Formats.FLOAT,
-      unit: 'A',
-      perms: [Perms.PAIRED_READ, Perms.NOTIFY],
-    });
-    this.value = this.getDefaultValue();
-  };
-  CustomCharacteristic.ElectricCurrent.UUID = 'E863F126-079E-48FF-8F27-9C2605A29F52';
-  inherits(CustomCharacteristic.ElectricCurrent, Characteristic);
+    constructor() {
+      super('Electric Current', CustomCharacteristics.ElectricCurrent.UUID, {
+        format: Formats.FLOAT,
+        unit: 'A',
+        perms: [Perms.PAIRED_READ, Perms.NOTIFY],
+      });
+      this.value = this.getDefaultValue();
+    }
+  }
 
-  // Aka watts
+  inherits(CustomCharacteristics.ElectricCurrent, Characteristic);
 
-  CustomCharacteristic.CurrentConsumption = function () {
-    Characteristic.call(this, 'Current Consumption', CustomCharacteristic.CurrentConsumption.UUID);
-    this.setProps({
-      format: Formats.FLOAT,
-      unit: 'W',
-      perms: [Perms.PAIRED_READ, Perms.NOTIFY],
-    });
-    this.value = this.getDefaultValue();
-  };
-  CustomCharacteristic.CurrentConsumption.UUID = 'E863F10D-079E-48FF-8F27-9C2605A29F52';
-  inherits(CustomCharacteristic.CurrentConsumption, Characteristic);
+  export class CurrentConsumption extends Characteristic {
+    static readonly UUID: string = 'E863F10D-079E-48FF-8F27-9C2605A29F52';
 
-  // Aka kilowatts
+    constructor() {
+      super('Current Consumption', CustomCharacteristics.CurrentConsumption.UUID, {
+        format: Formats.FLOAT,
+        unit: 'W',
+        perms: [Perms.PAIRED_READ, Perms.NOTIFY],
+      });
+      this.value = this.getDefaultValue();
+    }
+  }
 
-  CustomCharacteristic.TotalConsumption = function () {
-    Characteristic.call(this, 'Total Consumption', CustomCharacteristic.TotalConsumption.UUID);
-    this.setProps({
-      format: Formats.FLOAT,
-      unit: 'kWh',
-      perms: [Perms.PAIRED_READ, Perms.NOTIFY],
-    });
-    this.value = this.getDefaultValue();
-  };
-  CustomCharacteristic.TotalConsumption.UUID = 'E863F10C-079E-48FF-8F27-9C2605A29F52';
-  inherits(CustomCharacteristic.TotalConsumption, Characteristic);
+  inherits(CustomCharacteristics.CurrentConsumption, Characteristic);
 
+  export class TotalConsumption extends Characteristic {
+    static readonly UUID: string = 'E863F10C-079E-48FF-8F27-9C2605A29F52';
 
-  CustomCharacteristic.AtmosphericPressureLevel = function () {
-    Characteristic.call(this, 'Air Pressure', CustomCharacteristic.AtmosphericPressureLevel.UUID);
-    this.setProps({
-      format: Formats.UINT16,
-      unit: 'hPa',
-      minValue: 100,      // Issue #45
-      maxValue: 1100,
-      minStep: 1,
-      perms: [Perms.PAIRED_READ, Perms.NOTIFY],
-    });
-    this.value = this.getDefaultValue();
-  };
-  CustomCharacteristic.AtmosphericPressureLevel.UUID = 'E863F10F-079E-48FF-8F27-9C2605A29F52';
-  inherits(CustomCharacteristic.AtmosphericPressureLevel, Characteristic);
+    constructor() {
+      super('Total Consumption', CustomCharacteristics.TotalConsumption.UUID, {
+        format: Formats.FLOAT,
+        unit: 'kWh',
+        perms: [Perms.PAIRED_READ, Perms.NOTIFY],
+      });
+      this.value = this.getDefaultValue();
+    }
+  }
 
-  CustomCharacteristic.ValvePosition = function () {
-    Characteristic.call(this, 'Valve position', 'E863F12E-079E-48FF-8F27-9C2605A29F52');
-    this.setProps({
-      format: Formats.UINT8,
-      unit: Characteristic.Units.PERCENTAGE,
-      perms: [Perms.PAIRED_READ, Perms.NOTIFY],
-    });
-    this.value = this.getDefaultValue();
-  };
-  inherits(CustomCharacteristic.ValvePosition, Characteristic);
+  inherits(CustomCharacteristics.TotalConsumption, Characteristic);
 
-  CustomCharacteristic.LastActivation = function () {
-    Characteristic.call(this, 'Last Activation', CustomCharacteristic.LastActivation.UUID);
-    this.setProps({
-      format: Formats.UINT32,
-      unit: Characteristic.Units.SECONDS,
-      perms: [Perms.PAIRED_READ, Perms.NOTIFY],
-    });
-    this.value = this.getDefaultValue();
-  };
-  CustomCharacteristic.LastActivation.UUID = 'E863F11A-079E-48FF-8F27-9C2605A29F52';
-  inherits(CustomCharacteristic.LastActivation, Characteristic);
+  export class AtmosphericPressureLevel extends Characteristic {
+    static readonly UUID: string = 'E863F10F-079E-48FF-8F27-9C2605A29F52';
 
-  CustomCharacteristic.ResetTotal = function () {
-    Characteristic.call(this, 'Reset Total', CustomCharacteristic.ResetTotal.UUID);
-    this.setProps({
-      format: Formats.UINT32,
-      unit: Characteristic.Units.SECONDS,
-      perms: [Perms.PAIRED_READ, Perms.NOTIFY],
-    });
-    this.value = this.getDefaultValue();
-  };
-  CustomCharacteristic.ResetTotal.UUID = 'E863F112-079E-48FF-8F27-9C2605A29F52';
-  inherits(CustomCharacteristic.LastActivation, Characteristic);
+    constructor() {
+      super('Air Pressure', CustomCharacteristics.AtmosphericPressureLevel.UUID, {
+        format: Formats.UINT16,
+        unit: 'hPa',
+        minValue: 100,
+        maxValue: 1100,
+        minStep: 1,
+        perms: [Perms.PAIRED_READ, Perms.NOTIFY],
+      });
+      this.value = this.getDefaultValue();
+    }
+  }
 
-  CustomCharacteristic.TimesOpened = function () {
-    Characteristic.call(this, 'Times Opened', CustomCharacteristic.TimesOpened.UUID);
-    this.setProps({
-      format: Formats.UINT32,
-      perms: [Perms.PAIRED_READ, Perms.NOTIFY],
-    });
-    this.value = this.getDefaultValue();
-  };
-  CustomCharacteristic.TimesOpened.UUID = 'E863F129-079E-48FF-8F27-9C2605A29F52';
-  inherits(CustomCharacteristic.TimesOpened, Characteristic);
+  inherits(CustomCharacteristics.AtmosphericPressureLevel, Characteristic);
 
-  CustomCharacteristic.ProgramData = function () {
-    Characteristic.call(this, 'Program data', 'E863F12F-079E-48FF-8F27-9C2605A29F52');
-    this.setProps({
-      format: Formats.DATA,
-      perms: [Perms.PAIRED_WRITE, Perms.NOTIFY],
-    });
-    this.value = this.getDefaultValue();
-  };
-  inherits(CustomCharacteristic.ProgramData, Characteristic);
+  export class ValvePosition extends Characteristic {
+    static readonly UUID: string = 'E863F12E-079E-48FF-8F27-9C2605A29F52';
 
-  CustomCharacteristic.ProgramCommand = function () {
-    Characteristic.call(this, 'Program command', 'E863F12C-079E-48FF-8F27-9C2605A29F52');
-    console.log(this.setProps);
-    this.setProps({
-      format: Formats.DATA,
-      perms: [Perms.WRITE, Perms.NOTIFY],
-    });
-    this.value = this.getDefaultValue();
-  };
-  inherits(CustomCharacteristic.ProgramCommand, Characteristic);
+    constructor() {
+      super('Valve Position', CustomCharacteristics.ValvePosition.UUID, {
+        format: Formats.UINT8,
+        unit: Units.PERCENTAGE,
+        perms: [Perms.PAIRED_READ, Perms.NOTIFY],
+      });
+      this.value = this.getDefaultValue();
+    }
+  }
 
-  // courtesy of https://github.com/robi-van-kinobi/homebridge-cubesensors
-  CustomCharacteristic.AtmosphericPressureSensor = function (displayName, subtype) {
-    Service.call(this, displayName, CustomCharacteristic.AtmosphericPressureSensor.UUID, subtype);
+  inherits(CustomCharacteristics.ValvePosition, Characteristic);
 
-    // Required Characteristics
-    this.addCharacteristic(CustomCharacteristic.AtmosphericPressureLevel);
+  export class LastActivation extends Characteristic {
+    static readonly UUID: string = 'E863F11A-079E-48FF-8F27-9C2605A29F52';
 
-    // Optional Characteristics
-    this.addOptionalCharacteristic(Characteristic.StatusActive);
-    this.addOptionalCharacteristic(Characteristic.StatusFault);
-    this.addOptionalCharacteristic(Characteristic.StatusLowBattery);
-    this.addOptionalCharacteristic(Characteristic.StatusTampered);
-    this.addOptionalCharacteristic(Characteristic.Name);
-  };
-  CustomCharacteristic.AtmosphericPressureSensor.UUID = 'B77831FD-D66A-46A4-B66D-FD7EE8DFE3CE';
-  inherits(CustomCharacteristic.AtmosphericPressureSensor, Service);
+    constructor() {
+      super('Last Activation', CustomCharacteristics.LastActivation.UUID, {
+        format: Formats.UINT32,
+        unit: Units.SECONDS,
+        perms: [Perms.PAIRED_READ, Perms.NOTIFY],
+      });
+      this.value = this.getDefaultValue();
+    }
+  }
 
-  return CustomCharacteristic;
-};
+  inherits(CustomCharacteristics.LastActivation, Characteristic);
+
+  export class ProgramCommand extends Characteristic {
+    static readonly UUID: string = 'E863F12C-079E-48FF-8F27-9C2605A29F52';
+
+    constructor() {
+      super('Program Command', CustomCharacteristics.ProgramCommand.UUID, {
+        format: Formats.DATA,
+        perms: [Perms.PAIRED_WRITE, Perms.NOTIFY],
+      });
+      this.value = this.getDefaultValue();
+    }
+  }
+
+  inherits(CustomCharacteristics.ProgramCommand, Characteristic);
+
+  export class TimesOpened extends Characteristic {
+    static readonly UUID: string = 'E863F129-079E-48FF-8F27-9C2605A29F52';
+
+    constructor() {
+      super('Times Opened', CustomCharacteristics.TimesOpened.UUID, {
+        format: Formats.UINT32,
+        perms: [Perms.PAIRED_READ, Perms.NOTIFY],
+      });
+      this.value = this.getDefaultValue();
+    }
+  }
+
+  inherits(CustomCharacteristics.TimesOpened, Characteristic);
+
+  export class ResetTotal extends Characteristic {
+    static readonly UUID: string = 'E863F112-079E-48FF-8F27-9C2605A29F52';
+
+    constructor() {
+      super('Reset Total', CustomCharacteristics.ResetTotal.UUID, {
+        format: Formats.UINT32,
+        unit: Units.SECONDS,
+        perms: [Perms.PAIRED_READ, Perms.NOTIFY],
+      });
+      this.value = this.getDefaultValue();
+    }
+  }
+
+  inherits(CustomCharacteristics.ResetTotal, Characteristic);
+
+  export class ProgramData extends Characteristic {
+    static readonly UUID: string = 'E863F12F-079E-48FF-8F27-9C2605A29F52';
+
+    constructor() {
+      super('Program Data', CustomCharacteristics.ProgramData.UUID, {
+        format: Formats.DATA,
+        perms: [Perms.PAIRED_WRITE, Perms.NOTIFY],
+      });
+      this.value = this.getDefaultValue();
+    }
+  }
+
+  inherits(CustomCharacteristics.ProgramData, Characteristic);
+
+  export class AtmosphericPressureSensor extends Service {
+    static readonly UUID: string = 'B77831FD-D66A-46A4-B66D-FD7EE8DFE3CE';
+
+    constructor(displayName?: string, subtype?: string) {
+      super(displayName, AtmosphericPressureSensor.UUID, subtype);
+
+      this.addCharacteristic(CustomCharacteristics.AtmosphericPressureLevel);
+
+      this.addOptionalCharacteristic(Characteristic.StatusActive);
+      this.addOptionalCharacteristic(Characteristic.StatusFault);
+      this.addOptionalCharacteristic(Characteristic.StatusLowBattery);
+      this.addOptionalCharacteristic(Characteristic.StatusTampered);
+      this.addOptionalCharacteristic(Characteristic.Name);
+    }
+  }
+
+  inherits(CustomCharacteristics.AtmosphericPressureSensor, Service);
+}

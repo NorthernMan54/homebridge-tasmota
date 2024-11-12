@@ -2,6 +2,7 @@ import os from 'node:os'
 import createDebug from 'debug'
 import { Characteristic, CharacteristicValue, Nullable, PlatformAccessory, Service } from 'homebridge'
 import nunjucks from 'nunjucks'
+import { CustomCharacteristics } from './lib/CustomCharacteristics';
 
 import { tasmotaPlatform } from './platform'
 
@@ -33,7 +34,6 @@ export class TasmotaService {
     public readonly accessory: PlatformAccessory,
     protected readonly uniq_id: string,
   ) {
-    /* eslint-disable ts/no-require-imports */
     this.uuid = this.platform.api.hap.uuid.generate(this.accessory.context.device[this.uniq_id].uniq_id)
     this.device_class = accessory.context.device[this.uniq_id].dev_cla
 
@@ -98,16 +98,16 @@ export class TasmotaService {
     switch (device_class) {
       case '-dt24-amp':
       case '_energy_current': // Amps
-        return (this.platform.CustomCharacteristics.ElectricCurrent)
+        return (CustomCharacteristics.ElectricCurrent)
       case '_energy_voltage': // Voltage
       case '-dt24-volt': // dt24
-        return (this.platform.CustomCharacteristics.Voltage)
+        return (CustomCharacteristics.Voltage)
       case '_energy_power': // Watts
       case '-dt24-watt': // dt24
-        return (this.platform.CustomCharacteristics.CurrentConsumption)
+        return (CustomCharacteristics.CurrentConsumption)
       case '_energy_total': // Total Kilowatts
       case '-dt24-watt-hour':
-        return (this.platform.CustomCharacteristics.TotalConsumption)
+        return (CustomCharacteristics.TotalConsumption)
         break
     }
   }

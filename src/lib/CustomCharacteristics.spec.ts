@@ -1,7 +1,6 @@
 import { expect } from '@jest/globals';
-import { Formats, Perms, Units } from 'homebridge';
-import { Characteristic, Service } from 'hap-nodejs';
-const CustomCharacteristics = require('./CustomCharacteristics')(Service, Characteristic);
+import { CustomCharacteristics } from './CustomCharacteristics';
+import { Formats, Perms, Units } from 'hap-nodejs';
 
 describe('Custom Characteristics', () => {
 
@@ -74,7 +73,7 @@ describe('Custom Characteristics', () => {
 
   test('Valve Position characteristic has correct properties', () => {
     const valvePosition = new CustomCharacteristics.ValvePosition();
-    expect(valvePosition.displayName).toBe('Valve position');
+    expect(valvePosition.displayName).toBe('Valve Position');
     expect(valvePosition.UUID).toBe('E863F12E-079E-48FF-8F27-9C2605A29F52');
     expect(valvePosition.props).toEqual({
       format: Formats.UINT8,
@@ -86,7 +85,7 @@ describe('Custom Characteristics', () => {
 
   test('Program Command characteristic has correct properties', () => {
     const programCommand = new CustomCharacteristics.ProgramCommand();
-    expect(programCommand.displayName).toBe('Program command');
+    expect(programCommand.displayName).toBe('Program Command');
     expect(programCommand.UUID).toBe('E863F12C-079E-48FF-8F27-9C2605A29F52');
     expect(programCommand.props).toEqual({
       format: Formats.DATA,
@@ -107,7 +106,18 @@ describe('Custom Characteristics', () => {
     expect(lastActivation.value).toBeDefined();
   });
 
-  test.skip('Reset Total characteristic has correct properties', () => {
+  test('Times Opened characteristic has correct properties', () => {
+    const timesOpened = new CustomCharacteristics.TimesOpened();
+    expect(timesOpened.displayName).toBe('Times Opened');
+    expect(timesOpened.UUID).toBe('E863F129-079E-48FF-8F27-9C2605A29F52');
+    expect(timesOpened.props).toEqual({
+      format: Formats.UINT32,
+      perms: [Perms.PAIRED_READ, Perms.NOTIFY],
+    });
+    expect(timesOpened.value).toBeDefined();
+  });
+
+  test('Reset Total characteristic has correct properties', () => {
     expect(CustomCharacteristics.ResetTotal).toBeDefined();
     const resetTotal = new CustomCharacteristics.ResetTotal();
     expect(resetTotal).toBeDefined();
@@ -120,15 +130,20 @@ describe('Custom Characteristics', () => {
     });
     expect(resetTotal.value).toBeDefined();
   });
-
-  test('Times Opened characteristic has correct properties', () => {
-    const timesOpened = new CustomCharacteristics.TimesOpened();
-    expect(timesOpened.displayName).toBe('Times Opened');
-    expect(timesOpened.UUID).toBe('E863F129-079E-48FF-8F27-9C2605A29F52');
-    expect(timesOpened.props).toEqual({
-      format: Formats.UINT32,
-      perms: [Perms.PAIRED_READ, Perms.NOTIFY],
-    });
-    expect(timesOpened.value).toBeDefined();
-  });
 });
+
+describe('Custom Services', () => {
+  test('CustomCharacteristic object is defined', () => {
+    expect(CustomCharacteristics).toBeDefined();
+  });
+
+  test('Atmospheric Pressure Sensor has correct properties', () => {
+    expect(CustomCharacteristics.AtmosphericPressureSensor).toBeDefined();
+    const atmosphericPressureSensor = new CustomCharacteristics.AtmosphericPressureSensor('test Atmospheric Pressure Sensor');
+    expect(atmosphericPressureSensor).toBeDefined();
+    expect(atmosphericPressureSensor.displayName).toBe('test Atmospheric Pressure Sensor');
+    expect(atmosphericPressureSensor.UUID).toBe('B77831FD-D66A-46A4-B66D-FD7EE8DFE3CE');
+    expect(atmosphericPressureSensor.characteristics).toBeDefined();
+  });
+
+});  
