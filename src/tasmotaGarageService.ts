@@ -1,10 +1,10 @@
-import createDebug from "debug";
-import { CharacteristicSetCallback, CharacteristicValue, PlatformAccessory } from "homebridge";
-import { TasmotaService } from "./TasmotaService";
-import { tasmotaPlatform } from "./platform";
+import createDebug from 'debug';
+import { CharacteristicSetCallback, CharacteristicValue, PlatformAccessory } from 'homebridge';
+import { TasmotaService } from './TasmotaService';
+import { tasmotaPlatform } from './platform';
 
 
-const debug = createDebug("Tasmota:garage");
+const debug = createDebug('Tasmota:garage');
 
 /**
  * Platform Accessory
@@ -42,19 +42,19 @@ export class tasmotaGarageService extends TasmotaService {
 
     // register handlers for the On/Off Characteristic
 
-    if (this.service.getCharacteristic(this.platform.Characteristic.TargetDoorState).listenerCount("set") < 1) {
+    if (this.service.getCharacteristic(this.platform.Characteristic.TargetDoorState).listenerCount('set') < 1) {
       this.service.getCharacteristic(this.platform.Characteristic.TargetDoorState)
-        .on("set", this.setDoorState.bind(this)); // SET - bind to the `setOn` method below
+        .on('set', this.setDoorState.bind(this)); // SET - bind to the `setOn` method below
       // .on('get', this.getOn.bind(this));               // GET - bind to the `getOn` method below
     }
     this.enableStatus();
 
-    this.doorStatusTopic = this.accessory.context.device[this.uniq_id].stat_t.replace("STATE", "DOOR");
+    this.doorStatusTopic = this.accessory.context.device[this.uniq_id].stat_t.replace('STATE', 'DOOR');
 
     this.accessory.context.mqttHost.on(this.doorStatusTopic, this.statusUpdate.bind(this));
     this.accessory.context.mqttHost.statusSubscribe(this.doorStatusTopic);
 
-    this.doorSensorTopic = this.accessory.context.device[this.uniq_id].stat_t.replace("STATE", "SENSOR");
+    this.doorSensorTopic = this.accessory.context.device[this.uniq_id].stat_t.replace('STATE', 'SENSOR');
 
     this.accessory.context.mqttHost.on(this.doorSensorTopic, this.statusUpdate.bind(this));
     this.accessory.context.mqttHost.statusSubscribe(this.doorSensorTopic);
@@ -90,7 +90,7 @@ export class tasmotaGarageService extends TasmotaService {
    */
 
   statusUpdate(topic, message) {
-    debug("MQTT", topic, message.toString());
+    debug('MQTT', topic, message.toString());
 
     try {
       this.accessory.context.timeout = this.platform.autoCleanup(this.accessory);
@@ -98,28 +98,28 @@ export class tasmotaGarageService extends TasmotaService {
 
       switch (topic) {
         case this.doorStatusTopic:
-          debug("doorStatusTopic '%s:%s'", this.service.displayName, this.characteristic.displayName);
+          debug('doorStatusTopic \'%s:%s\'', this.service.displayName, this.characteristic.displayName);
           switch (value) {
-            case "CLOSED":
+            case 'CLOSED':
               value = this.platform.Characteristic.CurrentDoorState.CLOSED;
               break;
-            case "OPEN":
+            case 'OPEN':
               value = this.platform.Characteristic.CurrentDoorState.OPEN;
               break;
-            case "CLOSING":
+            case 'CLOSING':
               value = this.platform.Characteristic.CurrentDoorState.CLOSING;
               break;
-            case "OPENING":
+            case 'OPENING':
               value = this.platform.Characteristic.CurrentDoorState.OPENING;
               break;
             default:
-              this.platform.log.error("Unhandled Garage Door Status", value);
+              this.platform.log.error('Unhandled Garage Door Status', value);
           }
 
           if (this.characteristic.value !== value) {
-            this.platform.log.info("Updating '%s:%s' to %s", this.service.displayName, this.characteristic.displayName, value);
+            this.platform.log.info('Updating \'%s:%s\' to %s', this.service.displayName, this.characteristic.displayName, value);
           } else {
-            this.platform.log.debug("Updating '%s' to %s", this.service.displayName, value);
+            this.platform.log.debug('Updating \'%s\' to %s', this.service.displayName, value);
           }
 
           this.characteristic.updateValue(value);
@@ -129,15 +129,15 @@ export class tasmotaGarageService extends TasmotaService {
           }
           break;
         case this.doorSensorTopic:
-          debug("doorSensorTopic '%s:%s'", this.service.displayName, this.characteristic.displayName);
+          debug('doorSensorTopic \'%s:%s\'', this.service.displayName, this.characteristic.displayName);
           value = JSON.parse(value);
-          debug("doorSensorTopic %s", value);
-          if (value.Switch2 === "OFF") {
+          debug('doorSensorTopic %s', value);
+          if (value.Switch2 === 'OFF') {
             value = this.platform.Characteristic.CurrentDoorState.OPEN;
             if (this.characteristic.value !== value) {
-              this.platform.log.info("Updating '%s:%s' to %s", this.service.displayName, this.characteristic.displayName, value);
+              this.platform.log.info('Updating \'%s:%s\' to %s', this.service.displayName, this.characteristic.displayName, value);
             } else {
-              this.platform.log.debug("Updating '%s' to %s", this.service.displayName, value);
+              this.platform.log.debug('Updating \'%s\' to %s', this.service.displayName, value);
             }
 
             this.characteristic.updateValue(value);
@@ -145,12 +145,12 @@ export class tasmotaGarageService extends TasmotaService {
             if (topic === this.doorStatusTopic || topic === this.doorSensorTopic) {
               this.service.getCharacteristic(this.platform.Characteristic.TargetDoorState).updateValue(value % 2);
             }
-          } else if (value.Switch3 === "OFF") {
+          } else if (value.Switch3 === 'OFF') {
             value = this.platform.Characteristic.CurrentDoorState.CLOSED;
             if (this.characteristic.value !== value) {
-              this.platform.log.info("Updating '%s:%s' to %s", this.service.displayName, this.characteristic.displayName, value);
+              this.platform.log.info('Updating \'%s:%s\' to %s', this.service.displayName, this.characteristic.displayName, value);
             } else {
-              this.platform.log.debug("Updating '%s' to %s", this.service.displayName, value);
+              this.platform.log.debug('Updating \'%s\' to %s', this.service.displayName, value);
             }
 
             this.characteristic.updateValue(value);
@@ -159,15 +159,15 @@ export class tasmotaGarageService extends TasmotaService {
               this.service.getCharacteristic(this.platform.Characteristic.TargetDoorState).updateValue(value % 2);
             }
           } else {
-            this.platform.log.info("Not open or closed '%s:%s'", this.service.displayName, this.characteristic.displayName);
+            this.platform.log.info('Not open or closed \'%s:%s\'', this.service.displayName, this.characteristic.displayName);
           }
 
           break;
         default:
       }
     } catch (err) {
-      debug("ERROR:", err.message);
-      this.platform.log.error("ERROR: message parsing error", this.service.displayName, topic, message.toString());
+      debug('ERROR:', err.message);
+      this.platform.log.error('ERROR: message parsing error', this.service.displayName, topic, message.toString());
     }
   }
 
@@ -178,14 +178,14 @@ export class tasmotaGarageService extends TasmotaService {
   setDoorState(value: CharacteristicValue, callback: CharacteristicSetCallback) {
     try {
       if (this.service.getCharacteristic(this.platform.Characteristic.TargetDoorState).value !== value) {
-        this.platform.log.info("%s Pushing Garage Door Button ->", this.service.displayName, value);
+        this.platform.log.info('%s Pushing Garage Door Button ->', this.service.displayName, value);
 
         this.accessory.context.mqttHost.sendMessage(this.accessory.context.device[this.uniq_id].cmd_t, this.accessory.context.device[this.uniq_id].pl_on);
       } else {
-        this.platform.log.error("%s Not Pushing Garage Door Button ->", this.service.displayName, value);
+        this.platform.log.error('%s Not Pushing Garage Door Button ->', this.service.displayName, value);
       }
     } catch (err) {
-      this.platform.log.error("ERROR:", err.message);
+      this.platform.log.error('ERROR:', err.message);
     }
     // you must call the callback function
     callback(null);
