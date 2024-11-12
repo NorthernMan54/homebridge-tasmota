@@ -8,7 +8,7 @@ All notable changes to this project will be documented in this file. This projec
 
 #### Changes
 
-- Support for homebridge 2.0
+- Preperation for Homebridge 2.0
 - Minor exception fixes
 
 ## 0.1.18 (2024-06-09)
