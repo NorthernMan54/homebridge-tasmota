@@ -1,9 +1,9 @@
 import createDebug from 'debug'
 import { PlatformAccessory } from 'homebridge'
-import { tasmotaPlatform } from './platform'
+import { CustomCharacteristics } from './lib/CustomCharacteristics'
 
+import { tasmotaPlatform } from './platform'
 import { isTrue, TasmotaService } from './TasmotaService'
-import { CustomCharacteristics } from './lib/CustomCharacteristics';
 
 const debug = createDebug('Tasmota:binarySensor')
 

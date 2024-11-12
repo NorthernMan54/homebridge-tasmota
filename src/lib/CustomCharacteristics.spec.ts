@@ -1,6 +1,6 @@
 import { expect } from '@jest/globals';
 import { CustomCharacteristics } from './CustomCharacteristics';
-import { Formats, Perms, Units } from 'hap-nodejs';
+import { Accessory, Formats, Perms, Units } from 'hap-nodejs';
 
 describe('Custom Characteristics', () => {
 
@@ -133,17 +133,22 @@ describe('Custom Characteristics', () => {
 });
 
 describe('Custom Services', () => {
+  var accessory: Accessory;
   test('CustomCharacteristic object is defined', () => {
     expect(CustomCharacteristics).toBeDefined();
   });
 
-  test('Atmospheric Pressure Sensor has correct properties', () => {
+  test('Create an Accessory', () => {
+    accessory = new Accessory('test accessory', 'B77831FD-D66A-46A4-B66D-FD7EE8DFE3CE');
+    expect(accessory).toBeDefined();
+  });
+
+  test('Add Atmospheric Pressure Sensor to Accessory', () => {
     expect(CustomCharacteristics.AtmosphericPressureSensor).toBeDefined();
-    const atmosphericPressureSensor = new CustomCharacteristics.AtmosphericPressureSensor('test Atmospheric Pressure Sensor');
-    expect(atmosphericPressureSensor).toBeDefined();
-    expect(atmosphericPressureSensor.displayName).toBe('test Atmospheric Pressure Sensor');
-    expect(atmosphericPressureSensor.UUID).toBe('B77831FD-D66A-46A4-B66D-FD7EE8DFE3CE');
-    expect(atmosphericPressureSensor.characteristics).toBeDefined();
+    accessory.addService(CustomCharacteristics.AtmosphericPressureSensor, 'Test Atmospheric Pressure Sensor');
+    expect(accessory.services).toBeDefined();
+    expect(accessory.services.length).toBe(2);
+    expect(accessory.services[1].displayName).toBe('Test Atmospheric Pressure Sensor');
   });
 
 });  

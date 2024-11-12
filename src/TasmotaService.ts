@@ -2,7 +2,7 @@ import os from 'node:os'
 import createDebug from 'debug'
 import { Characteristic, CharacteristicValue, Nullable, PlatformAccessory, Service } from 'homebridge'
 import nunjucks from 'nunjucks'
-import { CustomCharacteristics } from './lib/CustomCharacteristics';
+import { CustomCharacteristics } from './lib/CustomCharacteristics'
 
 import { tasmotaPlatform } from './platform'
 

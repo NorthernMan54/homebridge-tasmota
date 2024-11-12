@@ -1,9 +1,9 @@
 import os from 'node:os'
 import createDebug from 'debug'
 import { PlatformAccessory } from 'homebridge'
+import { CustomCharacteristics } from './lib/CustomCharacteristics'
 import { tasmotaPlatform } from './platform'
 import { TasmotaService } from './TasmotaService'
-import { CustomCharacteristics } from './lib/CustomCharacteristics'
 
 const debug = createDebug('Tasmota:sensor')
 
