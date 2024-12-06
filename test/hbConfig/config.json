@@ -1,7 +1,7 @@
 {
   "bridge": {
-    "name": "ExamplePlugin",
-    "username": "AA:BB:CC:DD:EE:FF",
+    "name": "Heisenberg",
+    "username": "AA:BB:CC:DD:EE:01",
     "port": 51826,
     "pin": "031-45-154"
   },
