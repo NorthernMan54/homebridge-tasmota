@@ -9,7 +9,6 @@ import {
   PlatformAccessory,
   Service,
 } from 'homebridge';
-import { EveHomeKitTypes } from 'homebridge-lib/EveHomeKitTypes';
 import { Mqtt } from './lib/Mqtt';
 import { PLATFORM_NAME, PLUGIN_NAME } from './settings';
 import { tasmotaBinarySensorService } from './tasmotaBinarySensorService';
@@ -42,9 +41,9 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
   public readonly Service: typeof Service;
   public readonly Characteristic: typeof Characteristic;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public readonly CustomServices: any;
+  public CustomServices: any;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public readonly CustomCharacteristics: any;
+  public CustomCharacteristics: any;
 
   // this is used to track restored cached accessories
   public readonly accessories: PlatformAccessory[] = [];
@@ -74,8 +73,13 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
     this.Service = api.hap.Service;
     this.Characteristic = api.hap.Characteristic;
 
-    this.CustomServices = new EveHomeKitTypes(this.api).Services;
-    this.CustomCharacteristics = new EveHomeKitTypes(this.api).Characteristics;
+    (async () => {
+      const { EveHomeKitTypes } = await import('homebridge-lib/lib/EveHomeKitTypes.js');
+
+      // Your existing code
+      this.CustomServices = new EveHomeKitTypes(this.api).Services;
+      this.CustomCharacteristics = new EveHomeKitTypes(this.api).Characteristics;
+    });
 
     this.log.debug('Finished initializing platform:', this.config.name);
     this.cleanup = this.config.cleanup || 24; // Default removal of defunct devices after 24 hours
