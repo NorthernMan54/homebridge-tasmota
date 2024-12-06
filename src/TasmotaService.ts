@@ -1,4 +1,3 @@
-import os from 'node:os';
 import createDebug from 'debug';
 import {
   Characteristic,
@@ -7,8 +6,8 @@ import {
   PlatformAccessory,
   Service,
 } from 'homebridge';
+import os from 'node:os';
 import nunjucks from 'nunjucks';
-import { CustomCharacteristics } from './lib/CustomCharacteristics';
 import { tasmotaPlatform } from './platform';
 
 const debug = createDebug('Tasmota:Service');
@@ -104,16 +103,16 @@ export class TasmotaService {
     switch (device_class) {
       case '-dt24-amp':
       case '_energy_current': // Amps
-        return (CustomCharacteristics.ElectricCurrent);
+        return (this.platform.CustomCharacteristics.ElectricCurrent);
       case '_energy_voltage': // Voltage
       case '-dt24-volt': // dt24
-        return (CustomCharacteristics.Voltage);
+        return (this.platform.CustomCharacteristics.Voltage);
       case '_energy_power': // Watts
       case '-dt24-watt': // dt24
-        return (CustomCharacteristics.CurrentConsumption);
+        return (this.platform.CustomCharacteristics.CurrentConsumption);
       case '_energy_total': // Total Kilowatts
       case '-dt24-watt-hour':
-        return (CustomCharacteristics.TotalConsumption);
+        return (this.platform.CustomCharacteristics.TotalConsumption);
         break;
     }
   }
@@ -129,7 +128,7 @@ export class TasmotaService {
   }
 
   statusUpdate(topic, message) {
-    debug('statusUpdate', this.service.displayName, topic, message.toString());
+    debug('statusUpdate for "%s" on topic "%s" ->', this.service.displayName, topic, message.toString());
 
     this.accessory.context.timeout = this.platform.autoCleanup(this.accessory);
 

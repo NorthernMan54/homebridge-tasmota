@@ -124,8 +124,6 @@ dist
 DEVICES.md.orig.*
 DEVICES.md.toc.*
 
-/hbconfig/persist
-hbconfig/.uix-secrets
-/hbconfig/accessories
-/hbconfig/*persist.json
-/hbconfig/backups
+/test/hbConfig/accessories
+/test/hbConfig/backups
+/test/hbConfig/persist

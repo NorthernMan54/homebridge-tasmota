@@ -10,12 +10,19 @@
     "outDir": "./dist",
     "baseUrl": "./",
     "esModuleInterop": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "allowJs": true, // Include JavaScript files in the compilation
+    "typeRoots": [
+      "node_modules/@types",
+      "src/@types"
+    ]
   },
   "exclude": [
     "scripts",
     "homebridge-ui",
     "node_modules",
     "./dist",
+    "./docs",
+    "./test"
   ]
-}  
+}

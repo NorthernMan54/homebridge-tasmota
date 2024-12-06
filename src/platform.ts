@@ -17,6 +17,7 @@ import { tasmotaGarageService } from './tasmotaGarageService';
 import { tasmotaLightService } from './tasmotaLightService';
 import { tasmotaSensorService } from './tasmotaSensorService';
 // import { tasmotaAccessory } from './platformAccessory';
+import { EveHomeKitTypes } from './lib/EveHomeKitTypes.mjs';
 import { tasmotaSwitchService } from './tasmotaSwitchService';
 
 const debug = createDebug('Tasmota:platform');
@@ -41,6 +42,7 @@ interface DiscoveryTopicMap {
 export class tasmotaPlatform implements DynamicPlatformPlugin {
   public readonly Service: typeof Service = this.api.hap.Service;
   public readonly Characteristic: typeof Characteristic = this.api.hap.Characteristic;
+  public readonly CustomCharacteristics: any = new EveHomeKitTypes(this.api);
 
   // this is used to track restored cached accessories
   public readonly accessories: PlatformAccessory[] = [];
@@ -68,7 +70,6 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
     public readonly api: API,
   ) {
     this.log.debug('Finished initializing platform:', this.config.name);
-
     this.cleanup = this.config.cleanup || 24; // Default removal of defunct devices after 24 hours
     this.debug = this.config.debug || false;
     this.teleperiod = this.config.teleperiod || 300;
@@ -89,7 +90,7 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
     if (this.config.override) {
       interface Injection {
         key: string
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         value: any
       }
       interface Injections {
@@ -108,8 +109,8 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
         );
         injections.push({ topic, injection: inject });
       });
-      debug('This is your override reformated to injections.');
-      debug('"injections": %s\n', JSON.stringify(injections, null, 2));
+      // debug('This is your override reformated to injections.');
+      // debug('"injections": %s\n', JSON.stringify(injections, null, 2));
     }
 
     // When this event is fired it means Homebridge has restored all cached accessories from disk.
