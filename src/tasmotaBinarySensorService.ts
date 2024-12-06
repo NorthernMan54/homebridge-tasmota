@@ -1,7 +1,7 @@
 import createDebug from 'debug';
 import { PlatformAccessory } from 'homebridge';
-import { tasmotaPlatform } from './platform';
 import { isTrue, TasmotaService } from './TasmotaService';
+import { tasmotaPlatform } from './platform';
 
 const debug = createDebug('Tasmota:binarySensor');
 
