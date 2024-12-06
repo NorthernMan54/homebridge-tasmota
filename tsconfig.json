@@ -1,20 +1,24 @@
 {
   "compilerOptions": {
-    "target": "es2020",
-    "emitDecoratorMetadata": true,
-    "experimentalDecorators": true,
-    "baseUrl": "./",
-    "module": "commonjs",
+    "target": "ES2022",
+    "lib": [
+      "DOM",
+      "ES2022"
+    ],
+    "rootDir": "src",
+    "module": "ES2022",
+    "moduleResolution": "node",
+    "strict": true,
     "declaration": true,
-    "outDir": "./dist",
-    "removeComments": true,
+    "outDir": "dist",
     "sourceMap": true,
-    "esModuleInterop": true
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true
   },
-  "exclude": [
-    "node_modules",
-    "./dist",
-    "ui",
-    "public"
+  "include": [
+    "eslint.config.js",
+    "homebridge-ui",
+    "src"
   ]
 }

@@ -101,19 +101,19 @@ export class TasmotaService {
 
   deviceClassToHKCharacteristic(device_class: string) {
     switch (device_class) {
-      case '-dt24-amp':
-      case '_energy_current': // Amps
-        return (this.platform.CustomCharacteristics.ElectricCurrent);
-      case '_energy_voltage': // Voltage
-      case '-dt24-volt': // dt24
-        return (this.platform.CustomCharacteristics.Voltage);
-      case '_energy_power': // Watts
-      case '-dt24-watt': // dt24
-        return (this.platform.CustomCharacteristics.CurrentConsumption);
-      case '_energy_total': // Total Kilowatts
-      case '-dt24-watt-hour':
-        return (this.platform.CustomCharacteristics.TotalConsumption);
-        break;
+    case '-dt24-amp':
+    case '_energy_current': // Amps
+      return (this.platform.CustomCharacteristics.ElectricCurrent);
+    case '_energy_voltage': // Voltage
+    case '-dt24-volt': // dt24
+      return (this.platform.CustomCharacteristics.Voltage);
+    case '_energy_power': // Watts
+    case '-dt24-watt': // dt24
+      return (this.platform.CustomCharacteristics.CurrentConsumption);
+    case '_energy_total': // Total Kilowatts
+    case '-dt24-watt-hour':
+      return (this.platform.CustomCharacteristics.TotalConsumption);
+      break;
     }
   }
 
@@ -138,22 +138,22 @@ export class TasmotaService {
       // Sensor value tweaks or adjustments needed for homekit
 
       switch (this.device_class) {
-        case 'temperature':
-          if (this.accessory.context.device[this.uniq_id].unit_of_meas.toUpperCase() === 'F') {
-            value = Math.round((value - 32) * 5 / 9 * 10) / 10;
-          }
-          break;
-        case 'illuminance':
-          // normalize LX in the range homebridge expects
-          value = (value < 0.0001 ? 0.0001 : (value > 100000 ? 100000 : value));
-          break;
-        case 'co2':
-          if (value > 1200) {
-            this.service.setCharacteristic(this.platform.Characteristic.CarbonDioxideDetected, this.platform.Characteristic.CarbonDioxideDetected.CO2_LEVELS_ABNORMAL);
-          } else {
-            this.service.setCharacteristic(this.platform.Characteristic.CarbonDioxideDetected, this.platform.Characteristic.CarbonDioxideDetected.CO2_LEVELS_NORMAL);
-          }
-          break;
+      case 'temperature':
+        if (this.accessory.context.device[this.uniq_id].unit_of_meas.toUpperCase() === 'F') {
+          value = Math.round((value - 32) * 5 / 9 * 10) / 10;
+        }
+        break;
+      case 'illuminance':
+        // normalize LX in the range homebridge expects
+        value = (value < 0.0001 ? 0.0001 : (value > 100000 ? 100000 : value));
+        break;
+      case 'co2':
+        if (value > 1200) {
+          this.service.setCharacteristic(this.platform.Characteristic.CarbonDioxideDetected, this.platform.Characteristic.CarbonDioxideDetected.CO2_LEVELS_ABNORMAL);
+        } else {
+          this.service.setCharacteristic(this.platform.Characteristic.CarbonDioxideDetected, this.platform.Characteristic.CarbonDioxideDetected.CO2_LEVELS_NORMAL);
+        }
+        break;
       }
 
       if (value instanceof Error) {
@@ -230,14 +230,14 @@ export function isTrue(value: string | boolean | number): boolean {
     value = value.trim().toLowerCase();
   }
   switch (value) {
-    case true:
-    case 'true':
-    case 1:
-    case '1':
-    case 'on':
-    case 'yes':
-      return true;
-    default:
-      return false;
+  case true:
+  case 'true':
+  case 1:
+  case '1':
+  case 'on':
+  case 'yes':
+    return true;
+  default:
+    return false;
   }
 }

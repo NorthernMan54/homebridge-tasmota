@@ -62,7 +62,7 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
   private timeoutCounter = 1;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private debug: any;
-  public FakeGatoHistoryService;
+  public FakeGatoHistoryService: any;
   public teleperiod = 300;
 
   constructor(
@@ -140,7 +140,7 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
 
         // Only addEntries that match the expected profile of the function.
 
-        this.FakeGatoHistoryService.prototype.appendData = function (entry) {
+        this.FakeGatoHistoryService.prototype.appendData = function (entry: any) {
           entry.time = Math.round(new Date().valueOf() / 1000);
           switch (this.accessoryType) {
             default:
@@ -426,7 +426,7 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
   discoveryOveride(uniq_id: string, message: any) {
     if (this.config.override) { // pre version 0.1.0 override configuration
       // debug('override', this.config.override);
-      const overrides = [];
+      const overrides: any = [];
       for (const [key, value] of Object.entries(this.config.override)) {
         // debug(`${key}: ${value}`);
         overrides[key] = value;
@@ -439,9 +439,9 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
       }
     } else if (this.config.injections) {
       // debug('injections', this.config.injections);
-      this.config.injections.forEach((overide) => {
+      this.config.injections.forEach((overide: any) => {
         if (overide.topic === uniq_id) {
-          overide.injection.forEach((inject) => {
+          overide.injection.forEach((inject: any) => {
             message[inject.key] = inject.value;
           });
         }
@@ -680,7 +680,7 @@ function replaceStringsInObject(obj, findStr, replaceStr, cache = new Map()) {
 }
 
 function renameKeys(o, mapShortToLong) {
-  let build, key, destKey, value;
+  let build, key, destKey: String, value;
 
   if (Array.isArray(o)) {
     build = [];
@@ -706,7 +706,7 @@ function renameKeys(o, mapShortToLong) {
   return build;
 }
 
-function findVal(object, key) {
+function findVal(object: any, key: any) {
   let value;
   Object.keys(object).some((k) => {
     if (k === key) {

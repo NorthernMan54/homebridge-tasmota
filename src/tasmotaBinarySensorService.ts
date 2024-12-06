@@ -19,88 +19,88 @@ export class tasmotaBinarySensorService extends TasmotaService {
   ) {
     super(platform, accessory, uniq_id);
     switch (accessory.context.device[this.uniq_id].dev_cla) {
-      case 'doorbell':
-        this.platform.log.debug('Creating %s binary sensor %s', accessory.context.device[this.uniq_id].dev_cla, accessory.context.device[this.uniq_id].name);
+    case 'doorbell':
+      this.platform.log.debug('Creating %s binary sensor %s', accessory.context.device[this.uniq_id].dev_cla, accessory.context.device[this.uniq_id].name);
 
-        this.service = this.accessory.getService(this.uuid) || this.accessory.addService(this.platform.Service.ContactSensor, accessory.context.device[this.uniq_id].name, this.uuid);
-        this.service.setCharacteristic(this.platform.Characteristic.ConfiguredName, accessory.context.device[this.uniq_id].name);
+      this.service = this.accessory.getService(this.uuid) || this.accessory.addService(this.platform.Service.ContactSensor, accessory.context.device[this.uniq_id].name, this.uuid);
+      this.service.setCharacteristic(this.platform.Characteristic.ConfiguredName, accessory.context.device[this.uniq_id].name);
 
-        if (!this.service.displayName) {
-          this.service.setCharacteristic(this.platform.Characteristic.Name, accessory.context.device[this.uniq_id].name);
-        }
-        this.characteristic = this.service.getCharacteristic(this.platform.Characteristic.ContactSensorState);
-        if (this.platform.config.history) {
-          this.fakegato = 'contact';
-          this.service.addOptionalCharacteristic(this.platform.CustomCharacteristics.TimesOpened);
-          this.service.addOptionalCharacteristic(this.platform.CustomCharacteristics.LastActivation);
-        }
-        break;
-      case 'motion':
-        this.platform.log.debug('Creating %s binary sensor %s', accessory.context.device[this.uniq_id].dev_cla, accessory.context.device[this.uniq_id].name);
+      if (!this.service.displayName) {
+        this.service.setCharacteristic(this.platform.Characteristic.Name, accessory.context.device[this.uniq_id].name);
+      }
+      this.characteristic = this.service.getCharacteristic(this.platform.Characteristic.ContactSensorState);
+      if (this.platform.config.history) {
+        this.fakegato = 'contact';
+        this.service.addOptionalCharacteristic(this.platform.CustomCharacteristics.TimesOpened);
+        this.service.addOptionalCharacteristic(this.platform.CustomCharacteristics.LastActivation);
+      }
+      break;
+    case 'motion':
+      this.platform.log.debug('Creating %s binary sensor %s', accessory.context.device[this.uniq_id].dev_cla, accessory.context.device[this.uniq_id].name);
 
-        this.service = this.accessory.getService(this.uuid) || this.accessory.addService(this.platform.Service.MotionSensor, accessory.context.device[this.uniq_id].name, this.uuid);
-        this.service.setCharacteristic(this.platform.Characteristic.ConfiguredName, accessory.context.device[this.uniq_id].name);
+      this.service = this.accessory.getService(this.uuid) || this.accessory.addService(this.platform.Service.MotionSensor, accessory.context.device[this.uniq_id].name, this.uuid);
+      this.service.setCharacteristic(this.platform.Characteristic.ConfiguredName, accessory.context.device[this.uniq_id].name);
 
-        if (!this.service.displayName) {
-          this.service.setCharacteristic(this.platform.Characteristic.Name, accessory.context.device[this.uniq_id].name);
-        }
-        this.characteristic = this.service.getCharacteristic(this.platform.Characteristic.MotionDetected);
-        if (this.platform.config.history) {
-          this.fakegato = 'motion';
-          this.service.addOptionalCharacteristic(this.platform.CustomCharacteristics.LastActivation);
-          debug('adding', this.fakegato);
-        }
-        break;
-      case 'contact':
-        this.platform.log.debug('Creating %s binary sensor %s', accessory.context.device[this.uniq_id].dev_cla, accessory.context.device[this.uniq_id].name);
+      if (!this.service.displayName) {
+        this.service.setCharacteristic(this.platform.Characteristic.Name, accessory.context.device[this.uniq_id].name);
+      }
+      this.characteristic = this.service.getCharacteristic(this.platform.Characteristic.MotionDetected);
+      if (this.platform.config.history) {
+        this.fakegato = 'motion';
+        this.service.addOptionalCharacteristic(this.platform.CustomCharacteristics.LastActivation);
+        debug('adding', this.fakegato);
+      }
+      break;
+    case 'contact':
+      this.platform.log.debug('Creating %s binary sensor %s', accessory.context.device[this.uniq_id].dev_cla, accessory.context.device[this.uniq_id].name);
 
-        this.service = this.accessory.getService(this.uuid) || this.accessory.addService(this.platform.Service.ContactSensor, accessory.context.device[this.uniq_id].name, this.uuid);
-        this.service.setCharacteristic(this.platform.Characteristic.ConfiguredName, accessory.context.device[this.uniq_id].name);
+      this.service = this.accessory.getService(this.uuid) || this.accessory.addService(this.platform.Service.ContactSensor, accessory.context.device[this.uniq_id].name, this.uuid);
+      this.service.setCharacteristic(this.platform.Characteristic.ConfiguredName, accessory.context.device[this.uniq_id].name);
 
-        if (!this.service.displayName) {
-          this.service.setCharacteristic(this.platform.Characteristic.Name, accessory.context.device[this.uniq_id].name);
-        }
-        this.characteristic = this.service.getCharacteristic(this.platform.Characteristic.ContactSensorState);
-        if (this.platform.config.history) {
-          this.fakegato = 'contact';
-          this.service.addOptionalCharacteristic(this.platform.CustomCharacteristics.LastActivation);
-          debug('adding', this.fakegato);
-        }
-        break;
-      case 'door':
-        this.platform.log.debug('Creating %s binary sensor %s', accessory.context.device[this.uniq_id].dev_cla, accessory.context.device[this.uniq_id].name);
+      if (!this.service.displayName) {
+        this.service.setCharacteristic(this.platform.Characteristic.Name, accessory.context.device[this.uniq_id].name);
+      }
+      this.characteristic = this.service.getCharacteristic(this.platform.Characteristic.ContactSensorState);
+      if (this.platform.config.history) {
+        this.fakegato = 'contact';
+        this.service.addOptionalCharacteristic(this.platform.CustomCharacteristics.LastActivation);
+        debug('adding', this.fakegato);
+      }
+      break;
+    case 'door':
+      this.platform.log.debug('Creating %s binary sensor %s', accessory.context.device[this.uniq_id].dev_cla, accessory.context.device[this.uniq_id].name);
 
-        this.service = this.accessory.getService(this.uuid) || this.accessory.addService(this.platform.Service.ContactSensor, accessory.context.device[this.uniq_id].name, this.uuid);
-        this.service.setCharacteristic(this.platform.Characteristic.ConfiguredName, accessory.context.device[this.uniq_id].name);
+      this.service = this.accessory.getService(this.uuid) || this.accessory.addService(this.platform.Service.ContactSensor, accessory.context.device[this.uniq_id].name, this.uuid);
+      this.service.setCharacteristic(this.platform.Characteristic.ConfiguredName, accessory.context.device[this.uniq_id].name);
 
-        if (!this.service.displayName) {
-          this.service.setCharacteristic(this.platform.Characteristic.Name, accessory.context.device[this.uniq_id].name);
-        }
-        this.characteristic = this.service.getCharacteristic(this.platform.Characteristic.ContactSensorState);
-        if (this.platform.config.history) {
-          this.fakegato = 'motion';
-          this.service.addOptionalCharacteristic(this.platform.CustomCharacteristics.LastActivation);
-          debug('adding', this.fakegato);
-        }
-        break;
-      case 'moisture':
-        this.platform.log.debug('Creating %s binary sensor %s', accessory.context.device[this.uniq_id].dev_cla, accessory.context.device[this.uniq_id].name);
+      if (!this.service.displayName) {
+        this.service.setCharacteristic(this.platform.Characteristic.Name, accessory.context.device[this.uniq_id].name);
+      }
+      this.characteristic = this.service.getCharacteristic(this.platform.Characteristic.ContactSensorState);
+      if (this.platform.config.history) {
+        this.fakegato = 'motion';
+        this.service.addOptionalCharacteristic(this.platform.CustomCharacteristics.LastActivation);
+        debug('adding', this.fakegato);
+      }
+      break;
+    case 'moisture':
+      this.platform.log.debug('Creating %s binary sensor %s', accessory.context.device[this.uniq_id].dev_cla, accessory.context.device[this.uniq_id].name);
 
-        this.service = this.accessory.getService(this.uuid) || this.accessory.addService(this.platform.Service.LeakSensor, accessory.context.device[this.uniq_id].name, this.uuid);
-        this.service.setCharacteristic(this.platform.Characteristic.ConfiguredName, accessory.context.device[this.uniq_id].name);
+      this.service = this.accessory.getService(this.uuid) || this.accessory.addService(this.platform.Service.LeakSensor, accessory.context.device[this.uniq_id].name, this.uuid);
+      this.service.setCharacteristic(this.platform.Characteristic.ConfiguredName, accessory.context.device[this.uniq_id].name);
 
-        if (!this.service.displayName) {
-          this.service.setCharacteristic(this.platform.Characteristic.Name, accessory.context.device[this.uniq_id].name);
-        }
-        this.characteristic = this.service.getCharacteristic(this.platform.Characteristic.LeakDetected);
-        if (this.platform.config.history) {
-          // this.fakegato = 'motion';
-          this.service.addOptionalCharacteristic(this.platform.CustomCharacteristics.LastActivation);
-          // debug('adding', this.fakegato);
-        }
-        break;
-      default:
-        this.platform.log.error('Warning: Unhandled Tasmota binary sensor type', accessory.context.device[this.uniq_id].dev_cla);
+      if (!this.service.displayName) {
+        this.service.setCharacteristic(this.platform.Characteristic.Name, accessory.context.device[this.uniq_id].name);
+      }
+      this.characteristic = this.service.getCharacteristic(this.platform.Characteristic.LeakDetected);
+      if (this.platform.config.history) {
+        // this.fakegato = 'motion';
+        this.service.addOptionalCharacteristic(this.platform.CustomCharacteristics.LastActivation);
+        // debug('adding', this.fakegato);
+      }
+      break;
+    default:
+      this.platform.log.error('Warning: Unhandled Tasmota binary sensor type', accessory.context.device[this.uniq_id].dev_cla);
     }
 
     this.enableFakegato();
@@ -128,53 +128,53 @@ export class tasmotaBinarySensorService extends TasmotaService {
       // Adjust value to format expected by sensor type
 
       switch (this.device_class) {
-        case 'doorbell':
-          break;
-        case 'moisture':
-          // 1 / 0
-          debug('moisture', this.accessory.context.device[this.uniq_id].pl_on, value);
-          value = (this.accessory.context.device[this.uniq_id].pl_on === value
-            ? this.platform.Characteristic.LeakDetected.LEAK_DETECTED
-            : this.platform.Characteristic.LeakDetected.LEAK_NOT_DETECTED);
-          break;
-        case 'door':
-          if (typeof this.accessory.context.device[this.uniq_id].pl_on === 'boolean') {
-            value = isTrue(value);
-          }
-          value = (this.accessory.context.device[this.uniq_id].pl_on === value
-            ? this.platform.Characteristic.ContactSensorState.CONTACT_NOT_DETECTED
-            : this.platform.Characteristic.ContactSensorState.CONTACT_DETECTED);
-          break;
-        case 'motion':
-          // boolean
-          value = (this.accessory.context.device[this.uniq_id].pl_on === value);
-          break;
-        case 'contact':
-          // boolean
-          value = (this.accessory.context.device[this.uniq_id].pl_on === value
-            ? this.platform.Characteristic.ContactSensorState.CONTACT_NOT_DETECTED
-            : this.platform.Characteristic.ContactSensorState.CONTACT_DETECTED);
-          break;
+      case 'doorbell':
+        break;
+      case 'moisture':
+        // 1 / 0
+        debug('moisture', this.accessory.context.device[this.uniq_id].pl_on, value);
+        value = (this.accessory.context.device[this.uniq_id].pl_on === value
+          ? this.platform.Characteristic.LeakDetected.LEAK_DETECTED
+          : this.platform.Characteristic.LeakDetected.LEAK_NOT_DETECTED);
+        break;
+      case 'door':
+        if (typeof this.accessory.context.device[this.uniq_id].pl_on === 'boolean') {
+          value = isTrue(value);
+        }
+        value = (this.accessory.context.device[this.uniq_id].pl_on === value
+          ? this.platform.Characteristic.ContactSensorState.CONTACT_NOT_DETECTED
+          : this.platform.Characteristic.ContactSensorState.CONTACT_DETECTED);
+        break;
+      case 'motion':
+        // boolean
+        value = (this.accessory.context.device[this.uniq_id].pl_on === value);
+        break;
+      case 'contact':
+        // boolean
+        value = (this.accessory.context.device[this.uniq_id].pl_on === value
+          ? this.platform.Characteristic.ContactSensorState.CONTACT_NOT_DETECTED
+          : this.platform.Characteristic.ContactSensorState.CONTACT_DETECTED);
+        break;
       }
 
       if (this.characteristic.value !== value) {
         this.platform.log.info('Updating \'%s\' binary sensor to %s', this.service.displayName, value);
         let timesOpened;
         switch (this.device_class) {
-          case 'doorbell':
-            timesOpened = timesOpened + this.service.getCharacteristic(this.platform.CustomCharacteristics.TimesOpened).value;
-            this.service.updateCharacteristic(this.platform.CustomCharacteristics.TimesOpened, timesOpened);
+        case 'doorbell':
+          timesOpened = timesOpened + this.service.getCharacteristic(this.platform.CustomCharacteristics.TimesOpened).value;
+          this.service.updateCharacteristic(this.platform.CustomCharacteristics.TimesOpened, timesOpened);
           // fall thru
           /* eslint-disable no-fallthrough */
-          case 'moisture':
-          case 'motion':
-          case 'contact':
-            if (this.platform.config.history) {
-              const now = Math.round(new Date().valueOf() / 1000);
-              const lastActivation = now - this.accessory.context.fakegatoService.getInitialTime();
-              this.service.updateCharacteristic(this.platform.CustomCharacteristics.LastActivation, lastActivation);
-            }
-            break;
+        case 'moisture':
+        case 'motion':
+        case 'contact':
+          if (this.platform.config.history) {
+            const now = Math.round(new Date().valueOf() / 1000);
+            const lastActivation = now - this.accessory.context.fakegatoService.getInitialTime();
+            this.service.updateCharacteristic(this.platform.CustomCharacteristics.LastActivation, lastActivation);
+          }
+          break;
         }
       } else {
         this.platform.log.debug('Updating \'%s\' binary sensor to %s', this.service.displayName, value);
