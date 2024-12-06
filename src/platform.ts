@@ -9,6 +9,7 @@ import {
   PlatformAccessory,
   Service,
 } from 'homebridge';
+import { EveHomeKitTypes } from './lib/EveHomeKitTypes.mjs';
 import { Mqtt } from './lib/Mqtt';
 import { PLATFORM_NAME, PLUGIN_NAME } from './settings';
 import { tasmotaBinarySensorService } from './tasmotaBinarySensorService';
@@ -17,7 +18,6 @@ import { tasmotaGarageService } from './tasmotaGarageService';
 import { tasmotaLightService } from './tasmotaLightService';
 import { tasmotaSensorService } from './tasmotaSensorService';
 // import { tasmotaAccessory } from './platformAccessory';
-import { EveHomeKitTypes } from './lib/EveHomeKitTypes.mjs';
 import { tasmotaSwitchService } from './tasmotaSwitchService';
 
 const debug = createDebug('Tasmota:platform');
@@ -42,7 +42,8 @@ interface DiscoveryTopicMap {
 export class tasmotaPlatform implements DynamicPlatformPlugin {
   public readonly Service: typeof Service = this.api.hap.Service;
   public readonly Characteristic: typeof Characteristic = this.api.hap.Characteristic;
-  public readonly CustomTypes: EveHomeKitTypes = new EveHomeKitTypes(this.api);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public readonly CustomTypes: any = new EveHomeKitTypes(this.api);
 
   // this is used to track restored cached accessories
   public readonly accessories: PlatformAccessory[] = [];

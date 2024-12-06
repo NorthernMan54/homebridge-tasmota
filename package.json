@@ -32,7 +32,7 @@
     ],
     "ext": "ts",
     "ignore": [],
-    "exec": "npm run build && DEBUG=-HAP-NodeJS:*,Tasmota* homebridge -U ./test/hbConfig -T -D -P .",
+    "exec": "npm run build && DEBUG=-HAP-NodeJS:*,Tasmota* homebridge -U ./test/hbConfig -T -D -I -P .",
     "signal": "SIGTERM",
     "env": {
       "NODE_OPTIONS": "--trace-warnings"

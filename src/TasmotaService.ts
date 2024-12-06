@@ -1,3 +1,4 @@
+import os from 'node:os';
 import createDebug from 'debug';
 import {
   Characteristic,
@@ -6,7 +7,6 @@ import {
   PlatformAccessory,
   Service,
 } from 'homebridge';
-import os from 'node:os';
 import nunjucks from 'nunjucks';
 import { tasmotaPlatform } from './platform';
 
