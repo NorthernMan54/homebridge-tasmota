@@ -103,16 +103,16 @@ export class TasmotaService {
     switch (device_class) {
       case '-dt24-amp':
       case '_energy_current': // Amps
-        return (this.platform.CustomCharacteristics.ElectricCurrent);
+        return (this.platform.CustomTypes.Characteristics.ElectricCurrent);
       case '_energy_voltage': // Voltage
       case '-dt24-volt': // dt24
-        return (this.platform.CustomCharacteristics.Voltage);
+        return (this.platform.CustomTypes.Characteristics.Voltage);
       case '_energy_power': // Watts
       case '-dt24-watt': // dt24
-        return (this.platform.CustomCharacteristics.CurrentConsumption);
+        return (this.platform.CustomTypes.Characteristics.CurrentConsumption);
       case '_energy_total': // Total Kilowatts
       case '-dt24-watt-hour':
-        return (this.platform.CustomCharacteristics.TotalConsumption);
+        return (this.platform.CustomTypes.Characteristics.TotalConsumption);
         break;
     }
   }

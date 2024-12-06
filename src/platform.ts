@@ -42,7 +42,7 @@ interface DiscoveryTopicMap {
 export class tasmotaPlatform implements DynamicPlatformPlugin {
   public readonly Service: typeof Service = this.api.hap.Service;
   public readonly Characteristic: typeof Characteristic = this.api.hap.Characteristic;
-  public readonly CustomCharacteristics: any = new EveHomeKitTypes(this.api);
+  public readonly CustomTypes: EveHomeKitTypes = new EveHomeKitTypes(this.api);
 
   // this is used to track restored cached accessories
   public readonly accessories: PlatformAccessory[] = [];

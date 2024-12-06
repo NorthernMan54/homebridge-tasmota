@@ -31,8 +31,8 @@ export class tasmotaBinarySensorService extends TasmotaService {
         this.characteristic = this.service.getCharacteristic(this.platform.Characteristic.ContactSensorState);
         if (this.platform.config.history) {
           this.fakegato = 'contact';
-          this.service.addOptionalCharacteristic(this.platform.CustomCharacteristics.TimesOpened);
-          this.service.addOptionalCharacteristic(this.platform.CustomCharacteristics.LastActivation);
+          this.service.addOptionalCharacteristic(this.platform.CustomTypes.Characteristics.TimesOpened);
+          this.service.addOptionalCharacteristic(this.platform.CustomTypes.Characteristics.LastActivation);
         }
         break;
       case 'motion':
@@ -47,7 +47,7 @@ export class tasmotaBinarySensorService extends TasmotaService {
         this.characteristic = this.service.getCharacteristic(this.platform.Characteristic.MotionDetected);
         if (this.platform.config.history) {
           this.fakegato = 'motion';
-          this.service.addOptionalCharacteristic(this.platform.CustomCharacteristics.LastActivation);
+          this.service.addOptionalCharacteristic(this.platform.CustomTypes.Characteristics.LastActivation);
           debug('adding', this.fakegato);
         }
         break;
@@ -63,7 +63,7 @@ export class tasmotaBinarySensorService extends TasmotaService {
         this.characteristic = this.service.getCharacteristic(this.platform.Characteristic.ContactSensorState);
         if (this.platform.config.history) {
           this.fakegato = 'contact';
-          this.service.addOptionalCharacteristic(this.platform.CustomCharacteristics.LastActivation);
+          this.service.addOptionalCharacteristic(this.platform.CustomTypes.Characteristics.LastActivation);
           debug('adding', this.fakegato);
         }
         break;
@@ -79,7 +79,7 @@ export class tasmotaBinarySensorService extends TasmotaService {
         this.characteristic = this.service.getCharacteristic(this.platform.Characteristic.ContactSensorState);
         if (this.platform.config.history) {
           this.fakegato = 'motion';
-          this.service.addOptionalCharacteristic(this.platform.CustomCharacteristics.LastActivation);
+          this.service.addOptionalCharacteristic(this.platform.CustomTypes.Characteristics.LastActivation);
           debug('adding', this.fakegato);
         }
         break;
@@ -95,7 +95,7 @@ export class tasmotaBinarySensorService extends TasmotaService {
         this.characteristic = this.service.getCharacteristic(this.platform.Characteristic.LeakDetected);
         if (this.platform.config.history) {
           // this.fakegato = 'motion';
-          this.service.addOptionalCharacteristic(this.platform.CustomCharacteristics.LastActivation);
+          this.service.addOptionalCharacteristic(this.platform.CustomTypes.Characteristics.LastActivation);
           // debug('adding', this.fakegato);
         }
         break;
@@ -162,8 +162,8 @@ export class tasmotaBinarySensorService extends TasmotaService {
         let timesOpened;
         switch (this.device_class) {
           case 'doorbell':
-            timesOpened = timesOpened + this.service.getCharacteristic(this.platform.CustomCharacteristics.TimesOpened).value;
-            this.service.updateCharacteristic(this.platform.CustomCharacteristics.TimesOpened, timesOpened);
+            timesOpened = timesOpened + this.service.getCharacteristic(this.platform.CustomTypes.Characteristics.TimesOpened).value;
+            this.service.updateCharacteristic(this.platform.CustomTypes.Characteristics.TimesOpened, timesOpened);
           // fall thru
           /* eslint-disable no-fallthrough */
           case 'moisture':
@@ -172,7 +172,7 @@ export class tasmotaBinarySensorService extends TasmotaService {
             if (this.platform.config.history) {
               const now = Math.round(new Date().valueOf() / 1000);
               const lastActivation = now - this.accessory.context.fakegatoService.getInitialTime();
-              this.service.updateCharacteristic(this.platform.CustomCharacteristics.LastActivation, lastActivation);
+              this.service.updateCharacteristic(this.platform.CustomTypes.Characteristics.LastActivation, lastActivation);
             }
             break;
         }
