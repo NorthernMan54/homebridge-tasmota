@@ -71,13 +71,13 @@ export class tasmotaSensorService extends TasmotaService {
       case 'pressure':
         this.platform.log.debug('Creating "%s" sensor %s', accessory.context.device[this.uniq_id].dev_cla, accessory.context.device[this.uniq_id].name, this.uuid);
         this.service = this.accessory.getService(this.uuid)
-          || this.accessory.addService(this.platform.CustomTypes.Services.AtmosphericPressureSensor, accessory.context.device[this.uniq_id].name, this.uuid);
+          || this.accessory.addService(this.platform.CustomServices.AirPressureSensor, accessory.context.device[this.uniq_id].name, this.uuid);
         this.service.setCharacteristic(this.platform.Characteristic.ConfiguredName, accessory.context.device[this.uniq_id].name);
 
         if (!this.service.displayName) {
           this.service.setCharacteristic(this.platform.Characteristic.Name, accessory.context.device[this.uniq_id].name);
         }
-        this.characteristic = this.service.getCharacteristic(this.platform.CustomTypes.Characteristics.AirPressure);
+        this.characteristic = this.service.getCharacteristic(this.platform.CustomCharacteristics.AirPressure);
         break;
       case 'illuminance':
         this.platform.log.debug('Creating %s sensor %s', accessory.context.device[this.uniq_id].dev_cla, accessory.context.device[this.uniq_id].name);
@@ -250,8 +250,8 @@ export class tasmotaSensorService extends TasmotaService {
             case 'temperature':
               debug('Updating fakegato \'%s:%s\'', that.service.displayName, that.characteristic.displayName, {
                 temp: value,
-                pressure: that.accessory.getService(this.platform.CustomTypes.Services.AtmosphericPressureSensor)
-                  ?.getCharacteristic(this.platform.CustomTypes.Characteristics.AirPressure)
+                pressure: that.accessory.getService(this.platform.CustomServices.AirPressureSensor)
+                  ?.getCharacteristic(this.platform.CustomCharacteristics.AirPressure)
                   .value ?? 0,
                 humidity: that.accessory.getService(that.platform.Service.HumiditySensor)
                   ?.getCharacteristic(that.platform.Characteristic.CurrentRelativeHumidity)
@@ -260,8 +260,8 @@ export class tasmotaSensorService extends TasmotaService {
 
               that.accessory.context.fakegatoService.appendData({
                 temp: value,
-                pressure: that.accessory.getService(this.platform.CustomTypes.Services.AtmosphericPressureSensor)
-                  ?.getCharacteristic(this.platform.CustomTypes.Characteristics.AirPressure)
+                pressure: that.accessory.getService(this.platform.CustomServices.AirPressureSensor)
+                  ?.getCharacteristic(this.platform.CustomCharacteristics.AirPressure)
                   .value ?? 0,
                 humidity: that.accessory.getService(that.platform.Service.HumiditySensor)
                   ?.getCharacteristic(that.platform.Characteristic.CurrentRelativeHumidity)

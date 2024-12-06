@@ -9,7 +9,7 @@ import {
   PlatformAccessory,
   Service,
 } from 'homebridge';
-import { EveHomeKitTypes } from './lib/EveHomeKitTypes.mjs';
+import { EveHomeKitTypes } from 'homebridge-lib/EveHomeKitTypes';
 import { Mqtt } from './lib/Mqtt';
 import { PLATFORM_NAME, PLUGIN_NAME } from './settings';
 import { tasmotaBinarySensorService } from './tasmotaBinarySensorService';
@@ -17,7 +17,6 @@ import { tasmotaFanService } from './tasmotaFanService';
 import { tasmotaGarageService } from './tasmotaGarageService';
 import { tasmotaLightService } from './tasmotaLightService';
 import { tasmotaSensorService } from './tasmotaSensorService';
-// import { tasmotaAccessory } from './platformAccessory';
 import { tasmotaSwitchService } from './tasmotaSwitchService';
 
 const debug = createDebug('Tasmota:platform');
@@ -40,10 +39,12 @@ interface DiscoveryTopicMap {
  */
 
 export class tasmotaPlatform implements DynamicPlatformPlugin {
-  public readonly Service: typeof Service = this.api.hap.Service;
-  public readonly Characteristic: typeof Characteristic = this.api.hap.Characteristic;
+  public readonly Service: typeof Service;
+  public readonly Characteristic: typeof Characteristic;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public readonly CustomTypes: any = new EveHomeKitTypes(this.api);
+  public readonly CustomServices: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public readonly CustomCharacteristics: any;
 
   // this is used to track restored cached accessories
   public readonly accessories: PlatformAccessory[] = [];
@@ -70,6 +71,12 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
     public readonly config: any,
     public readonly api: API,
   ) {
+    this.Service = api.hap.Service;
+    this.Characteristic = api.hap.Characteristic;
+
+    this.CustomServices = new EveHomeKitTypes(this.api).Services;
+    this.CustomCharacteristics = new EveHomeKitTypes(this.api).Characteristics;
+
     this.log.debug('Finished initializing platform:', this.config.name);
     this.cleanup = this.config.cleanup || 24; // Default removal of defunct devices after 24 hours
     this.debug = this.config.debug || false;
