@@ -48,7 +48,8 @@
     "fakegato-history": "^0.6.5",
     "homebridge-lib": "^7.1.0",
     "mqtt": "^5.10.1",
-    "nunjucks": "^3.2.x"
+    "nunjucks": "^3.2.x",
+    "semver": "^7.6.3"
   },
   "devDependencies": {
     "@eslint/js": "^9.14.0",
