@@ -4,6 +4,7 @@ import os from 'node:os';
 import { TasmotaService } from './TasmotaService.js';
 import { tasmotaPlatform } from './platform.js';
 import { PLUGIN_NAME } from './settings.js';
+import { HSBtoTasmota, RGBtoScaledHSV, ScaledHSVtoRGB } from './utils.js';
 
 const debug = createDebug('Tasmota:light');
 
@@ -13,130 +14,6 @@ const debug = createDebug('Tasmota:light');
  * Each accessory may expose multiple services of different service types.
  */
 
-/*
-    * HSV to RGB conversion from https://stackoverflow.com/questions/17242144/javascript-convert-hsb-hsv-color-to-rgb-accurately
-    * accepts parameters
-    * h  Object = {h:x, s:y, v:z}
-    * OR
-    * h, s, v
-    */
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function HSVtoRGB(h: any, s: number, v: number) {
-  let r = 0, g = 0, b = 0;
-  if (arguments.length === 1) {
-    s = h.s;
-    v = h.v;
-    h = h.h;
-  }
-  const i = Math.floor(h * 6);
-  const f = h * 6 - i;
-  const p = v * (1 - s);
-  const q = v * (1 - f * s);
-  const t = v * (1 - (1 - f) * s);
-  switch (i % 6) {
-    case 0:
-      r = v;
-      g = t;
-      b = p;
-      break;
-    case 1:
-      r = q;
-      g = v;
-      b = p;
-      break;
-    case 2:
-      r = p;
-      g = v;
-      b = t;
-      break;
-    case 3:
-      r = p;
-      g = q;
-      b = v;
-      break;
-    case 4:
-      r = t;
-      g = p;
-      b = v;
-      break;
-    case 5:
-      r = v;
-      g = p;
-      b = q;
-      break;
-  }
-
-  const rgb = [0, 0, 0];
-  rgb[0] = Math.round(r * 255);
-  rgb[1] = Math.round(g * 255);
-  rgb[2] = Math.round(b * 255);
-  return (
-    rgb
-  );
-}
-
-/* accepts parameters
- * r  Object = {r:x, g:y, b:z}
- * OR
- * r, g, b
- */
-function RGBtoHSV(r: number, g: number, b: number) {
-  // debug('from', r, g, b);
-  const max = Math.max(r, g, b);
-  const min = Math.min(r, g, b);
-  const d = max - min;
-  let h = 0;
-  const s = (max === 0 ? 0 : d / max);
-  const v = max / 255;
-  // debug('max', )
-  switch (max) {
-    case min:
-      h = 0;
-      break;
-    case r:
-      h = (g - b) + d * (g < b ? 6 : 0);
-      h /= 6 * d;
-      break;
-    case g:
-      h = (b - r) + d * 2;
-      h /= 6 * d;
-      break;
-    case b: h = (r - g) + d * 4;
-      h /= 6 * d;
-      break;
-  }
-
-  return {
-    h,
-    s,
-    v,
-  };
-}
-
-function RGBtoScaledHSV(r: string, g: string, b: string) {
-  const hsv = RGBtoHSV(Number.parseFloat(r), Number.parseFloat(g), Number.parseFloat(b));
-  // debug('to', hsv);
-  return {
-    h: Math.round(hsv.h * 360),
-    s: Math.round(hsv.s * 100),
-    v: Math.round(hsv.v * 100),
-  };
-}
-
-function ScaledHSVtoRGB(h: number, s: number, v: number) {
-  return HSVtoRGB(h / 360, s / 100, v / 100);
-}
-
-function HSBtoTasmota(h: number, s: number, b: number) {
-  const hsb = [0, 0, 0];
-  hsb[0] = h;
-  hsb[1] = s;
-  hsb[2] = b;
-  return (
-    hsb
-  );
-}
 
 export class tasmotaLightService extends TasmotaService {
   private update?: ChangeHSB;
@@ -292,7 +169,7 @@ export class tasmotaLightService extends TasmotaService {
   setActiveIdentifier(value: CharacteristicValue, callback: any) {
     this.platform.log.info('%s Set Effects Scheme ->', this.accessory.displayName, value);
     try {
-      this.accessory.context.mqttHost.sendMessage(this.accessory.context.device[this.uniq_id].fx_cmd_t, value.toString());
+      this.platform.mqttHost.sendMessage(this.accessory.context.device[this.uniq_id].fx_cmd_t, value.toString());
       callback(null);
     } catch (err: unknown) {
       this.platform.log.debug(String((err && (err as Error).message ? (err as Error).message : err)));
@@ -463,7 +340,7 @@ export class tasmotaLightService extends TasmotaService {
   setOn(value: CharacteristicValue, callback: CharacteristicSetCallback) {
     this.platform.log.info('%s Set Characteristic On ->', this.accessory.displayName, value);
 
-    this.accessory.context.mqttHost.sendMessage(this.accessory.context.device[this.uniq_id].cmd_t, (value
+    this.platform.mqttHost.sendMessage(this.accessory.context.device[this.uniq_id].cmd_t, (value
       ? this.accessory.context.device[this.uniq_id].pl_on
       : this.accessory.context.device[this.uniq_id].pl_off));
     callback(null);
@@ -471,7 +348,7 @@ export class tasmotaLightService extends TasmotaService {
 
   setBrightness(value: CharacteristicValue, callback: CharacteristicSetCallback) {
     this.platform.log.info('%s Set Characteristic Brightness ->', this.accessory.displayName, value);
-    this.accessory.context.mqttHost.sendMessage(this.accessory.context.device[this.uniq_id].bri_cmd_t, value.toString());
+    this.platform.mqttHost.sendMessage(this.accessory.context.device[this.uniq_id].bri_cmd_t, value.toString());
     callback(null);
   }
 
@@ -511,7 +388,7 @@ export class tasmotaLightService extends TasmotaService {
 
   setColorTemperature(value: CharacteristicValue, callback: CharacteristicSetCallback) {
     this.platform.log.info('%s Set Characteristic ColorTemperature ->', this.accessory.displayName, value);
-    this.accessory.context.mqttHost.sendMessage(this.accessory.context.device[this.uniq_id].clr_temp_cmd_t, value.toString());
+    this.platform.mqttHost.sendMessage(this.accessory.context.device[this.uniq_id].clr_temp_cmd_t, value.toString());
     callback(null);
   }
 }
@@ -524,6 +401,7 @@ class ChangeHSB {
   private deferrals: any[];
   private waitTimeUpdate: number;
 
+  private platform: tasmotaPlatform;
   private timeout: NodeJS.Timeout | null;
   private accessory: PlatformAccessory;
   private readonly uniq_id: string;
@@ -537,6 +415,7 @@ class ChangeHSB {
     this.deferrals = [];
     this.waitTimeUpdate = 100; // wait 100ms before processing change
     this.timeout = null;
+    this.platform = that.platform;
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -558,13 +437,13 @@ class ChangeHSB {
             Number(this.desiredState?.newSaturation ?? this.desiredState?.oldSaturation), 50).toString());
 
           if (this.accessory.context.device[this.uniq_id].rgb_cmd_t) {
-            this.accessory.context.mqttHost.sendMessage(this.accessory.context.device[this.uniq_id].rgb_cmd_t,
+            this.platform.mqttHost.sendMessage(this.accessory.context.device[this.uniq_id].rgb_cmd_t,
               ScaledHSVtoRGB(Number(this.desiredState.newHue ?? this.desiredState.oldHue),
                 Number(this.desiredState?.newSaturation ?? this.desiredState?.oldSaturation), 50).toString());
           }
 
           if (this.accessory.context.device[this.uniq_id].hs_cmd_t) {
-            this.accessory.context.mqttHost.sendMessage(this.accessory.context.device[this.uniq_id].hs_cmd_t,
+            this.platform.mqttHost.sendMessage(this.accessory.context.device[this.uniq_id].hs_cmd_t,
               HSBtoTasmota(Number(this.desiredState.newHue ?? this.desiredState.oldHue),
                 Number(this.desiredState?.newSaturation ?? this.desiredState?.oldSaturation),
                 Number(this.desiredState?.newBrightness ?? this.desiredState?.oldBrightness)).toString());

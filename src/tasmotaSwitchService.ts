@@ -114,11 +114,11 @@ export class tasmotaSwitchService extends TasmotaService {
       this.platform.log.info('%s Set Characteristic On ->', this.service?.displayName, value);
 
       if (typeof this.accessory.context.device[this.uniq_id].pl_on === 'boolean') {
-        this.accessory.context.mqttHost.sendMessage(this.accessory.context.device[this.uniq_id].cmd_t, (value
+        this.platform.mqttHost.sendMessage(this.accessory.context.device[this.uniq_id].cmd_t, (value
           ? 'true'
           : 'false'));
       } else {
-        this.accessory.context.mqttHost.sendMessage(this.accessory.context.device[this.uniq_id].cmd_t, (value
+        this.platform.mqttHost.sendMessage(this.accessory.context.device[this.uniq_id].cmd_t, (value
           ? this.accessory.context.device[this.uniq_id].pl_on
           : this.accessory.context.device[this.uniq_id].pl_off));
       }

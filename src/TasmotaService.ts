@@ -93,13 +93,13 @@ export class TasmotaService {
         this.platform.log.debug('Creating statusUpdate listener for %s %s', this.accessory.context.device[this.uniq_id].stat_t,
           this.accessory.context.device[this.uniq_id].name);
         this.statusSubscribe = { event: this.accessory.context.device[this.uniq_id].stat_t, callback: this.statusUpdate.bind(this) };
-        this.accessory.context.mqttHost.on(this.accessory.context.device[this.uniq_id].stat_t, this.statusUpdate.bind(this));
-        this.accessory.context.mqttHost.statusSubscribe(this.accessory.context.device[this.uniq_id].stat_t);
+        this.platform.mqttHost.on(this.accessory.context.device[this.uniq_id].stat_t, this.statusUpdate.bind(this));
+        this.platform.mqttHost.statusSubscribe(this.accessory.context.device[this.uniq_id].stat_t);
       }
       if (this.accessory.context.device[this.uniq_id].avty_t) {
         this.availabilitySubscribe = { event: this.accessory.context.device[this.uniq_id].avty_t, callback: this.availabilityUpdate.bind(this) };
-        this.accessory.context.mqttHost.on(this.accessory.context.device[this.uniq_id].avty_t, this.availabilityUpdate.bind(this));
-        this.availabilitySubscribe = this.accessory.context.mqttHost.availabilitySubscribe(this.accessory.context.device[this.uniq_id].avty_t);
+        this.platform.mqttHost.on(this.accessory.context.device[this.uniq_id].avty_t, this.availabilityUpdate.bind(this));
+        this.availabilitySubscribe = this.platform.mqttHost.availabilitySubscribe(this.accessory.context.device[this.uniq_id].avty_t);
       } else {
         this.platform.log.warn('Warning: Availability not supported for: %s', this.accessory.context.device[this.uniq_id].name);
       }
@@ -131,7 +131,7 @@ export class TasmotaService {
     if (this.accessory.context.device[this.uniq_id].stat_t && !this.accessory.context.device[this.uniq_id].stat_t.match('/\+|#/g')) {
       const teleperiod = `${this.accessory.context.device[this.uniq_id].stat_t.substr(0,
         this.accessory.context.device[this.uniq_id].stat_t.lastIndexOf('/') + 1).replace('tele', 'cmnd')}teleperiod`;
-      this.accessory.context.mqttHost.sendMessage(teleperiod, this.platform.teleperiod.toString());
+      this.platform.mqttHost.sendMessage(teleperiod, this.platform.teleperiod.toString());
     }
   }
 
@@ -152,7 +152,7 @@ export class TasmotaService {
           }
           break;
         case 'illuminance':
-        // normalize LX in the range homebridge expects
+          // normalize LX in the range homebridge expects
           value = String(Number(value) < 0.0001 ? 0.0001 : (Number(value) > 100000 ? 100000 : value));
           break;
         case 'co2':

@@ -97,7 +97,7 @@ export class Mqtt extends EventEmitter {
     }
   }
 
-  public availabilitySubscribe(topic: string): void {
+  public availabilitySubscribe(topic: string): undefined {
     debug("Availability subscribe:", topic);
     this.connection.subscribe(topic);
   }
