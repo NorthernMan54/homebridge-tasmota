@@ -1,6 +1,6 @@
 import { API } from 'homebridge';
-import { tasmotaPlatform } from './platform';
-import { PLATFORM_NAME } from './settings';
+import { tasmotaPlatform } from './platform.js';
+import { PLATFORM_NAME } from './settings.js';
 
 /**
  * This method registers the platform with Homebridge

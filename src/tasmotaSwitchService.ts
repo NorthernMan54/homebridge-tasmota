@@ -1,7 +1,7 @@
 import createDebug from 'debug';
 import { CharacteristicSetCallback, CharacteristicValue, PlatformAccessory } from 'homebridge';
-import { TasmotaService, isTrue } from './TasmotaService';
-import { tasmotaPlatform } from './platform';
+import { TasmotaService, isTrue } from './TasmotaService.js';
+import { tasmotaPlatform } from './platform.js';
 
 
 const debug = createDebug('Tasmota:switch');

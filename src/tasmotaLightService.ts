@@ -1,9 +1,9 @@
 import createDebug from 'debug';
 import { CharacteristicSetCallback, CharacteristicValue, PlatformAccessory } from 'homebridge';
 import os from 'node:os';
-import { TasmotaService } from './TasmotaService';
-import { tasmotaPlatform } from './platform';
-import { PLUGIN_NAME } from './settings';
+import { TasmotaService } from './TasmotaService.js';
+import { tasmotaPlatform } from './platform.js';
+import { PLUGIN_NAME } from './settings.js';
 
 const debug = createDebug('Tasmota:light');
 
@@ -35,36 +35,36 @@ function HSVtoRGB(h: any, s: number, v: number) {
   const q = v * (1 - f * s);
   const t = v * (1 - (1 - f) * s);
   switch (i % 6) {
-  case 0:
-    r = v;
-    g = t;
-    b = p;
-    break;
-  case 1:
-    r = q;
-    g = v;
-    b = p;
-    break;
-  case 2:
-    r = p;
-    g = v;
-    b = t;
-    break;
-  case 3:
-    r = p;
-    g = q;
-    b = v;
-    break;
-  case 4:
-    r = t;
-    g = p;
-    b = v;
-    break;
-  case 5:
-    r = v;
-    g = p;
-    b = q;
-    break;
+    case 0:
+      r = v;
+      g = t;
+      b = p;
+      break;
+    case 1:
+      r = q;
+      g = v;
+      b = p;
+      break;
+    case 2:
+      r = p;
+      g = v;
+      b = t;
+      break;
+    case 3:
+      r = p;
+      g = q;
+      b = v;
+      break;
+    case 4:
+      r = t;
+      g = p;
+      b = v;
+      break;
+    case 5:
+      r = v;
+      g = p;
+      b = q;
+      break;
   }
 
   const rgb = [0, 0, 0];
@@ -91,20 +91,20 @@ function RGBtoHSV(r: number, g: number, b: number) {
   const v = max / 255;
   // debug('max', )
   switch (max) {
-  case min:
-    h = 0;
-    break;
-  case r:
-    h = (g - b) + d * (g < b ? 6 : 0);
-    h /= 6 * d;
-    break;
-  case g:
-    h = (b - r) + d * 2;
-    h /= 6 * d;
-    break;
-  case b: h = (r - g) + d * 4;
-    h /= 6 * d;
-    break;
+    case min:
+      h = 0;
+      break;
+    case r:
+      h = (g - b) + d * (g < b ? 6 : 0);
+      h /= 6 * d;
+      break;
+    case g:
+      h = (b - r) + d * 2;
+      h /= 6 * d;
+      break;
+    case b: h = (r - g) + d * 4;
+      h /= 6 * d;
+      break;
   }
 
   return {
@@ -239,7 +239,7 @@ export class tasmotaLightService extends TasmotaService {
         .setCharacteristic(this.platform.Characteristic.FirmwareRevision, (accessory.context.device[this.uniq_id].dev.sw
           ?? 'undefined').replace(/[^-\w. ]/g, ''))
         .setCharacteristic(this.platform.Characteristic.SerialNumber, `${accessory.context.device[this.uniq_id].dev.ids[0]
-        }-${os.hostname()}`); // A unique fakegato ID
+          }-${os.hostname()}`); // A unique fakegato ID
 
       this.TVservice = effectsAccessory.getService(this.platform.Service.Television)
         || effectsAccessory.addService(this.platform.Service.Television);
@@ -261,9 +261,9 @@ export class tasmotaLightService extends TasmotaService {
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const schemes: { name: string, id: number, TVinput?: any }[] = [{ name: 'None', id: 0 }, { name: 'Wakeup', id: 1 },
-        { name: 'Cycle Up', id: 2 }, { name: 'Cycle Down', id: 3 }, { name: 'Random', id: 4 }, { name: 'Clock', id: 5 },
-        { name: 'Candlelight', id: 6 }, { name: 'RGB', id: 7 }, { name: 'Christmas', id: 8 }, { name: 'Hanukkah', id: 9 },
-        { name: 'Kwanzaa', id: 10 }, { name: 'Rainbow', id: 11 }, { name: 'Fire', id: 12 }];
+      { name: 'Cycle Up', id: 2 }, { name: 'Cycle Down', id: 3 }, { name: 'Random', id: 4 }, { name: 'Clock', id: 5 },
+      { name: 'Candlelight', id: 6 }, { name: 'RGB', id: 7 }, { name: 'Christmas', id: 8 }, { name: 'Hanukkah', id: 9 },
+      { name: 'Kwanzaa', id: 10 }, { name: 'Rainbow', id: 11 }, { name: 'Fire', id: 12 }];
 
       for (const element of schemes) {
         debug('element', element);
@@ -365,8 +365,8 @@ export class tasmotaLightService extends TasmotaService {
 
         const hsb = RGBtoScaledHSV(this.parseValue(this.accessory.context.device[this.uniq_id].rgb_val_tpl,
           message.toString()).split(',')[0], this.parseValue(this.accessory.context.device[this.uniq_id].rgb_val_tpl,
-          message.toString()).split(',')[1], this.parseValue(this.accessory.context.device[this.uniq_id].rgb_val_tpl,
-          message.toString()).split(',')[2]);
+            message.toString()).split(',')[1], this.parseValue(this.accessory.context.device[this.uniq_id].rgb_val_tpl,
+              message.toString()).split(',')[2]);
 
         // Use debug logging for no change updates, and info when a change occurred
 

@@ -1,7 +1,7 @@
 import createDebug from 'debug';
 import { CharacteristicSetCallback, CharacteristicValue, PlatformAccessory } from 'homebridge';
-import { TasmotaService } from './TasmotaService';
-import { tasmotaPlatform } from './platform';
+import { TasmotaService } from './TasmotaService.js';
+import { tasmotaPlatform } from './platform.js';
 
 
 const debug = createDebug('Tasmota:garage');
@@ -98,75 +98,75 @@ export class tasmotaGarageService extends TasmotaService {
       let value: CharacteristicValue = message.toString();
 
       switch (topic) {
-      case this.doorStatusTopic:
-        debug('doorStatusTopic \'%s:%s\'', this.service?.displayName, this.characteristic?.displayName);
-        switch (value) {
-        case 'CLOSED':
-          value = this.platform.Characteristic.CurrentDoorState.CLOSED;
+        case this.doorStatusTopic:
+          debug('doorStatusTopic \'%s:%s\'', this.service?.displayName, this.characteristic?.displayName);
+          switch (value) {
+            case 'CLOSED':
+              value = this.platform.Characteristic.CurrentDoorState.CLOSED;
+              break;
+            case 'OPEN':
+              value = this.platform.Characteristic.CurrentDoorState.OPEN;
+              break;
+            case 'CLOSING':
+              value = this.platform.Characteristic.CurrentDoorState.CLOSING;
+              break;
+            case 'OPENING':
+              value = this.platform.Characteristic.CurrentDoorState.OPENING;
+              break;
+            default:
+              this.platform.log.error('Unhandled Garage Door Status', value);
+          }
+
+          if (this.characteristic?.value !== value) {
+            this.platform.log.info('Updating \'%s:%s\' to %s', this.service?.displayName, this.characteristic?.displayName, value);
+          } else {
+            this.platform.log.debug('Updating \'%s\' to %s', this.service?.displayName, value);
+          }
+
+          this.characteristic?.updateValue(value);
+
+          if (topic === this.doorStatusTopic || topic === this.doorSensorTopic) {
+            this.service?.getCharacteristic(this.platform.Characteristic.TargetDoorState).updateValue(Number(value) % 2);
+          }
           break;
-        case 'OPEN':
-          value = this.platform.Characteristic.CurrentDoorState.OPEN;
+        case this.doorSensorTopic:
+        {
+          debug('doorSensorTopic \'%s:%s\'', this.service?.displayName, this.characteristic?.displayName);
+          const parsedValue = JSON.parse(value);
+          debug('doorSensorTopic %s', value);
+          if (parsedValue.Switch2 === 'OFF') {
+            value = this.platform.Characteristic.CurrentDoorState.OPEN;
+            if (this.characteristic?.value !== value) {
+              this.platform.log.info('Updating \'%s:%s\' to %s', this.service?.displayName, this.characteristic?.displayName, value);
+            } else {
+              this.platform.log.debug('Updating \'%s\' to %s', this.service?.displayName, value);
+            }
+
+            this.characteristic?.updateValue(value);
+
+            if (topic === this.doorStatusTopic || topic === this.doorSensorTopic) {
+              this.service?.getCharacteristic(this.platform.Characteristic.TargetDoorState).updateValue(value % 2);
+            }
+          } else if (parsedValue.Switch3 === 'OFF') {
+            value = this.platform.Characteristic.CurrentDoorState.CLOSED;
+            if (this.characteristic?.value !== value) {
+              this.platform.log.info('Updating \'%s:%s\' to %s', this.service?.displayName, this.characteristic?.displayName, value);
+            } else {
+              this.platform.log.debug('Updating \'%s\' to %s', this.service?.displayName, value);
+            }
+
+            this.characteristic?.updateValue(value);
+
+            if (topic === this.doorStatusTopic || topic === this.doorSensorTopic) {
+              this.service?.getCharacteristic(this.platform.Characteristic.TargetDoorState).updateValue(value % 2);
+            }
+          } else {
+            this.platform.log.info('Not open or closed \'%s:%s\'', this.service?.displayName, this.characteristic?.displayName);
+          }
+
           break;
-        case 'CLOSING':
-          value = this.platform.Characteristic.CurrentDoorState.CLOSING;
-          break;
-        case 'OPENING':
-          value = this.platform.Characteristic.CurrentDoorState.OPENING;
-          break;
+        }
         default:
-          this.platform.log.error('Unhandled Garage Door Status', value);
-        }
-
-        if (this.characteristic?.value !== value) {
-          this.platform.log.info('Updating \'%s:%s\' to %s', this.service?.displayName, this.characteristic?.displayName, value);
-        } else {
-          this.platform.log.debug('Updating \'%s\' to %s', this.service?.displayName, value);
-        }
-
-        this.characteristic?.updateValue(value);
-
-        if (topic === this.doorStatusTopic || topic === this.doorSensorTopic) {
-          this.service?.getCharacteristic(this.platform.Characteristic.TargetDoorState).updateValue(Number(value) % 2);
-        }
-        break;
-      case this.doorSensorTopic:
-      {
-        debug('doorSensorTopic \'%s:%s\'', this.service?.displayName, this.characteristic?.displayName);
-        const parsedValue = JSON.parse(value);
-        debug('doorSensorTopic %s', value);
-        if (parsedValue.Switch2 === 'OFF') {
-          value = this.platform.Characteristic.CurrentDoorState.OPEN;
-          if (this.characteristic?.value !== value) {
-            this.platform.log.info('Updating \'%s:%s\' to %s', this.service?.displayName, this.characteristic?.displayName, value);
-          } else {
-            this.platform.log.debug('Updating \'%s\' to %s', this.service?.displayName, value);
-          }
-
-          this.characteristic?.updateValue(value);
-
-          if (topic === this.doorStatusTopic || topic === this.doorSensorTopic) {
-            this.service?.getCharacteristic(this.platform.Characteristic.TargetDoorState).updateValue(value % 2);
-          }
-        } else if (parsedValue.Switch3 === 'OFF') {
-          value = this.platform.Characteristic.CurrentDoorState.CLOSED;
-          if (this.characteristic?.value !== value) {
-            this.platform.log.info('Updating \'%s:%s\' to %s', this.service?.displayName, this.characteristic?.displayName, value);
-          } else {
-            this.platform.log.debug('Updating \'%s\' to %s', this.service?.displayName, value);
-          }
-
-          this.characteristic?.updateValue(value);
-
-          if (topic === this.doorStatusTopic || topic === this.doorSensorTopic) {
-            this.service?.getCharacteristic(this.platform.Characteristic.TargetDoorState).updateValue(value % 2);
-          }
-        } else {
-          this.platform.log.info('Not open or closed \'%s:%s\'', this.service?.displayName, this.characteristic?.displayName);
-        }
-
-        break;
-      }
-      default:
       }
     } catch (err: unknown) {
       this.platform.log.error('ERROR: message parsing error', this.service?.displayName, topic, message.toString());
