@@ -1,6 +1,6 @@
-import os from 'node:os';
 import createDebug from 'debug';
 import { PlatformAccessory } from 'homebridge';
+import os from 'node:os';
 import { TasmotaService } from './TasmotaService';
 import { tasmotaPlatform } from './platform';
 
@@ -35,15 +35,15 @@ export class tasmotaSensorService extends TasmotaService {
 
       this.service = this.accessory.getService(this.uuid)
           || this.accessory.addService(this.platform.Service.TemperatureSensor, accessory.context.device[this.uniq_id].name, this.uuid);
-      this.service.setCharacteristic(this.platform.Characteristic.ConfiguredName, accessory.context.device[this.uniq_id].name);
-      // debug('displayName', this.service.displayName);
-      if (!this.service.displayName) {
-        this.service.setCharacteristic(this.platform.Characteristic.Name, accessory.context.device[this.uniq_id].name);
+      this.service?.setCharacteristic(this.platform.Characteristic.ConfiguredName, accessory.context.device[this.uniq_id].name);
+      // debug('displayName', this.service?.displayName);
+      if (!this.service?.displayName) {
+        this.service?.setCharacteristic(this.platform.Characteristic.Name, accessory.context.device[this.uniq_id].name);
       }
 
       // Burr winter is coming
 
-      this.service.getCharacteristic(this.platform.Characteristic.CurrentTemperature)
+      this.service?.getCharacteristic(this.platform.Characteristic.CurrentTemperature)
         .setProps({
           minValue: -100,
           maxValue: 100,
@@ -52,7 +52,7 @@ export class tasmotaSensorService extends TasmotaService {
       if (this.platform.config.history) {
         this.fakegato = 'custom';
       }
-      this.characteristic = this.service.getCharacteristic(this.platform.Characteristic.CurrentTemperature);
+      this.characteristic = this.service?.getCharacteristic(this.platform.Characteristic.CurrentTemperature);
 
       break;
     case 'humidity':
@@ -60,35 +60,37 @@ export class tasmotaSensorService extends TasmotaService {
 
       this.service = this.accessory.getService(this.uuid)
           || this.accessory.addService(this.platform.Service.HumiditySensor, accessory.context.device[this.uniq_id].name, this.uuid);
-      this.service.setCharacteristic(this.platform.Characteristic.ConfiguredName, accessory.context.device[this.uniq_id].name);
+      this.service?.setCharacteristic(this.platform.Characteristic.ConfiguredName, accessory.context.device[this.uniq_id].name);
 
-      if (!this.service.displayName) {
-        this.service.setCharacteristic(this.platform.Characteristic.Name, accessory.context.device[this.uniq_id].name);
+      if (!this.service?.displayName) {
+        this.service?.setCharacteristic(this.platform.Characteristic.Name, accessory.context.device[this.uniq_id].name);
       }
-      this.characteristic = this.service.getCharacteristic(this.platform.Characteristic.CurrentRelativeHumidity);
+      this.characteristic = this.service?.getCharacteristic(this.platform.Characteristic.CurrentRelativeHumidity);
 
       break;
     case 'pressure':
-      this.platform.log.debug('Creating "%s" sensor %s', accessory.context.device[this.uniq_id].dev_cla, accessory.context.device[this.uniq_id].name, this.uuid);
+      this.platform.log.debug('Creating "%s" sensor %s', accessory.context.device[this.uniq_id].dev_cla,
+        accessory.context.device[this.uniq_id].name, this.uuid);
       this.service = this.accessory.getService(this.uuid)
           || this.accessory.addService(this.platform.CustomServices.AirPressureSensor, accessory.context.device[this.uniq_id].name, this.uuid);
-      this.service.setCharacteristic(this.platform.Characteristic.ConfiguredName, accessory.context.device[this.uniq_id].name);
+      this.service?.setCharacteristic(this.platform.Characteristic.ConfiguredName, accessory.context.device[this.uniq_id].name);
 
-      if (!this.service.displayName) {
-        this.service.setCharacteristic(this.platform.Characteristic.Name, accessory.context.device[this.uniq_id].name);
+      if (!this.service?.displayName) {
+        this.service?.setCharacteristic(this.platform.Characteristic.Name, accessory.context.device[this.uniq_id].name);
       }
-      this.characteristic = this.service.getCharacteristic(this.platform.CustomCharacteristics.AirPressure);
+      this.characteristic = this.service?.getCharacteristic(this.platform.CustomCharacteristics.AirPressure);
       break;
     case 'illuminance':
       this.platform.log.debug('Creating %s sensor %s', accessory.context.device[this.uniq_id].dev_cla, accessory.context.device[this.uniq_id].name);
 
-      this.service = this.accessory.getService(this.uuid) || this.accessory.addService(this.platform.Service.LightSensor, accessory.context.device[this.uniq_id].name, this.uuid);
-      this.service.setCharacteristic(this.platform.Characteristic.ConfiguredName, accessory.context.device[this.uniq_id].name);
+      this.service = this.accessory.getService(this.uuid) || this.accessory.addService(this.platform.Service.LightSensor,
+        accessory.context.device[this.uniq_id].name, this.uuid);
+      this.service?.setCharacteristic(this.platform.Characteristic.ConfiguredName, accessory.context.device[this.uniq_id].name);
 
-      if (!this.service.displayName) {
-        this.service.setCharacteristic(this.platform.Characteristic.Name, accessory.context.device[this.uniq_id].name);
+      if (!this.service?.displayName) {
+        this.service?.setCharacteristic(this.platform.Characteristic.Name, accessory.context.device[this.uniq_id].name);
       }
-      this.characteristic = this.service.getCharacteristic(this.platform.Characteristic.CurrentAmbientLightLevel);
+      this.characteristic = this.service?.getCharacteristic(this.platform.Characteristic.CurrentAmbientLightLevel);
 
       break;
     case 'co2':
@@ -97,11 +99,11 @@ export class tasmotaSensorService extends TasmotaService {
       this.service = this.accessory.getService(this.uuid)
           || this.accessory.addService(this.platform.Service.CarbonDioxideSensor, accessory.context.device[this.uniq_id].name, this.uuid);
 
-      this.service.setCharacteristic(this.platform.Characteristic.ConfiguredName, accessory.context.device[this.uniq_id].name);
-      if (!this.service.displayName) {
-        this.service.setCharacteristic(this.platform.Characteristic.Name, accessory.context.device[this.uniq_id].name);
+      this.service?.setCharacteristic(this.platform.Characteristic.ConfiguredName, accessory.context.device[this.uniq_id].name);
+      if (!this.service?.displayName) {
+        this.service?.setCharacteristic(this.platform.Characteristic.Name, accessory.context.device[this.uniq_id].name);
       }
-      this.characteristic = this.service.getCharacteristic(this.platform.Characteristic.CarbonDioxideLevel);
+      this.characteristic = this.service?.getCharacteristic(this.platform.Characteristic.CarbonDioxideLevel);
 
       break;
     case 'pm25':
@@ -110,11 +112,11 @@ export class tasmotaSensorService extends TasmotaService {
       this.service = this.accessory.getService(this.uuid)
           || this.accessory.addService(this.platform.Service.AirQualitySensor, accessory.context.device[this.uniq_id].name, this.uuid);
 
-      if (!this.service.displayName) {
-        this.service.setCharacteristic(this.platform.Characteristic.Name, accessory.context.device[this.uniq_id].name);
+      if (!this.service?.displayName) {
+        this.service?.setCharacteristic(this.platform.Characteristic.Name, accessory.context.device[this.uniq_id].name);
       }
-      this.characteristic = this.service.getCharacteristic(this.platform.Characteristic.AirParticulateDensity);
-      this.service.setCharacteristic(this.platform.Characteristic.AirParticulateSize, this.platform.Characteristic.AirParticulateSize._2_5_M);
+      this.characteristic = this.service?.getCharacteristic(this.platform.Characteristic.AirParticulateDensity);
+      this.service?.setCharacteristic(this.platform.Characteristic.AirParticulateSize, this.platform.Characteristic.AirParticulateSize._2_5_M);
 
       break;
     case 'power':
@@ -129,13 +131,14 @@ export class tasmotaSensorService extends TasmotaService {
         // debug('this.service', this.service);
 
         this.characteristic
-              = this.service.getCharacteristic(this.deviceClassToHKCharacteristic(this.uniq_id.replace(accessory.context.identifier, '').toLowerCase()));
+              = this.service?.getCharacteristic(this.deviceClassToHKCharacteristic(this.uniq_id.replace(accessory.context.identifier, '').toLowerCase()));
 
         this.outletInUse = true;
-        this.service.getCharacteristic(this.platform.Characteristic.OutletInUse)
-              || this.service.addCharacteristic(this.platform.Characteristic.OutletInUse);
-        //  this.service.setCharacteristic(this.platform.Characteristic.ConfiguredName, accessory.context.device[this.uniq_id].name);
-        // this.characteristic = this.service.getCharacteristic(this.platform.CustomTypes.ResetTotal);
+        if (!this.service.getCharacteristic(this.platform.Characteristic.OutletInUse)) {
+          this.service?.addCharacteristic(this.platform.Characteristic.OutletInUse);
+        }
+        //  this.service?.setCharacteristic(this.platform.Characteristic.ConfiguredName, accessory.context.device[this.uniq_id].name);
+        // this.characteristic = this.service?.getCharacteristic(this.platform.CustomTypes.ResetTotal);
         break;
       case '_energy_voltage': // Voltage
       case '_energy_current': // Amps
@@ -148,8 +151,8 @@ export class tasmotaSensorService extends TasmotaService {
         // debug('this.service', this.service);
 
         this.characteristic
-              = this.service.getCharacteristic(this.deviceClassToHKCharacteristic(this.uniq_id.replace(accessory.context.identifier, '').toLowerCase()));
-        // this.service.setCharacteristic(this.platform.Characteristic.ConfiguredName, accessory.context.device[this.uniq_id].name);
+              = this.service?.getCharacteristic(this.deviceClassToHKCharacteristic(this.uniq_id.replace(accessory.context.identifier, '').toLowerCase()));
+        // this.service?.setCharacteristic(this.platform.Characteristic.ConfiguredName, accessory.context.device[this.uniq_id].name);
         break;
       default:
         this.platform.log.warn('Warning: Unhandled Tasmota power sensor type', this.uniq_id.replace(accessory.context.identifier, '').toLowerCase());
@@ -192,16 +195,16 @@ export class tasmotaSensorService extends TasmotaService {
 
   // Override base statusUpdate
 
-  statusUpdate(topic, message) {
-    debug('statusUpdate for "%s" on topic "%s" ->', this.service.displayName, topic, message.toString());
+  statusUpdate(topic: string, message: Buffer) {
+    debug('statusUpdate for "%s" on topic "%s" ->', this.service?.displayName, topic, message.toString());
 
     this.accessory.context.timeout = this.platform.autoCleanup(this.accessory);
 
     try {
-      let value = this.parseValue(this.accessory.context.device[this.uniq_id].val_tpl, message.toString());
+      let value: number = Number(this.parseValue(this.accessory.context.device[this.uniq_id].val_tpl, message.toString()));
 
       if (value === null) {
-        debug('statusUpdate skipping, not for', this.service.displayName);
+        debug('statusUpdate skipping, not for', this.service?.displayName);
         return;
       }
 
@@ -210,9 +213,9 @@ export class tasmotaSensorService extends TasmotaService {
       switch (this.device_class) {
       case 'temperature':
         if (this.accessory.context.device[this.uniq_id].unit_of_meas.toUpperCase() === '°F') {
-          value = Math.round((value - 32) * 5 / 9 * 10) / 10;
+          value = Math.round((Number(value) - 32) * 5 / 9 * 10) / 10;
         } else {
-          value = Math.round(value * 10) / 10;
+          value = Math.round(Number(value) * 10) / 10;
         }
         break;
       case 'illuminance':
@@ -221,25 +224,27 @@ export class tasmotaSensorService extends TasmotaService {
         break;
       case 'co2':
         if (value > 1200) {
-          this.service.setCharacteristic(this.platform.Characteristic.CarbonDioxideDetected, this.platform.Characteristic.CarbonDioxideDetected.CO2_LEVELS_ABNORMAL);
+          this.service?.setCharacteristic(this.platform.Characteristic.CarbonDioxideDetected,
+            this.platform.Characteristic.CarbonDioxideDetected.CO2_LEVELS_ABNORMAL);
         } else {
-          this.service.setCharacteristic(this.platform.Characteristic.CarbonDioxideDetected, this.platform.Characteristic.CarbonDioxideDetected.CO2_LEVELS_NORMAL);
+          this.service?.setCharacteristic(this.platform.Characteristic.CarbonDioxideDetected,
+            this.platform.Characteristic.CarbonDioxideDetected.CO2_LEVELS_NORMAL);
         }
         break;
       }
 
       if (value !== null || typeof value !== 'undefined') {
-        if (this.characteristic.value !== value && this.delta(this.characteristic.value, value)) {
-          this.platform.log.info('Updating \'%s:%s\' to %s', this.service.displayName, this.characteristic.displayName ?? '', value);
+        if (this.characteristic?.value !== value && this.delta(this.characteristic?.value, value)) {
+          this.platform.log.info('Updating \'%s:%s\' to %s', this.service?.displayName, this.characteristic?.displayName ?? '', value);
         } else {
-          this.platform.log.debug('Updating \'%s:%s\' to %s', this.service.displayName, this.characteristic.displayName ?? '', value);
+          this.platform.log.debug('Updating \'%s:%s\' to %s', this.service?.displayName, this.characteristic?.displayName ?? '', value);
         }
 
-        if (this.outletInUse && this.service.getCharacteristic(this.platform.Characteristic.OutletInUse)) {
-          this.service.setCharacteristic(this.platform.Characteristic.OutletInUse, value > 0);
+        if (this.outletInUse && this.service?.getCharacteristic(this.platform.Characteristic.OutletInUse)) {
+          this.service?.setCharacteristic(this.platform.Characteristic.OutletInUse, value > 0);
         }
 
-        this.characteristic.updateValue(value);
+        this.characteristic?.updateValue(value);
       }
 
       // debug('fakegato', this.platform.config.history, this.fakegato, this.device_class);
@@ -248,7 +253,7 @@ export class tasmotaSensorService extends TasmotaService {
           // slightly delay updates for multi characteristic devices to ensure the latest data is shared
           switch (that.device_class) {
           case 'temperature':
-            debug('Updating fakegato \'%s:%s\'', that.service.displayName, that.characteristic.displayName, {
+            debug('Updating fakegato \'%s:%s\'', that.service?.displayName, that.characteristic?.displayName, {
               temp: value,
               pressure: that.accessory.getService(this.platform.CustomServices.AirPressureSensor)
                 ?.getCharacteristic(this.platform.CustomCharacteristics.AirPressure)
@@ -269,7 +274,7 @@ export class tasmotaSensorService extends TasmotaService {
             });
             break;
           case 'power':
-            debug('Updating fakegato \'%s:%s\'', that.characteristic.displayName, that.service.displayName, {
+            debug('Updating fakegato \'%s:%s\'', that.characteristic?.displayName, that.service?.displayName, {
               power: +value,
             });
             that.accessory.context.fakegatoService.appendData({
@@ -283,9 +288,9 @@ export class tasmotaSensorService extends TasmotaService {
           }
         }, 1000, this);
       }
-    } catch (err) {
+    } catch (err: unknown) {
       this.platform.log.error('ERROR: Message Parse Error', topic, message.toString());
-      this.platform.log.debug(err);
+      this.platform.log.debug(String((err && (err as Error).message ? (err as Error).message : err)));
     }
   }
 

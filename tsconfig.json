@@ -18,7 +18,6 @@
   },
   "include": [
     "eslint.config.js",
-    "homebridge-ui",
     "src"
   ]
 }

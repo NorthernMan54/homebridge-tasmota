@@ -1,6 +1,6 @@
 import createDebug from 'debug';
-import { PlatformAccessory } from 'homebridge';
-import { isTrue, TasmotaService } from './TasmotaService';
+import { CharacteristicValue, PlatformAccessory } from 'homebridge';
+import { TasmotaService, isTrue } from './TasmotaService';
 import { tasmotaPlatform } from './platform';
 
 const debug = createDebug('Tasmota:binarySensor');
@@ -22,7 +22,8 @@ export class tasmotaBinarySensorService extends TasmotaService {
     case 'doorbell':
       this.platform.log.debug('Creating %s binary sensor %s', accessory.context.device[this.uniq_id].dev_cla, accessory.context.device[this.uniq_id].name);
 
-      this.service = this.accessory.getService(this.uuid) || this.accessory.addService(this.platform.Service.ContactSensor, accessory.context.device[this.uniq_id].name, this.uuid);
+      this.service = this.accessory.getService(this.uuid) || this.accessory.addService(this.platform.Service.ContactSensor,
+        accessory.context.device[this.uniq_id].name, this.uuid);
       this.service.setCharacteristic(this.platform.Characteristic.ConfiguredName, accessory.context.device[this.uniq_id].name);
 
       if (!this.service.displayName) {
@@ -36,9 +37,11 @@ export class tasmotaBinarySensorService extends TasmotaService {
       }
       break;
     case 'motion':
-      this.platform.log.debug('Creating %s binary sensor %s', accessory.context.device[this.uniq_id].dev_cla, accessory.context.device[this.uniq_id].name);
+      this.platform.log.debug('Creating %s binary sensor %s', accessory.context.device[this.uniq_id].dev_cla,
+        accessory.context.device[this.uniq_id].name);
 
-      this.service = this.accessory.getService(this.uuid) || this.accessory.addService(this.platform.Service.MotionSensor, accessory.context.device[this.uniq_id].name, this.uuid);
+      this.service = this.accessory.getService(this.uuid) || this.accessory.addService(this.platform.Service.MotionSensor,
+        accessory.context.device[this.uniq_id].name, this.uuid);
       this.service.setCharacteristic(this.platform.Characteristic.ConfiguredName, accessory.context.device[this.uniq_id].name);
 
       if (!this.service.displayName) {
@@ -54,7 +57,8 @@ export class tasmotaBinarySensorService extends TasmotaService {
     case 'contact':
       this.platform.log.debug('Creating %s binary sensor %s', accessory.context.device[this.uniq_id].dev_cla, accessory.context.device[this.uniq_id].name);
 
-      this.service = this.accessory.getService(this.uuid) || this.accessory.addService(this.platform.Service.ContactSensor, accessory.context.device[this.uniq_id].name, this.uuid);
+      this.service = this.accessory.getService(this.uuid) || this.accessory.addService(this.platform.Service.ContactSensor,
+        accessory.context.device[this.uniq_id].name, this.uuid);
       this.service.setCharacteristic(this.platform.Characteristic.ConfiguredName, accessory.context.device[this.uniq_id].name);
 
       if (!this.service.displayName) {
@@ -70,7 +74,8 @@ export class tasmotaBinarySensorService extends TasmotaService {
     case 'door':
       this.platform.log.debug('Creating %s binary sensor %s', accessory.context.device[this.uniq_id].dev_cla, accessory.context.device[this.uniq_id].name);
 
-      this.service = this.accessory.getService(this.uuid) || this.accessory.addService(this.platform.Service.ContactSensor, accessory.context.device[this.uniq_id].name, this.uuid);
+      this.service = this.accessory.getService(this.uuid) || this.accessory.addService(this.platform.Service.ContactSensor,
+        accessory.context.device[this.uniq_id].name, this.uuid);
       this.service.setCharacteristic(this.platform.Characteristic.ConfiguredName, accessory.context.device[this.uniq_id].name);
 
       if (!this.service.displayName) {
@@ -86,7 +91,8 @@ export class tasmotaBinarySensorService extends TasmotaService {
     case 'moisture':
       this.platform.log.debug('Creating %s binary sensor %s', accessory.context.device[this.uniq_id].dev_cla, accessory.context.device[this.uniq_id].name);
 
-      this.service = this.accessory.getService(this.uuid) || this.accessory.addService(this.platform.Service.LeakSensor, accessory.context.device[this.uniq_id].name, this.uuid);
+      this.service = this.accessory.getService(this.uuid) || this.accessory.addService(this.platform.Service.LeakSensor,
+        accessory.context.device[this.uniq_id].name, this.uuid);
       this.service.setCharacteristic(this.platform.Characteristic.ConfiguredName, accessory.context.device[this.uniq_id].name);
 
       if (!this.service.displayName) {
@@ -108,7 +114,7 @@ export class tasmotaBinarySensorService extends TasmotaService {
     this.enableStatus();
   }
 
-  statusUpdate(topic, message) {
+  statusUpdate(topic: string, message: Buffer) {
     debug('MQTT', topic, message.toString());
 
     this.accessory.context.timeout = this.platform.autoCleanup(this.accessory);
@@ -117,7 +123,7 @@ export class tasmotaBinarySensorService extends TasmotaService {
       // debug('this.uniq_id', this.uniq_id);
       // debug('val_tpl', this.accessory.context.device[this.uniq_id].val_tpl);
       // debug('message', message.toString());
-      let value = message.toString();
+      let value: CharacteristicValue = message.toString();
 
       if (this.accessory.context.device[this.uniq_id].val_tpl) {
         value = this.parseValue(this.accessory.context.device[this.uniq_id].val_tpl, message.toString());
@@ -157,13 +163,13 @@ export class tasmotaBinarySensorService extends TasmotaService {
         break;
       }
 
-      if (this.characteristic.value !== value) {
-        this.platform.log.info('Updating \'%s\' binary sensor to %s', this.service.displayName, value);
-        let timesOpened;
+      if (this.characteristic?.value !== value) {
+        this.platform.log.info('Updating \'%s\' binary sensor to %s', this.service?.displayName, value);
+        let timesOpened: number;
         switch (this.device_class) {
         case 'doorbell':
-          timesOpened = timesOpened + this.service.getCharacteristic(this.platform.CustomCharacteristics.TimesOpened).value;
-          this.service.updateCharacteristic(this.platform.CustomCharacteristics.TimesOpened, timesOpened);
+          timesOpened = 1 + Number(this.service?.getCharacteristic(this.platform.CustomCharacteristics.TimesOpened).value);
+          this.service?.updateCharacteristic(this.platform.CustomCharacteristics.TimesOpened, timesOpened);
           // fall thru
           /* eslint-disable no-fallthrough */
         case 'moisture':
@@ -172,28 +178,29 @@ export class tasmotaBinarySensorService extends TasmotaService {
           if (this.platform.config.history) {
             const now = Math.round(new Date().valueOf() / 1000);
             const lastActivation = now - this.accessory.context.fakegatoService.getInitialTime();
-            this.service.updateCharacteristic(this.platform.CustomCharacteristics.LastActivation, lastActivation);
+            this.service?.updateCharacteristic(this.platform.CustomCharacteristics.LastActivation, lastActivation);
           }
           break;
         }
       } else {
-        this.platform.log.debug('Updating \'%s\' binary sensor to %s', this.service.displayName, value);
+        this.platform.log.debug('Updating \'%s\' binary sensor to %s', this.service?.displayName, value);
       }
 
-      this.characteristic.updateValue(value);
+      this.characteristic?.updateValue(value);
 
       if (this.platform.config.history && this.fakegato && this.accessory.context.fakegatoService?.addEntry) {
-        debug('Updating fakegato', this.service.displayName, {
-          [this.fakegato]: (this.characteristic.value ? 1 : 0),
+        debug('Updating fakegato', this.service?.displayName, {
+          [this.fakegato]: (this.characteristic?.value ? 1 : 0),
         });
         this.accessory.context.fakegatoService.appendData({
-          [this.fakegato]: (this.characteristic.value ? 1 : 0),
+          [this.fakegato]: (this.characteristic?.value ? 1 : 0),
         });
       } else {
         // debug('Not updating fakegato', this.service.displayName);
       }
-    } catch (err) {
+    } catch (err: unknown) {
       this.platform.log.error('ERROR: Message Parse Error', topic, message.toString());
+      this.platform.log.debug(String((err && (err as Error).message ? (err as Error).message : err)));
     }
   }
 }

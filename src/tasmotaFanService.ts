@@ -1,5 +1,5 @@
 import createDebug from 'debug';
-import { CharacteristicSetCallback, CharacteristicValue, PlatformAccessory } from 'homebridge';
+import { CharacteristicSetCallback, CharacteristicValue, Nullable, PlatformAccessory } from 'homebridge';
 import { TasmotaService } from './TasmotaService';
 import { tasmotaPlatform } from './platform';
 
@@ -20,15 +20,16 @@ export class tasmotaFanService extends TasmotaService {
   ) {
     super(platform, accessory, uniq_id);
 
-    this.service = this.accessory.getService(this.uuid) || this.accessory.addService(this.platform.Service.Fan, accessory.context.device[this.uniq_id].name, this.uuid);
-    this.service.setCharacteristic(this.platform.Characteristic.ConfiguredName, accessory.context.device[this.uniq_id].name);
+    this.service = this.accessory.getService(this.uuid) || this.accessory.addService(this.platform.Service.Fan,
+      accessory.context.device[this.uniq_id].name, this.uuid);
+    this.service?.setCharacteristic(this.platform.Characteristic.ConfiguredName, accessory.context.device[this.uniq_id].name);
 
-    if (!this.service.displayName) {
-      this.service.setCharacteristic(this.platform.Characteristic.Name, accessory.context.device[this.uniq_id].name);
+    if (!this.service?.displayName) {
+      this.service?.setCharacteristic(this.platform.Characteristic.Name, accessory.context.device[this.uniq_id].name);
     }
 
-    if (this.service.getCharacteristic(this.platform.Characteristic.On).listenerCount('set') < 1) {
-      this.characteristic = this.service.getCharacteristic(this.platform.Characteristic.On)
+    if (this.service?.getCharacteristic(this.platform.Characteristic.On).listenerCount('set') < 1) {
+      this.characteristic = this.service?.getCharacteristic(this.platform.Characteristic.On)
         .on('set', this.setOn.bind(this));
       this.enableStatus();
     }
@@ -54,7 +55,7 @@ export class tasmotaFanService extends TasmotaService {
    * These are sent when the device's state is changed, either via HomeKit, Local Control or Other control methods.
    */
 
-  statusUpdate(topic, message) {
+  statusUpdate(topic: string, message: Buffer) {
     debug('statusUpdate', topic, message.toString());
 
     this.accessory.context.timeout = this.platform.autoCleanup(this.accessory);
@@ -66,18 +67,18 @@ export class tasmotaFanService extends TasmotaService {
         value = this.parseValue(this.accessory.context.device[this.uniq_id].val_tpl, message.toString());
       }
 
-      if (this.service.getCharacteristic(this.platform.Characteristic.On).value !== (value
+      if (this.service?.getCharacteristic(this.platform.Characteristic.On).value !== (value
         === this.accessory.context.device[this.uniq_id].pl_on)) {
         // Use debug logging for no change updates, and info when a change occurred
 
-        this.platform.log.info('Updating \'%s\' to %s', this.service.displayName, value);
+        this.platform.log.info('Updating \'%s\' to %s', this.service?.displayName, value);
       } else {
-        this.platform.log.debug('Updating \'%s\' to %s', this.service.displayName, value);
+        this.platform.log.debug('Updating \'%s\' to %s', this.service?.displayName, value);
       }
-      this.platform.log.debug('Updating \'%s\' to %s ? %s', this.service.displayName, value, this.accessory.context.device[this.uniq_id].pl_on);
-      this.platform.log.debug('Updating \'%s\' to %s ? %s', this.service.displayName, value, (value
+      this.platform.log.debug('Updating \'%s\' to %s ? %s', this.service?.displayName, value, this.accessory.context.device[this.uniq_id].pl_on);
+      this.platform.log.debug('Updating \'%s\' to %s ? %s', this.service?.displayName, value, (value
         === this.accessory.context.device[this.uniq_id].pl_on));
-      this.service.getCharacteristic(this.platform.Characteristic.On).updateValue((value
+      this.service?.getCharacteristic(this.platform.Characteristic.On).updateValue((value
         === this.accessory.context.device[this.uniq_id].pl_on));
 
       // Update RotationSpeed if supported
@@ -86,14 +87,14 @@ export class tasmotaFanService extends TasmotaService {
         // Use debug logging for no change updates, and info when a change occurred
         const bri_val = this.parseValue(this.accessory.context.device[this.uniq_id].bri_val_tpl, message.toString());
 
-        if (this.service.getCharacteristic(this.platform.Characteristic.RotationSpeed).value !== bri_val) {
-          this.platform.log.info('Updating \'%s\' RotationSpeed to %s', this.service.displayName, bri_val);
+        if (this.service?.getCharacteristic(this.platform.Characteristic.RotationSpeed).value !== bri_val) {
+          this.platform.log.info('Updating \'%s\' RotationSpeed to %s', this.service?.displayName, bri_val);
         } else {
-          this.platform.log.debug('Updating \'%s\' RotationSpeed to %s', this.service.displayName, bri_val);
+          this.platform.log.debug('Updating \'%s\' RotationSpeed to %s', this.service?.displayName, bri_val);
         }
-        this.service.getCharacteristic(this.platform.Characteristic.RotationSpeed).updateValue(bri_val);
+        this.service?.getCharacteristic(this.platform.Characteristic.RotationSpeed).updateValue(bri_val as Nullable<CharacteristicValue>);
       }
-    } catch (err) {
+    } catch (err: unknown) {
       this.platform.log.error('ERROR: Message Parse Error', topic, message.toString());
     }
   }
@@ -113,7 +114,7 @@ export class tasmotaFanService extends TasmotaService {
         : this.accessory.context.device[this.uniq_id].pl_off));
     } else {
       // Turning on of Hampton bay RF Fans, they don't have a ON function but can restore previous speed
-      this.setRotationSpeedFixed(this.service.getCharacteristic(this.platform.Characteristic.RotationSpeed).value || 25, callback);
+      this.setRotationSpeedFixed(this.service?.getCharacteristic(this.platform.Characteristic.RotationSpeed).value || 25, callback);
       return;
     }
     callback(null);
