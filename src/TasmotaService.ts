@@ -8,7 +8,7 @@ import {
 } from 'homebridge';
 import os from 'node:os';
 import nunjucks from 'nunjucks';
-import { tasmotaPlatform } from './platform.js';
+import { tasmotaPlatform } from './tasmotaPlatform.js';
 
 const debug = createDebug('Tasmota:Service');
 

@@ -1,7 +1,7 @@
 import createDebug from 'debug';
 import { CharacteristicValue, PlatformAccessory } from 'homebridge';
 import { TasmotaService, isTrue } from './TasmotaService.js';
-import { tasmotaPlatform } from './platform.js';
+import { tasmotaPlatform } from './tasmotaPlatform.js';
 
 const debug = createDebug('Tasmota:binarySensor');
 
@@ -100,9 +100,9 @@ export class tasmotaBinarySensorService extends TasmotaService {
         }
         this.characteristic = this.service.getCharacteristic(this.platform.Characteristic.LeakDetected);
         if (this.platform.config.history) {
-        // this.fakegato = 'motion';
+          // this.fakegato = 'motion';
           this.service.addOptionalCharacteristic(this.platform.CustomCharacteristics.LastActivation);
-        // debug('adding', this.fakegato);
+          // debug('adding', this.fakegato);
         }
         break;
       default:
@@ -137,7 +137,7 @@ export class tasmotaBinarySensorService extends TasmotaService {
         case 'doorbell':
           break;
         case 'moisture':
-        // 1 / 0
+          // 1 / 0
           debug('moisture', this.accessory.context.device[this.uniq_id].pl_on, value);
           value = (this.accessory.context.device[this.uniq_id].pl_on === value
             ? this.platform.Characteristic.LeakDetected.LEAK_DETECTED
@@ -152,11 +152,11 @@ export class tasmotaBinarySensorService extends TasmotaService {
             : this.platform.Characteristic.ContactSensorState.CONTACT_DETECTED);
           break;
         case 'motion':
-        // boolean
+          // boolean
           value = (this.accessory.context.device[this.uniq_id].pl_on === value);
           break;
         case 'contact':
-        // boolean
+          // boolean
           value = (this.accessory.context.device[this.uniq_id].pl_on === value
             ? this.platform.Characteristic.ContactSensorState.CONTACT_NOT_DETECTED
             : this.platform.Characteristic.ContactSensorState.CONTACT_DETECTED);

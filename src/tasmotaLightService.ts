@@ -2,8 +2,8 @@ import createDebug from 'debug';
 import { CharacteristicSetCallback, CharacteristicValue, PlatformAccessory } from 'homebridge';
 import os from 'node:os';
 import { TasmotaService } from './TasmotaService.js';
-import { tasmotaPlatform } from './platform.js';
 import { PLUGIN_NAME } from './settings.js';
+import { tasmotaPlatform } from './tasmotaPlatform.js';
 import { HSBtoTasmota, RGBtoScaledHSV, ScaledHSVtoRGB } from './utils.js';
 
 const debug = createDebug('Tasmota:light');

@@ -2,7 +2,7 @@ import createDebug from 'debug';
 import { PlatformAccessory } from 'homebridge';
 import os from 'node:os';
 import { TasmotaService } from './TasmotaService.js';
-import { tasmotaPlatform } from './platform.js';
+import { tasmotaPlatform } from './tasmotaPlatform.js';
 
 const debug = createDebug('Tasmota:sensor');
 
@@ -159,8 +159,8 @@ export class tasmotaSensorService extends TasmotaService {
         }
         break;
       case undefined:
-      // This is this Device status object
-      // _status is a Tasmota device, and rssi is an OpenMQTTGateway
+        // This is this Device status object
+        // _status is a Tasmota device, and rssi is an OpenMQTTGateway
         if (this.uniq_id.replace(accessory.context.identifier, '').toLowerCase() === '_status'
           || this.uniq_id.replace(accessory.context.identifier, '').toLowerCase() === 'rssi') {
           hostname = os.hostname().replace(/[^-\w ]/g, '');
@@ -176,7 +176,7 @@ export class tasmotaSensorService extends TasmotaService {
               .setCharacteristic(this.platform.Characteristic.FirmwareRevision, (accessory.context.device[this.uniq_id].dev.sw
                 ?? 'undefined').replace(/[^-\w. ]/g, ''))
               .setCharacteristic(this.platform.Characteristic.SerialNumber, `${accessory.context.device[this.uniq_id].dev.ids[0]
-              }-${hostname}`); // A unique fakegato ID
+                }-${hostname}`); // A unique fakegato ID
           }
         } else {
           this.platform.log.warn('Warning: missing dev_cla', accessory.context.device[this.uniq_id].name);
@@ -219,7 +219,7 @@ export class tasmotaSensorService extends TasmotaService {
           }
           break;
         case 'illuminance':
-        // normalize LX in the range homebridge expects
+          // normalize LX in the range homebridge expects
           value = (value < 0.0001 ? 0.0001 : (value > 100000 ? 100000 : value));
           break;
         case 'co2':

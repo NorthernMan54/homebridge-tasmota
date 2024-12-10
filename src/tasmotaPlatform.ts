@@ -492,7 +492,7 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
           }
           // debug("Cleaned up listeners", existingAccessory.context.mqttHost);
         }
-
+        // This error message is stupid......
         existingAccessory.removeService(this.services[uniq_id].service);
         delete this.services[uniq_id];
         debug('serviceCleanup - this.api.updatePlatformAccessories');
