@@ -52,13 +52,13 @@ export class tasmotaGarageService extends TasmotaService {
 
     this.doorStatusTopic = this.accessory.context.device[this.uniq_id].stat_t.replace('STATE', 'DOOR');
 
-    this.accessory.context.mqttHost.on(this.doorStatusTopic, this.statusUpdate.bind(this));
-    this.accessory.context.mqttHost.statusSubscribe(this.doorStatusTopic);
+    this.platform.mqttHost.on(this.doorStatusTopic, this.statusUpdate.bind(this));
+    this.platform.mqttHost.statusSubscribe(this.doorStatusTopic);
 
     this.doorSensorTopic = this.accessory.context.device[this.uniq_id].stat_t.replace('STATE', 'SENSOR');
 
-    this.accessory.context.mqttHost.on(this.doorSensorTopic, this.statusUpdate.bind(this));
-    this.accessory.context.mqttHost.statusSubscribe(this.doorSensorTopic);
+    this.platform.mqttHost.on(this.doorSensorTopic, this.statusUpdate.bind(this));
+    this.platform.mqttHost.statusSubscribe(this.doorSensorTopic);
   }
 
   /**
@@ -69,15 +69,15 @@ export class tasmotaGarageService extends TasmotaService {
         this.platform.log.debug('Creating statusUpdate listener for %s %s', this.accessory.context.device[this.uniq_id].stat_t,
         this.accessory.context.device[this.uniq_id].name);
         this.statusSubscribe = { event: this.accessory.context.device[this.uniq_id].stat_t, callback: this.statusUpdate.bind(this) };
-        this.accessory.context.mqttHost.on(this.accessory.context.device[this.uniq_id].stat_t, this.statusUpdate.bind(this));
-        this.accessory.context.mqttHost.statusSubscribe(this.accessory.context.device[this.uniq_id].stat_t);
+        this.platform.mqttHost.on(this.accessory.context.device[this.uniq_id].stat_t, this.statusUpdate.bind(this));
+        this.platform.mqttHost.statusSubscribe(this.accessory.context.device[this.uniq_id].stat_t);
       }
       if (this.accessory.context.device[this.uniq_id].avty_t) {
         this.availabilitySubscribe = { event: this.accessory.context.device[this.uniq_id].avty_t,
           callback: this.availabilityUpdate.bind(this) };
-        this.accessory.context.mqttHost.on(this.accessory.context.device[this.uniq_id].avty_t, this.availabilityUpdate.bind(this));
+        this.platform.mqttHost.on(this.accessory.context.device[this.uniq_id].avty_t, this.availabilityUpdate.bind(this));
         this.availabilitySubscribe =
-        this.accessory.context.mqttHost.availabilitySubscribe(this.accessory.context.device[this.uniq_id].avty_t);
+        this.platform.mqttHost.availabilitySubscribe(this.accessory.context.device[this.uniq_id].avty_t);
       } else {
         this.platform.log.warn('Warning: Availability not supported for: %s', this.accessory.context.device[this.uniq_id].name);
       }
@@ -182,7 +182,7 @@ export class tasmotaGarageService extends TasmotaService {
       if (this.service?.getCharacteristic(this.platform.Characteristic.TargetDoorState).value !== value) {
         this.platform.log.info('%s Pushing Garage Door Button ->', this.service?.displayName, value);
 
-        this.accessory.context.mqttHost.sendMessage(this.accessory.context.device[this.uniq_id].cmd_t,
+        this.platform.mqttHost.sendMessage(this.accessory.context.device[this.uniq_id].cmd_t,
           this.accessory.context.device[this.uniq_id].pl_on);
       } else {
         this.platform.log.error('%s Not Pushing Garage Door Button ->', this.service?.displayName, value);
