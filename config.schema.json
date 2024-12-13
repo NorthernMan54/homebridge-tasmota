@@ -40,7 +40,7 @@
         "type": "number",
         "required": false,
         "placeholder": 24,
-        "description": "Cleanup of devices no longer connected too or responding on the network.  Time is in hours, defaults to 1 Day."
+        "description": "Cleanup of devices no longer connected too or responding on the network.  Time is in hours, defaults to 1 Day.  Maximum value is 596 hours ( 24 days )."
       },
       "debug": {
         "title": "Debug Logging",

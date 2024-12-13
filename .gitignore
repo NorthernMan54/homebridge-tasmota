@@ -123,3 +123,7 @@ dist
 
 DEVICES.md.orig.*
 DEVICES.md.toc.*
+
+/test/hbConfig/accessories
+/test/hbConfig/backups
+/test/hbConfig/persist

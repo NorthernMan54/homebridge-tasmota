@@ -1,189 +1,157 @@
-import mqttClient from "mqtt";
-import createDebug from 'debug';
-
+import createDebug from "debug";
 import { EventEmitter } from "events";
+import mqttClient, { MqttClient } from "mqtt";
 
-const debug = createDebug('Tasmota:mqtt');
-var connection;
+const debug = createDebug("Tasmota:mqtt");
 
-var wildCardTopics: any = [];
+interface Config {
+  mqttHost: string;
+  mqttUsername?: string;
+  mqttPassword?: string;
+}
+
+interface WildcardTopic {
+  topic: string;
+}
 
 export class Mqtt extends EventEmitter {
-  public emit: any;
+  private connection: MqttClient;
+  private wildCardTopics: WildcardTopic[] = [];
 
-  constructor(config) {
-    var options = {
-      username: config['mqttUsername'] || "",
-      password: config['mqttPassword'] || ""
-    }
-    connection = mqttClient.connect('mqtt://' + config.mqttHost, options);
+  constructor(config: Config) {
     super();
-    // debug("this", this);
-    // debug("Connecting", this);
-    connection.on('connect', function(this: Mqtt) {
-      // debug("Connected", this);
-      connection.subscribe("homeassistant/#");
-      /*
-      connection.subscribe("tele/+/STATE");
-      connection.subscribe("tele/+/SENSOR");
-      connection.subscribe("tele/+/LWT");
-      connection.subscribe("stat/+/RESULT");
-      connection.subscribe("+/tele/STATE");
-      connection.subscribe("+/tele/SENSOR");
-      connection.subscribe("+/tele/LWT");
-      connection.subscribe("+/stat/RESULT");
-      */
+
+    const options = {
+      username: config.mqttUsername || "",
+      password: config.mqttPassword || "",
+    };
+
+    this.connection = mqttClient.connect(`mqtt://${config.mqttHost}`, options);
+
+    this.setupConnectionHandlers(config);
+  }
+
+  private setupConnectionHandlers(config: Config): void {
+    this.connection.on("connect", () => {
+      debug("Connected to MQTT broker");
+      this.connection.subscribe("homeassistant/#");
     });
 
-    connection.on('reconnect', function() {
-      console.error('ERROR: mqtt reconnect to', config.mqttHost);
+    this.connection.on("reconnect", () => {
+      console.error("ERROR: MQTT reconnecting to", config.mqttHost);
     });
 
-    connection.on('error', function(err) {
-      console.error('ERROR: mqtt connection error ', config.mqttHost, err);
+    this.connection.on("error", (err) => {
+      console.error("ERROR: MQTT connection error", config.mqttHost, err);
     });
 
-    connection.on('message', (topic, message) => {
-      // debug("Message: Topic %s -> %s", topic, message.toString());
+    this.connection.on("message", (topic, message) =>
+      this.handleMessage(topic, message)
+    );
+  }
 
-      const subject = topic.split('/');
+  private handleMessage(topic: string, message: Buffer): void {
+    const subject = topic.split("/");
 
-      switch (subject[0]) {
-        case "homeassistant":
+    switch (subject[0]) {
+      case "homeassistant":
+        this.handleHomeAssistantMessage(topic, message, subject);
+        break;
+      default:
+        this.handleDefaultMessage(topic, message);
+        break;
+    }
+  }
 
-          if (message.length > 5 && topic.endsWith("config")) {
-            try {
-              const device = JSON.parse(message.toString());
+  private handleHomeAssistantMessage(
+    topic: string,
+    message: Buffer,
+    subject: string[]
+  ): void {
+    if (message.length > 5 && topic.endsWith("config")) {
+      try {
+        const device = JSON.parse(message.toString());
+        device.tasmotaType = subject[1];
 
-              device.tasmotaType = subject[1];
-
-              switch (subject[1]) {
-                case "switch":
-                case "sensor":
-                case "binary_sensor":
-                case "light":
-                case "fan":
-                case "garageDoor":
-                  // debug("emit", subject[1], this);
-                  this.emit('Discovered', topic, device);
-                  break;
-
-              }
-            } catch (error) {
-              debug('Error:', error);
-              debug('Triggerd by:', message.toString());
-            }
-          } else if (topic.endsWith('config')) {
-            this.emit('Remove', topic);
-            // debug('Remove', topic);
-          }
-          break;
-        default:
-          debug('emit', topic, message.toString());
-          this.emit(topic, topic, message);
-          if (isWildcardTopic(topic)) {
-            debug('emit - wildcard', getWildcardTopic(topic), message.toString());
-            this.emit(getWildcardTopic(topic), getWildcardTopic(topic), message);
-          }
-          break;
+        const validTypes = ["switch", "sensor", "binary_sensor", "light", "fan", "garageDoor"];
+        if (validTypes.includes(subject[1])) {
+          this.emit("Discovered", topic, device);
+        }
+      } catch (error) {
+        debug("Error parsing message:", error);
+        debug("Triggered by message:", message.toString());
       }
-    });
-  }
-
-  availabilitySubscribe(topic) {
-    // debug('availabilitySubscribe', topic);
-    connection.subscribe(topic);
-  }
-
-  statusSubscribe(topic) {
-    connection.subscribe(topic);
-    // fix for openmqttgateway
-    if (topic.includes('+') || topic.includes('#')) {
-    //  debug('statusSubscribe - wildcard', topic);
-      wildCardTopics.push({ "topic": topic });
-    } else {
-    //  debug('statusSubscribe - not wildcard', topic);
+    } else if (topic.endsWith("config")) {
+      this.emit("Remove", topic);
     }
   }
 
-  sendMessage(topic, message) {
-    debug("sendMessage", topic, message);
-    if (message && topic) {
-      connection.publish(topic, message);
-    } else {
-      throw new Error('sendMessage no message ' + topic);
-    }
-  }
-}
+  private handleDefaultMessage(topic: string, message: Buffer): void {
+    debug("Emit topic:", topic, message.toString());
+    this.emit(topic, topic, message);
 
-function isWildcardTopic(topic) {
-  // debug("isWildcardTopic", topic, wildCardTopics);
-  var match: boolean = false;
-  var index = wildCardTopics.findIndex((wildcard) => {
-    // debug("mqttWildcard", topic, wildcard.topic);
-    if (mqttWildcard(topic, wildcard.topic)) {
-      // debug("match", topic, wildcard.topic);
-      match = true;
-    }
-  });
-  // debug("done", topic, match);
-  return match;
-}
-
-function getWildcardTopic(topic) {
-  // debug("getWildcardTopic", topic, wildCardTopics);
-  var match: String = "";
-  var index = wildCardTopics.findIndex(function(wildcard) {
-    if (mqttWildcard(topic, wildcard.topic)) {
-      // debug("getWildcardTopic - match", topic, wildcard.topic);
-      match = wildcard.topic;
-    }
-  });
-  // debug("get-done", topic, wildCardTopics[index]);
-  return match;
-}
-
-/*
- * mqttWildcard('test/foo/bar', 'test/foo/bar'); // []
- * mqttWildcard('test/foo/bar', 'test/+/bar'); // ['foo']
- * mqttWildcard('test/foo/bar', 'test/#'); // ['foo/bar']
- * mqttWildcard('test/foo/bar/baz', 'test/+/#'); // ['foo', 'bar/baz']
- * mqttWildcard('test/foo/bar/baz', 'test/+/+/baz'); // ['foo', 'bar']
-
- * mqttWildcard('test', 'test/#'); // []
- * mqttWildcard('test/', 'test/#'); // ['']
-
- * mqttWildcard('test/foo/bar', 'test/+'); // null
- * mqttWildcard('test/foo/bar', 'test/nope/bar'); // null
-*/
-
-function mqttWildcard(topic, wildcard) {
-  if (topic === wildcard) {
-    return [];
-  } else if (wildcard === '#') {
-    return [topic];
-  }
-
-  var res: any = [];
-
-  var t = String(topic).split('/');
-  var w = String(wildcard).split('/');
-
-  var i = 0;
-  for (var lt = t.length; i < lt; i++) {
-    if (w[i] === '+') {
-      res.push(t[i]);
-    } else if (w[i] === '#') {
-      res.push(t.slice(i).join('/'));
-      return res;
-    } else if (w[i] !== t[i]) {
-      return null;
+    if (this.isWildcardTopic(topic)) {
+      const wildcard = this.getWildcardTopic(topic);
+      debug("Emit wildcard:", wildcard, message.toString());
+      this.emit(wildcard, wildcard, message);
     }
   }
 
-  if (w[i] === '#') {
-    i += 1;
+  public availabilitySubscribe(topic: string): undefined {
+    debug("Availability subscribe:", topic);
+    this.connection.subscribe(topic);
   }
 
-  return (i === w.length) ? res : null;
+  public statusSubscribe(topic: string): void {
+    debug("Status subscribe:", topic);
+    this.connection.subscribe(topic);
+
+    if (topic.includes("+") || topic.includes("#")) {
+      this.wildCardTopics.push({ topic });
+    }
+  }
+
+  public sendMessage(topic: string, message: string): void {
+    debug("Send message:", topic, message);
+    if (!topic || !message) {
+      throw new Error("sendMessage requires both topic and message");
+    }
+    this.connection.publish(topic, message);
+  }
+
+  private isWildcardTopic(topic: string): boolean {
+    return this.wildCardTopics.some((wildcard) =>
+      this.mqttWildcard(topic, wildcard.topic)
+    );
+  }
+
+  private getWildcardTopic(topic: string): string {
+    const match = this.wildCardTopics.find((wildcard) =>
+      this.mqttWildcard(topic, wildcard.topic)
+    );
+    return match?.topic || "";
+  }
+
+  private mqttWildcard(topic: string, wildcard: string): string[] | null {
+    if (topic === wildcard) return [];
+
+    if (wildcard === "#") return [topic];
+
+    const topicSegments = topic.split("/");
+    const wildcardSegments = wildcard.split("/");
+    const result: string[] = [];
+
+    for (let i = 0; i < topicSegments.length; i++) {
+      if (wildcardSegments[i] === "+") {
+        result.push(topicSegments[i]);
+      } else if (wildcardSegments[i] === "#") {
+        result.push(topicSegments.slice(i).join("/"));
+        return result;
+      } else if (wildcardSegments[i] !== topicSegments[i]) {
+        return null;
+      }
+    }
+
+    return wildcardSegments.length === topicSegments.length ? result : null;
+  }
 }
