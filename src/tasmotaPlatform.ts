@@ -91,7 +91,7 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
     this.CustomCharacteristics = new EveHomeKitTypes(this.api).Characteristics;
 
     this.log.debug('Finished initializing platform:', this.config.name);
-    this.cleanup = this.config.cleanup || 24; // Default removal of defunct devices after 24 hours
+    this.cleanup = (this.config.cleanup !== undefined ? this.config.cleanup : 24); // #46
     this.debug = this.config.debug || false;
     this.teleperiod = this.config.teleperiod || 300;
 
@@ -178,7 +178,9 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
 
     if (accessory.services.length > 1) {
       // debug('context', accessory.context);
-      accessory.context.timeout = this.autoCleanup(accessory);
+      if (this.cleanup > 0) {
+        accessory.context.timeout = this.autoCleanup(accessory);
+      }
 
       // add the restored accessory to the accessories cache so we can track if it has already been registered
       this.accessories.push(accessory);

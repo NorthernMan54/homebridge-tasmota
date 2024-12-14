@@ -39,8 +39,8 @@
         "title": "Disconnected Device Cleanup Timing",
         "type": "number",
         "required": false,
-        "placeholder": 24,
-        "description": "Cleanup of devices no longer connected too or responding on the network.  Time is in hours, defaults to 1 Day.  Maximum value is 596 hours ( 24 days )."
+        "default": 24,
+        "description": "Cleanup of devices no longer connected too or responding on the network.  Time is in hours, defaults to 1 Day.  Maximum value is 596 hours ( 24 days ).  IF set to 0, cleanup is disabled."
       },
       "debug": {
         "title": "Debug Logging",
@@ -147,14 +147,15 @@
       "type": "fieldset",
       "title": "Required Settings",
       "items": [
-          "mqttHost"
+        "mqttHost"
       ]
     },
     {
       "type": "fieldset",
       "expandable": true,
       "title": "Optional Settings",
-      "items": [{
+      "items": [
+        {
           "type": "flex",
           "flex-flow": "row wrap",
           "items": [
@@ -174,7 +175,8 @@
       "expandable": true,
       "title": "Device Discovery Filtering",
       "description": "Control which devices are discovered and included with Homebridge.",
-      "items": [{
+      "items": [
+        {
           "key": "filterAllow",
           "type": "array",
           "required": false,
@@ -202,23 +204,25 @@
       "expandable": true,
       "title": "MQTT Discovery Message Injection",
       "description": "Ability to inject/over write portions of a MQTT Discovery message.",
-      "items": [{
+      "items": [
+        {
           "key": "injections",
           "type": "array",
-
           "items": [
             "injections[].topic",
             {
               "key": "injections[].injection",
               "type": "array",
-              "items": [{
-                "type": "flex",
-                "flex-flow": "row wrap",
-                "items": [
-                  "injections[].injection[].key",
-                  "injections[].injection[].value"
-                ]
-              }]
+              "items": [
+                {
+                  "type": "flex",
+                  "flex-flow": "row wrap",
+                  "items": [
+                    "injections[].injection[].key",
+                    "injections[].injection[].value"
+                  ]
+                }
+              ]
             }
           ]
         },
