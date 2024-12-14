@@ -99,7 +99,7 @@ export class TasmotaService {
       if (this.accessory.context.device[this.uniq_id].avty_t) {
         this.availabilitySubscribe = { event: this.accessory.context.device[this.uniq_id].avty_t, callback: this.availabilityUpdate.bind(this) };
         this.platform.mqttHost.on(this.accessory.context.device[this.uniq_id].avty_t, this.availabilityUpdate.bind(this));
-        this.availabilitySubscribe = this.platform.mqttHost.availabilitySubscribe(this.accessory.context.device[this.uniq_id].avty_t);
+        this.platform.mqttHost.availabilitySubscribe(this.accessory.context.device[this.uniq_id].avty_t);
       } else {
         this.platform.log.warn('Warning: Availability not supported for: %s', this.accessory.context.device[this.uniq_id].name);
       }

@@ -481,12 +481,12 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
           // debug("Cleaned up listeners", mqttHost);
           // debug(this.services[uniq_id].statusSubscribe.event);
           if (this.services[uniq_id].statusSubscribe?.event) {
-            existingAccessory.context.mqttHost.removeAllListeners(this.services[uniq_id].statusSubscribe?.event);
+            this.mqttHost.removeAllListeners(this.services[uniq_id].statusSubscribe?.event);
           } else {
             this.log.error('statusSubscribe.event missing', this.services[uniq_id].service?.displayName);
           }
           if (this.services[uniq_id]?.availabilitySubscribe) {
-            existingAccessory.context.mqttHost.removeAllListeners(this.services[uniq_id].availabilitySubscribe?.event);
+            this.mqttHost.removeAllListeners(this.services[uniq_id].availabilitySubscribe?.event);
           } else {
             this.log.error('availabilitySubscribe missing', this.services[uniq_id].service?.displayName);
           }
@@ -495,7 +495,7 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
         // This error message is stupid......
         existingAccessory.removeService(this.services[uniq_id].service);
         delete this.services[uniq_id];
-        debug('serviceCleanup - this.api.updatePlatformAccessories');
+        debug('serviceCleanup - this.api.updatePlatformAccessories', uniq_id);
         this.api.updatePlatformAccessories([existingAccessory]);
       } else {
         debug('serviceCleanup - object');
