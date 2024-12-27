@@ -25,13 +25,11 @@
       "platform": "Tasmota",
       "name": "Tasmota",
       "mqttHost": "mqtt.local",
-      "cleanup": 0.1,
       "history": false,
       "debug": true,
+      "cleanup": 0,
       "filterAllow": [
-        "AC5811",
-        "CBA0E5",
-        "302F1B"
+        "130C86"
       ],
       "filterDeny": [
         "5673B2",

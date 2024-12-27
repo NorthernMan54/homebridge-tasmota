@@ -249,7 +249,7 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
       if (this.discoveryTopicMap[topic]) {
         const existingAccessory = this.accessories.find(accessory => accessory.UUID === this.discoveryTopicMap[topic].uuid);
         if (existingAccessory) {
-          // debug('Remove', this.discoveryTopicMap[topic]);
+          // debug('MQTT Remove', this.discoveryTopicMap[topic]);
           switch (this.discoveryTopicMap[topic].type) {
             case 'Service':
               this.serviceCleanup(this.discoveryTopicMap[topic].uniq_id, existingAccessory);
@@ -510,30 +510,34 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
 
   autoCleanup(accessory: PlatformAccessory): number | null {
     let timeoutID: number;
-
+    // debug('autoCleanup', this.cleanup, accessory.displayName, accessory.context);
     // Check if 'stat_t' is available in the accessory context
-    if (findVal(accessory.context.device, 'stat_t')) {
-      if (accessory.context.timeout) {
-        // Clear existing timeout if present
-        timeoutID = accessory.context.timeout;
-        clearTimeout(this.timeouts[timeoutID]);
-        delete this.timeouts[timeoutID];
+    if (this.cleanup) {
+      if (findVal(accessory.context.device, 'stat_t')) {
+        if (accessory.context.timeout) {
+          // Clear existing timeout if present
+          timeoutID = accessory.context.timeout;
+          clearTimeout(this.timeouts[timeoutID]);
+          delete this.timeouts[timeoutID];
+        }
+
+        // Create a new timeout ID and store it
+        timeoutID = this.timeoutCounter++;
+        this.timeouts[timeoutID] = setTimeout(
+          this.accessoryCleanup.bind(this),
+          this.cleanup * 60 * 60 * 1000, // Convert cleanup interval to milliseconds
+          accessory,
+        );
+
+        // Save the new timeout ID in the accessory context for future clearing
+        accessory.context.timeout = timeoutID;
+
+        return timeoutID;
+      } else {
+        // Return null if 'stat_t' is unavailable
+        return null;
       }
-
-      // Create a new timeout ID and store it
-      timeoutID = this.timeoutCounter++;
-      this.timeouts[timeoutID] = setTimeout(
-        this.accessoryCleanup.bind(this),
-        this.cleanup * 60 * 60 * 1000, // Convert cleanup interval to milliseconds
-        accessory,
-      );
-
-      // Save the new timeout ID in the accessory context for future clearing
-      accessory.context.timeout = timeoutID;
-
-      return timeoutID;
     } else {
-      // Return null if 'stat_t' is unavailable
       return null;
     }
   }
