@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. This project uses [Semantic Versioning](https://semver.org/).
 
+## 0.2.3 (2025-04-15)
+
+## [Version 0.2.3](https://github.com/northernman54/homebridge-tasmota/compare/0.2.3...0.2.3)
+
+#### Changes
+
+
+  
 ## 0.2.2 (2024-12-23)
 
 ## [Version 0.2.2](https://github.com/northernman54/homebridge-tasmota/compare/0.2.1...0.2.2)
