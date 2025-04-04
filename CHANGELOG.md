@@ -8,7 +8,7 @@ All notable changes to this project will be documented in this file. This projec
 
 #### Changes
 
-
+- Fix for power bars with multiple relays and not all relays appearing
   
 ## 0.2.2 (2024-12-23)
 

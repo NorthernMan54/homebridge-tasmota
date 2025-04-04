@@ -1,45 +1,43 @@
 <H1>Sample Device Configurations ( My personal collection )</H1>
 
 <!--ts-->
-* [Sample Device Configurations ( My personal collection )](#sample-device-configurations--my-personal-collection-)
-* [My standard config after setting name and device configuration ](#my-standard-config-after-setting-name-and-device-configuration-)
-   * [Tasmota Configuration](#tasmota-configuration)
-* [Sonoff IFAN03](#sonoff-ifan03)
-   * [Tasmota Configuration](#tasmota-configuration-1)
-   * [configuration override of discovery object to create a FAN ( post version 0.1.0 )](#configuration-override-of-discovery-object-to-create-a-fan--post-version-010-)
-   * [configuration override of discovery object to create a FAN ( pre version 0.1.0 )](#configuration-override-of-discovery-object-to-create-a-fan--pre-version-010-)
-   * [Slave a FEIT Wifi Dimmer Wall Switch to an iFan as a light switch](#slave-a-feit-wifi-dimmer-wall-switch-to-an-ifan-as-a-light-switch)
-* [BME280 Temperature Sensor - <a href="docs/MCUIOT.md">MCUIOT</a>](docs/MCUIOT.md)
-* [DHT11 Temperature Sensor - <a href="docs/MCUIOT.md">MCUIOT</a>](docs/MCUIOT.md)
-* [Water Leak Sensor with On/Off control](#water-leak-sensor-with-onoff-control)
-   * [LEAK Tasmota configuration - <a href="docs/MCUIOT.md#dht-yl">DHT11</a>](docs/MCUIOT.md#dht-yl)
-   * [Leak Tasmota configuration - <a href="docs/MCUIOT.md#dht-yl">BME280</a>](docs/MCUIOT.md#dht-yl)
-* [Motion + BME280 Temperature Sensor](#motion--bme280-temperature-sensor)
-* [PIR Motion + BME280 Temperature Sensor + BH1750 Lux Illuminance Sensor](#pir-motion--bme280-temperature-sensor--bh1750-lux-illuminance-sensor)
-* [ZMAi-90 Current Sensor Switch](#zmai-90-current-sensor-switch)
-* [MCULED Device with RGB+W Strip](#mculed-device-with-rgbw-strip)
-* [MCULED Device with RGB+W Strip - Version 2 ( Basement )](#mculed-device-with-rgbw-strip---version-2--basement-)
-* [MCULED Device with RGB+W Strip - Version 2 ( Cottage Sink )](#mculed-device-with-rgbw-strip---version-2--cottage-sink-)
-* [Tuya Dimmer Module as a FAN](#tuya-dimmer-module-as-a-fan)
-* [Trailer Relay Board](#trailer-relay-board)
-* [Gowfeel EN71 Water Valve](#gowfeel-en71-water-valve)
-* [Homebrew Doorbutton Button](#homebrew-doorbutton-button)
-* [Homebrew Garage Door Opener](#homebrew-garage-door-opener)
-* [CE SMART Wifi Dimmer](#ce-smart-wifi-dimmer)
-* [FEIT Wifi Dimmer](#feit-wifi-dimmer)
-   * [Using a FEIT Wifi Dimmer as a remote switch to OpenBK RGBCCT Potlights](#using-a-feit-wifi-dimmer-as-a-remote-switch-to-openbk-rgbcct-potlights)
-* [Turn off after 30 minutes](#turn-off-after-30-minutes)
-* [Hampton Bay Fan/Light RF Remote Control ( 303.9 Mhz )](#hampton-bay-fanlight-rf-remote-control--3039-mhz-)
-* [Valor Fireplace Remote ( 315 Mhz )](#valor-fireplace-remote--315-mhz-)
-* [Treatlife DS03 Fan Controller and Light Dimmer](#treatlife-ds03-fan-controller-and-light-dimmer)
-* [OpenMQTTGateway devices](#openmqttgateway-devices)
-* [Hampton Bay Light](#hampton-bay-light)
-* [Hampton Bay FAN](#hampton-bay-fan)
-* [openMQTTGateway / PiLight temperature sensor](#openmqttgateway--pilight-temperature-sensor)
-* [Internet Connection WatchDog](#internet-connection-watchdog)
-   * [Version 1 ( Uses node-red to monitor google.com and turn off the plug )](#version-1--uses-node-red-to-monitor-googlecom-and-turn-off-the-plug-)
-   * [Version 2](#version-2)
-   * [Version 3 - Do three checks before rebooting](#version-3---do-three-checks-before-rebooting)
+- [Sonoff IFAN03](#sonoff-ifan03)
+  - [Tasmota Configuration](#tasmota-configuration-1)
+  - [configuration override of discovery object to create a FAN ( post version 0.1.0 )](#configuration-override-of-discovery-object-to-create-a-fan--post-version-010-)
+  - [configuration override of discovery object to create a FAN ( pre version 0.1.0 )](#configuration-override-of-discovery-object-to-create-a-fan--pre-version-010-)
+  - [Slave a FEIT Wifi Dimmer Wall Switch to an iFan as a light switch](#slave-a-feit-wifi-dimmer-wall-switch-to-an-ifan-as-a-light-switch)
+- [BME280 Temperature Sensor - MCUIOT](#bme280-temperature-sensor---mcuiot)
+- [DHT11 Temperature Sensor - MCUIOT](#dht11-temperature-sensor---mcuiot)
+- [Water Leak Sensor with On/Off control](#water-leak-sensor-with-onoff-control)
+  - [LEAK Tasmota configuration - DHT11](#leak-tasmota-configuration---dht11)
+  - [Leak Tasmota configuration - BME280](#leak-tasmota-configuration---bme280)
+- [Motion + BME280 Temperature Sensor](#motion--bme280-temperature-sensor)
+- [PIR Motion + BME280 Temperature Sensor + BH1750 Lux Illuminance Sensor](#pir-motion--bme280-temperature-sensor--bh1750-lux-illuminance-sensor)
+- [ZMAi-90 Current Sensor Switch](#zmai-90-current-sensor-switch)
+- [MCULED Device with RGB+W Strip](#mculed-device-with-rgbw-strip)
+- [MCULED Device with RGB+W Strip - Version 2 ( Basement )](#mculed-device-with-rgbw-strip---version-2--basement-)
+- [MCULED Device with RGB+W Strip - Version 2 ( Cottage Sink )](#mculed-device-with-rgbw-strip---version-2--cottage-sink-)
+- [Tuya Dimmer Module as a FAN](#tuya-dimmer-module-as-a-fan)
+- [Trailer Relay Board](#trailer-relay-board)
+- [Gowfeel EN71 Water Valve](#gowfeel-en71-water-valve)
+- [Homebrew Doorbutton Button](#homebrew-doorbutton-button)
+- [Homebrew Garage Door Opener](#homebrew-garage-door-opener)
+- [CE SMART Wifi Dimmer](#ce-smart-wifi-dimmer)
+- [FEIT Wifi Dimmer](#feit-wifi-dimmer)
+  - [Using a FEIT Wifi Dimmer as a remote switch to OpenBK RGBCCT Potlights](#using-a-feit-wifi-dimmer-as-a-remote-switch-to-openbk-rgbcct-potlights)
+- [Turn off after 30 minutes](#turn-off-after-30-minutes)
+- [Hampton Bay Fan/Light RF Remote Control ( 303.9 Mhz )](#hampton-bay-fanlight-rf-remote-control--3039-mhz-)
+- [Valor Fireplace Remote ( 315 Mhz )](#valor-fireplace-remote--315-mhz-)
+- [Treatlife DS03 Fan Controller and Light Dimmer](#treatlife-ds03-fan-controller-and-light-dimmer)
+- [Greeni GNC-SW003-199](#greeni-gnc-sw003-199)
+- [OpenMQTTGateway devices](#openmqttgateway-devices)
+- [Hampton Bay Light](#hampton-bay-light)
+- [Hampton Bay FAN](#hampton-bay-fan)
+- [openMQTTGateway / PiLight temperature sensor](#openmqttgateway--pilight-temperature-sensor)
+- [Internet Connection WatchDog](#internet-connection-watchdog)
+  - [Version 1 ( Uses node-red to monitor google.com and turn off the plug )](#version-1--uses-node-red-to-monitor-googlecom-and-turn-off-the-plug-)
+  - [Version 2](#version-2)
+  - [Version 3 - Do three checks before rebooting](#version-3---do-three-checks-before-rebooting)
 <!--te-->
 
 # My standard config after setting name and device configuration <!-- omit in toc -->
@@ -594,6 +592,16 @@ tuyamcu 62,3 --> 62 for 4 speeds fan controller (possible values 0,1,2,3)
    "EF159D_LI_1": {     <--- This is the unique_id of the discovery message you want to override
    "tasmotaType": "fan" <--- This is the key and property you want to override
   }
+```
+
+# Greeni GNC-SW003-199
+
+* Tasmota configuration
+
+```
+backlog template {"NAME":"Geeni GNC-SW003-199","GPIO":[320,0,0,32,226,225,0,0,228,229,227,224,0,0],"FLAG":0,"BASE":18}; module 0
+backlog Friendlyname1 Switch 1; Friendlyname2 Switch 2; Friendlyname3 Switch 3; Friendlyname4 Switch 4; Friendlyname5 Switch 5; Friendlyname6 Switch 6
+Backlog MqttHost mqtt.local; topic tasmota_%06X; setoption57 1; setoption19 1
 ```
 
 # OpenMQTTGateway devices
