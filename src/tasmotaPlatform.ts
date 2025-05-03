@@ -277,8 +277,8 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
       // debug('filterList', this.config.filterList);
       if (this.isTopicAllowed(topic, this.config.filter, this.config.filterAllow, this.config.filterDeny)) {
         let message = normalizeMessage(config);
-        // debug('normalizeMessage ->', message);
-        if (message.dev && message.dev.ids[0]) {
+        debug('normalizeMessage ->', message);
+        if (message.dev?.ids?.[0]) {
           const identifier = message.dev.ids[0]; // Unique per accessory
           const uniq_id: string = message.uniq_id as string; // Unique per service
 
