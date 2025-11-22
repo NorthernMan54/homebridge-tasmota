@@ -176,7 +176,7 @@ export class tasmotaSensorService extends TasmotaService {
               .setCharacteristic(this.platform.Characteristic.FirmwareRevision, (accessory.context.device[this.uniq_id].dev.sw
                 ?? 'undefined').replace(/[^-\w. ]/g, ''))
               .setCharacteristic(this.platform.Characteristic.SerialNumber, `${accessory.context.device[this.uniq_id].dev.ids[0]
-                }-${hostname}`); // A unique fakegato ID
+              }-${hostname}`); // A unique fakegato ID
           }
         } else {
           this.platform.log.warn('Warning: missing dev_cla', accessory.context.device[this.uniq_id].name);
