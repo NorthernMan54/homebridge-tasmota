@@ -239,6 +239,10 @@ SwitchMode 1
 ```
 Backlog module 54; SetOption66 1; TuyaMCU 0,17; TuyaMCU 32,18; TuyaMCU 31,19; TuyaMCU 33,20; SetOption59 1; MqttHost mqtt.local; topic tasmota_%06X; SetOption57 1;
 Rule1 on System#Boot do RuleTimer1 5 endon on Rules#Timer=1 do backlog SerialSend5 55aa0001000000; RuleTimer1 5 endon
+
+Alternate
+
+Rule1 on System#Boot do RuleTimer1 10 endon on Rules#Timer=1 do backlog SerialSend5 fe010f080000001c; RuleTimer1 10 endon
 ```
 
 # MCULED Device with RGB+W Strip
@@ -446,7 +450,7 @@ backlog template {"NAME":"CE-WF500D","GPIO":[0,0,0,0,0,0,0,0,0,108,0,107,0],"FLA
 * Tasmota configuration
 
 ```
-backlog module 54;  TuyaMCU 21,2; MqttHost mqtt.local; topic tasmota_%06X; setoption57 1; DimmerRange 10,1000; setoption19 1
+backlog template {"NAME":"Feit DIM/WIFI","GPIO":[0,107,0,108,0,0,0,0,0,0,0,0,0],"FLAG":0,"BASE":54}; module 0;  TuyaMCU 21,2; MqttHost mqtt.local; topic tasmota_%06X; setoption57 1; DimmerRange 10,1000; setoption19 1
 ```
 
 * Tasmota configuration with Dimming removed
