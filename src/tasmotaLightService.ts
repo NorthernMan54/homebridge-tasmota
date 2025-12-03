@@ -116,7 +116,7 @@ export class tasmotaLightService extends TasmotaService {
         .setCharacteristic(this.platform.Characteristic.FirmwareRevision, (accessory.context.device[this.uniq_id].dev.sw
           ?? 'undefined').replace(/[^-\w. ]/g, ''))
         .setCharacteristic(this.platform.Characteristic.SerialNumber, `${accessory.context.device[this.uniq_id].dev.ids[0]
-          }-${os.hostname()}`); // A unique fakegato ID
+        }-${os.hostname()}`); // A unique fakegato ID
 
       this.TVservice = effectsAccessory.getService(this.platform.Service.Television)
         || effectsAccessory.addService(this.platform.Service.Television);
@@ -136,11 +136,11 @@ export class tasmotaLightService extends TasmotaService {
 
       // Tasmota effects schemes for ws2812 lights
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
       const schemes: { name: string, id: number, TVinput?: any }[] = [{ name: 'None', id: 0 }, { name: 'Wakeup', id: 1 },
-      { name: 'Cycle Up', id: 2 }, { name: 'Cycle Down', id: 3 }, { name: 'Random', id: 4 }, { name: 'Clock', id: 5 },
-      { name: 'Candlelight', id: 6 }, { name: 'RGB', id: 7 }, { name: 'Christmas', id: 8 }, { name: 'Hanukkah', id: 9 },
-      { name: 'Kwanzaa', id: 10 }, { name: 'Rainbow', id: 11 }, { name: 'Fire', id: 12 }];
+        { name: 'Cycle Up', id: 2 }, { name: 'Cycle Down', id: 3 }, { name: 'Random', id: 4 }, { name: 'Clock', id: 5 },
+        { name: 'Candlelight', id: 6 }, { name: 'RGB', id: 7 }, { name: 'Christmas', id: 8 }, { name: 'Hanukkah', id: 9 },
+        { name: 'Kwanzaa', id: 10 }, { name: 'Rainbow', id: 11 }, { name: 'Fire', id: 12 }];
 
       for (const element of schemes) {
         debug('element', element);
@@ -165,7 +165,7 @@ export class tasmotaLightService extends TasmotaService {
     this.enableStatus();
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   setActiveIdentifier(value: CharacteristicValue, callback: any) {
     this.platform.log.info('%s Set Effects Scheme ->', this.accessory.displayName, value);
     try {
@@ -177,7 +177,7 @@ export class tasmotaLightService extends TasmotaService {
     }
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   setConfiguredName(value: CharacteristicValue, callback: any) {
     this.platform.log.info('setConfiguredName', value);
     callback(null);
@@ -242,8 +242,8 @@ export class tasmotaLightService extends TasmotaService {
 
         const hsb = RGBtoScaledHSV(this.parseValue(this.accessory.context.device[this.uniq_id].rgb_val_tpl,
           message.toString()).split(',')[0], this.parseValue(this.accessory.context.device[this.uniq_id].rgb_val_tpl,
-            message.toString()).split(',')[1], this.parseValue(this.accessory.context.device[this.uniq_id].rgb_val_tpl,
-              message.toString()).split(',')[2]);
+          message.toString()).split(',')[1], this.parseValue(this.accessory.context.device[this.uniq_id].rgb_val_tpl,
+          message.toString()).split(',')[2]);
 
         // Use debug logging for no change updates, and info when a change occurred
 
@@ -397,7 +397,7 @@ export class tasmotaLightService extends TasmotaService {
 
 class ChangeHSB {
   private desiredState: Record<string, unknown>;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   private deferrals: any[];
   private waitTimeUpdate: number;
 
@@ -406,7 +406,7 @@ class ChangeHSB {
   private accessory: PlatformAccessory;
   private readonly uniq_id: string;
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   constructor(accessory: PlatformAccessory, that: any) {
     debug('ChangeHSB', this);
     this.accessory = accessory;
@@ -418,7 +418,7 @@ class ChangeHSB {
     this.platform = that.platform;
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   put(state: any) {
     return new Promise((resolve, reject) => {
       for (const key in state) {

@@ -20,6 +20,7 @@ export class tasmotaSwitchService extends TasmotaService {
   ) {
     super(platform, accessory, uniq_id);
 
+    /*
     if (this.accessory.getService(this.uuid)) {
       this.service = this.accessory.getService(this.uuid)!;
     } else if (this.accessory.getService(this.platform.Service.Outlet)) {
@@ -32,7 +33,9 @@ export class tasmotaSwitchService extends TasmotaService {
         this.service.subtype = this.uuid;
       }
     }
-    this.service = this.service || this.accessory.addService(this.platform.Service.Outlet, accessory.context.device[this.uniq_id].name, this.uuid);
+    */
+
+    this.service = this.accessory.getService(this.uuid) || this.accessory.addService(this.platform.Service.Outlet, accessory.context.device[this.uniq_id].name, this.uuid);
     this.service?.setCharacteristic(this.platform.Characteristic.ConfiguredName, accessory.context.device[this.uniq_id].name);
 
     this.service?.setPrimaryService(true);

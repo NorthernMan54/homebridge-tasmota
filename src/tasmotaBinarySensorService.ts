@@ -170,8 +170,8 @@ export class tasmotaBinarySensorService extends TasmotaService {
           case 'doorbell':
             timesOpened = 1 + Number(this.service?.getCharacteristic(this.platform.CustomCharacteristics.TimesOpened).value);
             this.service?.updateCharacteristic(this.platform.CustomCharacteristics.TimesOpened, timesOpened);
-          // fall thru
-          /* eslint-disable no-fallthrough */
+            // fall thru
+
           case 'moisture':
           case 'motion':
           case 'contact':

@@ -20,7 +20,7 @@ const debug = createDebug('Tasmota:Service');
 
 interface Subscription {
   event: string
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   callback: any
 }
 
@@ -127,7 +127,7 @@ export class TasmotaService {
   refresh() {
     // Get current status for accessory/service on startup
     // Wild cards in topic break this
-    // eslint-disable-next-line no-useless-escape
+
     if (this.accessory.context.device[this.uniq_id].stat_t && !this.accessory.context.device[this.uniq_id].stat_t.match('/\+|#/g')) {
       const teleperiod = `${this.accessory.context.device[this.uniq_id].stat_t.substr(0,
         this.accessory.context.device[this.uniq_id].stat_t.lastIndexOf('/') + 1).replace('tele', 'cmnd')}teleperiod`;

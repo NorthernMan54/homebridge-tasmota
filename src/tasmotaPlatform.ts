@@ -54,9 +54,9 @@ type TasmotaService =
 export class tasmotaPlatform implements DynamicPlatformPlugin {
   public readonly Service: typeof Service;
   public readonly Characteristic: typeof Characteristic;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   public readonly CustomServices: any;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   public readonly CustomCharacteristics: any;
 
   // this is used to track restored cached accessories
@@ -72,15 +72,15 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
   private cleanup: number;
   private timeouts: Record<number, NodeJS.Timeout> = {};
   private timeoutCounter: number = 1;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   private debug: any;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   public FakeGatoHistoryService: any;
   public teleperiod = 300;
 
   constructor(
     public readonly log: Logger,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
     public readonly config: any,
     public readonly api: API,
   ) {
@@ -111,7 +111,7 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
     if (this.config.override) {
       interface Injection {
         key: string
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
         value: any
       }
       interface Injections {
@@ -152,7 +152,7 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
         this.FakeGatoHistoryService = fakegato(this.api);
 
         // Only addEntries that match the expected profile of the function.
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
         this.FakeGatoHistoryService.prototype.appendData = function (entry: any) {
           entry.time = Math.round(new Date().valueOf() / 1000);
           switch (this.accessoryType) {
@@ -277,8 +277,8 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
       // debug('filterList', this.config.filterList);
       if (this.isTopicAllowed(topic, this.config.filter, this.config.filterAllow, this.config.filterDeny)) {
         let message = normalizeMessage(config);
-        // debug('normalizeMessage ->', message);
-        if (message.dev && message.dev.ids[0]) {
+        debug('normalizeMessage ->', message);
+        if (message.dev?.ids?.[0]) {
           const identifier = message.dev.ids[0]; // Unique per accessory
           const uniq_id: string = message.uniq_id as string; // Unique per service
 
@@ -426,7 +426,7 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
             this.log.warn('Warning: Missing accessory friendly name', topic, config.name);
           }
 
-          //          if (this.services[uniq_id] && this.services[uniq_id].service && 
+          //          if (this.services[uniq_id] && this.services[uniq_id].service &&
           // this.services[uniq_id].service.getCharacteristic(this.Characteristic.ConfiguredName).listenerCount('set') < 1) {
           //            (this.services[uniq_id].service.getCharacteristic(this.Characteristic.ConfiguredName)
           //              || this.services[uniq_id].service.addCharacteristic(this.Characteristic.ConfiguredName))
@@ -441,11 +441,11 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
     });
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   discoveryOveride(uniq_id: string, message: any) {
     if (this.config.override) { // pre version 0.1.0 override configuration
       // debug('override', this.config.override);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
       const overrides: any = [];
       for (const [key, value] of Object.entries(this.config.override)) {
         // debug(`${key}: ${value}`);
@@ -459,10 +459,10 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
       }
     } else if (this.config.injections) {
       // debug('injections', this.config.injections);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
       this.config.injections.forEach((overide: any) => {
         if (overide.topic === uniq_id) {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
           overide.injection.forEach((inject: any) => {
             message[inject.key] = inject.value;
           });

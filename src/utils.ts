@@ -13,22 +13,22 @@ export interface Message {
   val_tpl?: string;
   bri_val_tpl?: string;
   speeds?: string[];
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   [key: string]: any; // Allow additional properties
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+
 export function renameKeys<T extends Record<string, any>>(
   obj: T | T[],
   mapShortToLong: Record<string, string>,
 ): T | T[] {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   let result: any;
 
   if (Array.isArray(obj)) {
     result = obj.map((item) => renameKeys(item, mapShortToLong));
   } else {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
     result = {} as Record<string, any>;
     for (const key in obj) {
       if (Object.prototype.hasOwnProperty.call(obj, key)) {
@@ -53,13 +53,13 @@ export function renameKeys<T extends Record<string, any>>(
 }
 
 export function replaceStringsInObject(
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   obj: Record<string, any>,
   findStr: string,
   replaceStr: string,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   cache: Map<any, any> = new Map(),
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
 ): Record<string, any> {
   // Check if the object has already been processed to avoid circular references
   if (cache.has(obj)) {
@@ -67,12 +67,12 @@ export function replaceStringsInObject(
   }
 
   // Initialize result object
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   const result: Record<string, any> = {};
   cache.set(obj, result); // Cache the object reference
 
   for (const [key, value] of Object.entries(obj)) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
     let updatedValue: any;
 
     if (typeof value === 'string') {
@@ -180,7 +180,7 @@ export function normalizeMessage(message: Message): Message {
   return message;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+
 export function findVal<T>(object: Record<string, any>, key: string): T | undefined {
   let value: T | undefined;
 
@@ -207,7 +207,7 @@ export function findVal<T>(object: Record<string, any>, key: string): T | undefi
     * h, s, v
     */
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+
 export function HSVtoRGB(h: any, s: number, v: number) {
   let r = 0, g = 0, b = 0;
   if (arguments.length === 1) {
