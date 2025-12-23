@@ -611,6 +611,14 @@ backlog Friendlyname1 Switch 1; Friendlyname2 Switch 2; Friendlyname3 Switch 3; 
 Backlog MqttHost mqtt.local; topic tasmota_%06X; setoption57 1; setoption19 1
 ```
 
+## Always on Powerbar - Turns on after 30 seconds
+
+```
+backlog PowerOnState 5; pulsetime1 130; pulsetime2 130; pulsetime3 130; pulsetime4 130; pulsetime5 130; pulsetime6 130
+backlog Friendlyname1 Router; Friendlyname2 UCG Max; Friendlyname3 Switch; Friendlyname4 Switch 4; Friendlyname5 WiFi; Friendlyname6 Jessie
+backlog WebButton1 Router; WebButton2 UCG Max; WebButton3 USW Switch; WebButton4 Switch 4; WebButton5 WiFi; WebButton6 Jessie
+```
+
 # OpenMQTTGateway devices
 
 I have been working on utilizing an OpenMQTTGateway device configured with a cc1101 RF Transceiver and the GatewayRF module.  The goal is to control my Hampton Bay ( 303 Mhz ), and GE Fans ( 315 Mhz ) and other RF devices.
