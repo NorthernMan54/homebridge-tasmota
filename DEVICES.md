@@ -339,7 +339,8 @@ DimmerRange 100,255
 * Tasmota configuration
 
 ```
-backlog webbutton1 Ceiling; webbutton2 Flood; webbutton3 Porch; webbutton4 Step
+Template {"NAME":"Trailer Ceiling","GPIO":[0,0,0,0,225,224,0,0,226,0,0,227,0,0],"FLAG":0,"BASE":18}
+Backlog Module 0; WebButton1 Trailer Ceiling; WebButton2 Trailer Flood; WebButton3 Trailer Porch; WebButton4 Trailer Step
 ```
 
 # Gowfeel EN71 Water Valve
