@@ -18,18 +18,14 @@ export class tasmotaFanService extends TasmotaService {
     public readonly accessory: PlatformAccessory,
     protected readonly uniq_id: string,
   ) {
-    super(platform, accessory, uniq_id);
-
-    this.service = this.accessory.getService(this.uuid) || this.accessory.addService(this.platform.Service.Fan,
-      accessory.context.device[this.uniq_id].name, this.uuid);
-    this.service?.setCharacteristic(this.platform.Characteristic.ConfiguredName, accessory.context.device[this.uniq_id].name);
+    super(platform, accessory, uniq_id, platform.Service.Fan);
 
     if (!this.service?.displayName) {
       this.service?.setCharacteristic(this.platform.Characteristic.Name, accessory.context.device[this.uniq_id].name);
     }
 
-    if (this.service?.getCharacteristic(this.platform.Characteristic.On).listenerCount('set') < 1) {
-      this.characteristic = this.service?.getCharacteristic(this.platform.Characteristic.On)
+    if (this.service && this.service.getCharacteristic(this.platform.Characteristic.On).listenerCount('set') < 1) {
+      this.characteristic = this.service.getCharacteristic(this.platform.Characteristic.On)
         .on('set', this.setOn.bind(this));
       this.enableStatus();
     }
@@ -37,13 +33,13 @@ export class tasmotaFanService extends TasmotaService {
     // Does the Fan include a RotationSpeed characteristic
 
     if (accessory.context.device[this.uniq_id].bri_cmd_t) {
-      (this.service.getCharacteristic(this.platform.Characteristic.RotationSpeed)
-        || this.service.addCharacteristic(this.platform.Characteristic.RotationSpeed))
-        .on('set', this.setRotationSpeed.bind(this));
+      const rotationSpeed = this.service?.getCharacteristic(this.platform.Characteristic.RotationSpeed)
+        || this.service?.addCharacteristic(this.platform.Characteristic.RotationSpeed);
+      rotationSpeed?.on('set', this.setRotationSpeed.bind(this));
     } else if (accessory.context.device[this.uniq_id].spds) {
-      (this.service.getCharacteristic(this.platform.Characteristic.RotationSpeed)
-        || this.service.addCharacteristic(this.platform.Characteristic.RotationSpeed))
-        .on('set', this.setRotationSpeedFixed.bind(this));
+      const rotationSpeed = this.service?.getCharacteristic(this.platform.Characteristic.RotationSpeed)
+        || this.service?.addCharacteristic(this.platform.Characteristic.RotationSpeed);
+      rotationSpeed?.on('set', this.setRotationSpeedFixed.bind(this));
       //        .setProps({     // This causes an issue with validateUserInput in Characteristic and 33.3333 becomes 0
       //          minStep: 33.33333333333333,
       //        });

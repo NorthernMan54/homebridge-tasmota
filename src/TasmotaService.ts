@@ -25,7 +25,7 @@ interface Subscription {
 }
 
 export class TasmotaService {
-  public service?: Service;
+  public service: Service | undefined;
   protected characteristic?: Characteristic;
   protected device_class: string;
   public statusSubscribe?: Subscription;
@@ -38,6 +38,7 @@ export class TasmotaService {
     public readonly platform: tasmotaPlatform,
     public readonly accessory: PlatformAccessory,
     protected readonly uniq_id: string,
+    protected readonly serviceType: any,
   ) {
     this.fakegato = '';
     this.uuid = this.platform.api.hap.uuid.generate(this.accessory.context.device[this.uniq_id].uniq_id);
@@ -66,6 +67,43 @@ export class TasmotaService {
     nunjucks.configure({
       autoescape: true,
     });
+
+    this.service = this.accessory.getService(this.uuid);
+
+    if (this.service === undefined && serviceType) {
+      this.service = this.accessory.addService(serviceType, accessory.context.device[this.uniq_id].name, this.uuid);
+    }
+
+    // debug('--------------------------------------------------------------');
+    // debug('Service', this.service.displayName, this.service.UUID, this.service.subtype, this.service.getCharacteristic(this.platform.Characteristic.ConfiguredName));
+    // debug('--------------------------------------------------------------');
+    // this.service.setCharacteristic(this.platform.Characteristic.ConfiguredName, accessory.context.device[this.uniq_id].name);
+
+    // set the service name, this is what is displayed as the default name on the Home app
+    // in this example we are using the name we stored in the `accessory.context` in the `discoverDevices` method.
+    if (!this.service?.displayName) {
+      this.service?.setCharacteristic(this.platform.Characteristic.Name, accessory.context.device[this.uniq_id].name);
+    }
+
+    if (
+      this.service?.getCharacteristic(this.platform.Characteristic.ConfiguredName)?.listenerCount('set') ?? 0 < 1) {
+      if (this.service) {
+        (this.service.getCharacteristic(this.platform.Characteristic.ConfiguredName)
+          || this.service.addCharacteristic(this.platform.Characteristic.ConfiguredName))
+          .on('set', this.setConfiguredName.bind(this));
+        debug('--------------------------------------------------------------');
+        debug('ConfiguredName set listener added for', this.service.displayName);
+        debug('--------------------------------------------------------------');
+      }
+    }
+  }
+
+  setConfiguredName(value: CharacteristicValue, callback: any) {
+    debug('--------------------------------------------------------------');
+    debug('setConfiguredName', value);
+    debug('--------------------------------------------------------------');
+    // this.service?.setCharacteristic(this.platform.Characteristic.ConfiguredName, value);
+    callback(null);
   }
 
   enableFakegato() {
@@ -121,6 +159,9 @@ export class TasmotaService {
       case '-dt24-watt-hour':
         return (this.platform.CustomCharacteristics.TotalConsumption);
         break;
+      default:
+        this.platform.log.warn('Warning: Unsupported device class "%s" for %s, using generic CurrentTemperature characteristic', device_class, this.accessory.context.device[this.uniq_id].name);
+        return (this.platform.Characteristic.CurrentTemperature);
     }
   }
 

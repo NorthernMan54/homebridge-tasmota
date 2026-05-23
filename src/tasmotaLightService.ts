@@ -24,18 +24,14 @@ export class tasmotaLightService extends TasmotaService {
     public readonly accessory: PlatformAccessory,
     protected readonly uniq_id: string,
   ) {
-    super(platform, accessory, uniq_id);
-
-    this.service = this.accessory.getService(this.uuid) || this.accessory.addService(this.platform.Service.Lightbulb,
-      accessory.context.device[this.uniq_id].name, this.uuid);
-    this.service?.setCharacteristic(this.platform.Characteristic.ConfiguredName, accessory.context.device[this.uniq_id].name);
+    super(platform, accessory, uniq_id, platform.Service.Lightbulb);
 
     if (!this.service?.displayName) {
       this.service?.setCharacteristic(this.platform.Characteristic.Name, accessory.context.device[this.uniq_id].name);
     }
 
-    if (this.service?.getCharacteristic(this.platform.Characteristic.On).listenerCount('set') < 1) {
-      this.characteristic = this.service?.getCharacteristic(this.platform.Characteristic.On)
+    if (this.service && this.service.getCharacteristic(this.platform.Characteristic.On).listenerCount('set') < 1) {
+      this.characteristic = this.service.getCharacteristic(this.platform.Characteristic.On)
         .on('set', this.setOn.bind(this)); // SET - bind to the `setOn` method below
       // .on('get', this.getOn.bind(this));               // GET - bind to the `getOn` method below
 
@@ -59,7 +55,7 @@ export class tasmotaLightService extends TasmotaService {
 
     // Does the lightbulb include a brightness characteristic
 
-    if (accessory.context.device[this.uniq_id].bri_cmd_t) {
+    if (accessory.context.device[this.uniq_id].bri_cmd_t && this.service) {
       (this.service.getCharacteristic(this.platform.Characteristic.Brightness)
         || this.service.addCharacteristic(this.platform.Characteristic.Brightness))
         .on('set', this.setBrightness.bind(this));
@@ -67,7 +63,7 @@ export class tasmotaLightService extends TasmotaService {
 
     // Does the lightbulb include a RGB characteristic
 
-    if (accessory.context.device[this.uniq_id].rgb_cmd_t) {
+    if (accessory.context.device[this.uniq_id].rgb_cmd_t && this.service) {
       this.update = new ChangeHSB(accessory, this);
 
       (this.service.getCharacteristic(this.platform.Characteristic.Hue)
@@ -80,7 +76,7 @@ export class tasmotaLightService extends TasmotaService {
 
     // Does the lightbulb include a HSB characteristic ( Tasmota 10.x.x + )
 
-    if (accessory.context.device[this.uniq_id].hs_cmd_t) {
+    if (accessory.context.device[this.uniq_id].hs_cmd_t && this.service) {
       this.update = new ChangeHSB(accessory, this);
 
       (this.service.getCharacteristic(this.platform.Characteristic.Hue)
@@ -93,7 +89,7 @@ export class tasmotaLightService extends TasmotaService {
 
     // Does the lightbulb include a colour temperature characteristic
 
-    if (accessory.context.device[this.uniq_id].clr_temp_cmd_t) {
+    if (accessory.context.device[this.uniq_id].clr_temp_cmd_t && this.service) {
       (this.service.getCharacteristic(this.platform.Characteristic.ColorTemperature)
         || this.service.addCharacteristic(this.platform.Characteristic.ColorTemperature))
         .on('set', this.setColorTemperature.bind(this));
@@ -105,7 +101,7 @@ export class tasmotaLightService extends TasmotaService {
       const uuid = this.platform.api.hap.uuid.generate(this.uniq_id + os.hostname());
 
       // debug('api', this.platform.api);
-      const effectsAccessory = new this.platform.api.platformAccessory(this.accessory.displayName, uuid, this.platform.api.hap.Categories.AUDIO_RECEIVER);
+      const effectsAccessory = new this.platform.api.platformAccessory(this.accessory.displayName, uuid, 28);
 
       effectsAccessory.getService(this.platform.Service.AccessoryInformation)!
         .setCharacteristic(this.platform.Characteristic.Name, this.accessory.displayName)
@@ -116,7 +112,7 @@ export class tasmotaLightService extends TasmotaService {
         .setCharacteristic(this.platform.Characteristic.FirmwareRevision, (accessory.context.device[this.uniq_id].dev.sw
           ?? 'undefined').replace(/[^-\w. ]/g, ''))
         .setCharacteristic(this.platform.Characteristic.SerialNumber, `${accessory.context.device[this.uniq_id].dev.ids[0]
-        }-${os.hostname()}`); // A unique fakegato ID
+          }-${os.hostname()}`); // A unique fakegato ID
 
       this.TVservice = effectsAccessory.getService(this.platform.Service.Television)
         || effectsAccessory.addService(this.platform.Service.Television);
@@ -138,9 +134,9 @@ export class tasmotaLightService extends TasmotaService {
 
 
       const schemes: { name: string, id: number, TVinput?: any }[] = [{ name: 'None', id: 0 }, { name: 'Wakeup', id: 1 },
-        { name: 'Cycle Up', id: 2 }, { name: 'Cycle Down', id: 3 }, { name: 'Random', id: 4 }, { name: 'Clock', id: 5 },
-        { name: 'Candlelight', id: 6 }, { name: 'RGB', id: 7 }, { name: 'Christmas', id: 8 }, { name: 'Hanukkah', id: 9 },
-        { name: 'Kwanzaa', id: 10 }, { name: 'Rainbow', id: 11 }, { name: 'Fire', id: 12 }];
+      { name: 'Cycle Up', id: 2 }, { name: 'Cycle Down', id: 3 }, { name: 'Random', id: 4 }, { name: 'Clock', id: 5 },
+      { name: 'Candlelight', id: 6 }, { name: 'RGB', id: 7 }, { name: 'Christmas', id: 8 }, { name: 'Hanukkah', id: 9 },
+      { name: 'Kwanzaa', id: 10 }, { name: 'Rainbow', id: 11 }, { name: 'Fire', id: 12 }];
 
       for (const element of schemes) {
         debug('element', element);
@@ -242,8 +238,8 @@ export class tasmotaLightService extends TasmotaService {
 
         const hsb = RGBtoScaledHSV(this.parseValue(this.accessory.context.device[this.uniq_id].rgb_val_tpl,
           message.toString()).split(',')[0], this.parseValue(this.accessory.context.device[this.uniq_id].rgb_val_tpl,
-          message.toString()).split(',')[1], this.parseValue(this.accessory.context.device[this.uniq_id].rgb_val_tpl,
-          message.toString()).split(',')[2]);
+            message.toString()).split(',')[1], this.parseValue(this.accessory.context.device[this.uniq_id].rgb_val_tpl,
+              message.toString()).split(',')[2]);
 
         // Use debug logging for no change updates, and info when a change occurred
 

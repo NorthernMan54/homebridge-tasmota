@@ -18,7 +18,7 @@ export class tasmotaSwitchService extends TasmotaService {
     public readonly accessory: PlatformAccessory,
     protected readonly uniq_id: string,
   ) {
-    super(platform, accessory, uniq_id);
+    super(platform, accessory, uniq_id, platform.Service.Outlet);
 
     /*
     if (this.accessory.getService(this.uuid)) {
@@ -27,23 +27,16 @@ export class tasmotaSwitchService extends TasmotaService {
       const temp = this.accessory.getService(this.platform.Service.Outlet)!;
       if (temp.name === null) {
         this.service = temp!;
-        this.service.name = accessory.context.device[this.uniq_id].name;
-        this.service.displayName = accessory.context.device[this.uniq_id].name;
-        this.service.setCharacteristic(this.platform.Characteristic.Name, accessory.context.device[this.uniq_id].name)!;
-        this.service.subtype = this.uuid;
+        this.service?.name = accessory.context.device[this.uniq_id].name;
+        this.service?.displayName = accessory.context.device[this.uniq_id].name;
+        this.service?.setCharacteristic(this.platform.Characteristic.Name, accessory.context.device[this.uniq_id].name)!;
+        this.service?.subtype = this.uuid;
       }
     }
     */
 
-    this.service = this.accessory.getService(this.uuid) || this.accessory.addService(this.platform.Service.Outlet, accessory.context.device[this.uniq_id].name, this.uuid);
-    this.service?.setCharacteristic(this.platform.Characteristic.ConfiguredName, accessory.context.device[this.uniq_id].name);
-
     this.service?.setPrimaryService(true);
-    // set the service name, this is what is displayed as the default name on the Home app
-    // in this example we are using the name we stored in the `accessory.context` in the `discoverDevices` method.
-    if (!this.service?.displayName) {
-      this.service?.setCharacteristic(this.platform.Characteristic.Name, accessory.context.device[this.uniq_id].name);
-    }
+
 
     // each service must implement at-minimum the "required characteristics" for the given service type
     // see https://developers.homebridge.io/#/service/Lightbulb
@@ -54,8 +47,8 @@ export class tasmotaSwitchService extends TasmotaService {
 
     // register handlers for the On/Off Characteristic
 
-    if (this.service?.getCharacteristic(this.platform.Characteristic.On).listenerCount('set') < 1) {
-      this.service?.getCharacteristic(this.platform.Characteristic.On)
+    if (this.service && this.service.getCharacteristic(this.platform.Characteristic.On).listenerCount('set') < 1) {
+      this.service.getCharacteristic(this.platform.Characteristic.On)
         .on('set', this.setOn.bind(this)); // SET - bind to the `setOn` method below
       // .on('get', this.getOn.bind(this));               // GET - bind to the `getOn` method below
     }

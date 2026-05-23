@@ -277,7 +277,7 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
       // debug('filterList', this.config.filterList);
       if (this.isTopicAllowed(topic, this.config.filter, this.config.filterAllow, this.config.filterDeny)) {
         let message = normalizeMessage(config);
-        debug('normalizeMessage ->', message);
+        // debug('normalizeMessage ->', message);
         if (message.dev?.ids?.[0]) {
           const identifier = message.dev.ids[0]; // Unique per accessory
           const uniq_id: string = message.uniq_id as string; // Unique per service
@@ -294,7 +294,7 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
           if (existingAccessory) {
             // the accessory already exists
 
-            this.log.info('Found existing accessory: %s - %s', message.name, uniq_id);
+            this.log.info('Found existing accessory: %s - %s', existingAccessory.displayName, uniq_id);
             // if you need to update the accessory.context then you should run `api.updatePlatformAccessories`. eg.:
             // existingAccessory.context.device = device;
             // this.api.updatePlatformAccessories([existingAccessory]);
@@ -326,7 +326,7 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
             } else if (message.name) {
               // this.log.info('existingAccessory:', existingAccessory.displayName, existingAccessory)
               // this.log.info('this.services:', this.services)
-              this.log.info('Creating service:', message.name, message.tasmotaType);
+              this.log.info('Creating service: %s - %s', message.name, message.tasmotaType);
               switch (message.tasmotaType) {
                 case 'sensor':
                   this.services[uniq_id] = new tasmotaSensorService(this, existingAccessory, uniq_id);
@@ -368,7 +368,7 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
             this.api.updatePlatformAccessories([existingAccessory]);
           } else if (message.name) {
             // the accessory does not yet exist, so we need to create it
-            this.log.info('Adding new accessory:', message.name);
+            this.log.info('Adding new accessory: %s - %s', message.name, message.tasmotaType);
 
             // create a new accessory
             const accessory = new this.api.platformAccessory(message.name, uuid);
@@ -584,5 +584,41 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
       debug('Removing', accessory.displayName);
       this.accessoryCleanup(accessory);
     });
+  }
+
+  // Leveraged by Binary Sensor and Sensor services to map Tasmota device classes to HomeKit services and characteristics
+
+  deviceClassToHKService(device_class: string): typeof Service {
+    switch (device_class) {
+      // Sensor Service device class mappings
+      case 'temperature':
+        return (this.Service.TemperatureSensor);
+      case 'humidity':
+        return (this.Service.HumiditySensor);
+      case 'pressure':
+        return (this.CustomServices.AirPressureSensor);
+      case 'illuminance':
+        return (this.Service.LightSensor);
+      case 'co2':
+        return (this.Service.CarbonDioxideSensor);
+      case 'pm25':
+        return (this.Service.AirQualitySensor);
+      case 'power':
+        return (this.Service.Outlet);
+      // Binary Sensor Service device class mappings
+      case 'doorbell':
+        return (this.Service.Doorbell);
+      case 'motion':
+        return (this.Service.MotionSensor);
+      case 'contact':
+        return (this.Service.ContactSensor);
+      case 'door':
+        return (this.Service.ContactSensor);
+      case 'moisture':
+        return (this.Service.LeakSensor);
+      default:
+        this.log.error('Error: Unsupported device class "%s", using generic Sensor service', device_class);
+        return (this.Service.ContactSensor);
+    }
   }
 }
