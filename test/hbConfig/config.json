@@ -1,7 +1,7 @@
 {
   "bridge": {
-    "name": "Heisenberg",
-    "username": "AA:BB:CC:DD:EE:01",
+    "name": "Homebridge Tasmota Test",
+    "username": "AA:BB:CC:DD:EE:02",
     "port": 51826,
     "pin": "031-45-154"
   },
@@ -29,7 +29,7 @@
       "debug": true,
       "cleanup": 0,
       "filterAllow": [
-        "4F7DD5"
+        "139827"
       ],
       "filterDeny": [
         "5673B2",

@@ -1,4 +1,4 @@
-import { findVal, normalizeMessage, renameKeys, replaceStringsInObject } from './utils';
+import { findVal, normalizeMessage, renameKeys, replaceStringsInObject } from './utils.js';
 
 describe('normalizeMessage', () => {
   test('should handle fanFixed tasmotaType', () => {

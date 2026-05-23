@@ -36,6 +36,7 @@ export default [
       'no-multi-spaces': ['warn'],
       'object-property-newline': ['warn', { allowAllPropertiesOnSameLine: true }],
       'no-trailing-spaces': ['warn'],
+      'no-warning-comments': ['warn', { terms: ['TODO:'], location: 'anywhere' }],
       '@typescript-eslint/explicit-function-return-type': 'off',
       '@typescript-eslint/no-non-null-assertion': 'off',
       '@typescript-eslint/explicit-module-boundary-types': 'off',

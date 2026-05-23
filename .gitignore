@@ -128,3 +128,5 @@ DEVICES.md.toc.*
 /test/hbConfig/backups
 /test/hbConfig/persist
 test/hbConfig/config.json
+test/hbConfig/Pinkman_139827_RL_1_persist.json
+device_dump.json
