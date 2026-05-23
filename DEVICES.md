@@ -33,6 +33,7 @@
 * [Valor Fireplace Remote ( 315 Mhz )](#valor-fireplace-remote--315-mhz-)
 * [Treatlife DS03 Fan Controller and Light Dimmer](#treatlife-ds03-fan-controller-and-light-dimmer)
 * [Greeni GNC-SW003-199](#greeni-gnc-sw003-199)
+   * [Always on Powerbar - Turns on after 30 seconds](#always-on-powerbar---turns-on-after-30-seconds)
 * [OpenMQTTGateway devices](#openmqttgateway-devices)
 * [Hampton Bay Light](#hampton-bay-light)
 * [Hampton Bay FAN](#hampton-bay-fan)
