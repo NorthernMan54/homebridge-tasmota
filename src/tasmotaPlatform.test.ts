@@ -29,6 +29,7 @@ function emitDiscovered(topic: string, config: Record<string, any>) {
 
 // --- Tests ---
 
+import { UUID } from 'crypto';
 import { HomebridgeAPI } from '../node_modules/homebridge/dist/api.js';
 import { tasmotaPlatform } from './tasmotaPlatform.js';
 
@@ -61,8 +62,8 @@ describe('Trailer Power', () => {
     expect(registeredAccessory.services).toHaveLength(2);
     expect(registeredAccessory.services[1]).toBeInstanceOf(api.hap.Service.Outlet);
     expect(Object.keys(registeredAccessory.services[1].characteristics).length).toBe(3); // Outlet has On, OutletInUse, and Name characteristics
-    expect(registeredAccessory.services[1].getCharacteristic(api.hap.Characteristic.On)).toBeDefined();
-    expect(registeredAccessory.services[1].getCharacteristic(api.hap.Characteristic.On).UUID)
+    expect(registeredAccessory.services[1].getCharacteristic('On')).toBeDefined();
+    expect(registeredAccessory.services[1].getCharacteristic('On').UUID)
       .toBe(api.hap.Characteristic.On.UUID);
 
 
@@ -86,8 +87,8 @@ describe('Trailer Power', () => {
     expect(updatedAccessory.services).toHaveLength(2);
     expect(updatedAccessory.services[1]).toBeInstanceOf(api.hap.Service.Outlet);
     expect(Object.keys(updatedAccessory.services[1].characteristics).length).toBe(3); // Outlet has On, OutletInUse, and Name characteristics
-    expect(updatedAccessory.services[1].getCharacteristic(api.hap.Characteristic.On)).toBeDefined();
-    expect(updatedAccessory.services[1].getCharacteristic(api.hap.Characteristic.On).UUID)
+    expect(updatedAccessory.services[1].getCharacteristic('On')).toBeDefined();
+    expect(updatedAccessory.services[1].getCharacteristic('On').UUID)
       .toBe(api.hap.Characteristic.On.UUID);
 
     expect(platform.services['139827_ENERGY_TotalStartTime']).toBeDefined();
@@ -110,22 +111,21 @@ describe('Trailer Power', () => {
     console.log('Updated accessory services:', updatedAccessory.services);
     expect(updatedAccessory.services).toHaveLength(2);
     expect(updatedAccessory.services[1]).toBeInstanceOf(api.hap.Service.Outlet);
-    expect(updatedAccessory.services[1].getCharacteristic(api.hap.Characteristic.On)).toBeDefined();
-    expect(updatedAccessory.services[1].getCharacteristic(api.hap.Characteristic.On).UUID)
+    expect(updatedAccessory.services[1].getCharacteristic('On')).toBeDefined();
+    expect(updatedAccessory.services[1].getCharacteristic('On').UUID)
       .toBe(api.hap.Characteristic.On.UUID);
-
     expect(platform.services['139827_ENERGY_Total']).toBeDefined();
-
-    // TotalConsumption characteristic is on the sensor service (services[2])
-    const totalConsumptionUUID = 'E863F10C-079E-48FF-8F27-9C2605A29F52';
-    expect(updatedAccessory.services[2].getCharacteristic(totalConsumptionUUID)).toBeDefined();
-    expect(updatedAccessory.services[2].getCharacteristic(totalConsumptionUUID).UUID).toBe(totalConsumptionUUID);
-    expect(updatedAccessory.services[2].getCharacteristic(totalConsumptionUUID).displayName).toBe('Total Consumption');
-    expect(updatedAccessory.services[2].getCharacteristic(totalConsumptionUUID).props.unit).toBe('kWh');
-    expect(updatedAccessory.services[2].getCharacteristic(totalConsumptionUUID).props.format).toBe('float');
-    expect(updatedAccessory.services[2].getCharacteristic(totalConsumptionUUID).props.minValue).toBe(0);
-    expect(updatedAccessory.services[2].getCharacteristic(totalConsumptionUUID).props.maxValue).toBe(1000000);
-    expect(updatedAccessory.services[2].getCharacteristic(totalConsumptionUUID).props.minStep).toBe(0.01);
+    // TotalConsumption characteristic is on the Outlet service - look up by display name since getCharacteristic(string) matches displayName not UUID
+    const totalConsumptionUUID: UUID = 'E863F10C-079E-48FF-8F27-9C2605A29F52';
+    console.log('Updated accessory services after adding energy total:', updatedAccessory.services[1].characteristics);
+    expect(updatedAccessory.services[1].getCharacteristic('Total Consumption')).toBeDefined();
+    expect(updatedAccessory.services[1].getCharacteristic('Total Consumption').UUID).toBe(totalConsumptionUUID);
+    expect(updatedAccessory.services[1].getCharacteristic('Total Consumption').displayName).toBe('Total Consumption');
+    expect(updatedAccessory.services[1].getCharacteristic('Total Consumption').props.unit).toBe('kWh');
+    expect(updatedAccessory.services[1].getCharacteristic('Total Consumption').props.format).toBe('float');
+    expect(updatedAccessory.services[1].getCharacteristic('Total Consumption').props.minValue).toBe(0);
+    expect(updatedAccessory.services[1].getCharacteristic('Total Consumption').props.maxValue).toBe(1000000);
+    expect(updatedAccessory.services[1].getCharacteristic('Total Consumption').props.minStep).toBe(0.01);
   });
 
 });
