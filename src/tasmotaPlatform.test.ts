@@ -108,7 +108,6 @@ describe('Trailer Power', () => {
     expect(updatedAccessory.context.identifier).toBe('139827');
 
     // 3 services: AccessoryInformation + Outlet + power sensor
-    console.log('Updated accessory services:', updatedAccessory.services);
     expect(updatedAccessory.services).toHaveLength(2);
     expect(updatedAccessory.services[1]).toBeInstanceOf(api.hap.Service.Outlet);
     expect(updatedAccessory.services[1].getCharacteristic('On')).toBeDefined();
@@ -117,7 +116,6 @@ describe('Trailer Power', () => {
     expect(platform.services['139827_ENERGY_Total']).toBeDefined();
     // TotalConsumption characteristic is on the Outlet service - look up by display name since getCharacteristic(string) matches displayName not UUID
     const totalConsumptionUUID: UUID = 'E863F10C-079E-48FF-8F27-9C2605A29F52';
-    console.log('Updated accessory services after adding energy total:', updatedAccessory.services[1].characteristics);
     expect(updatedAccessory.services[1].getCharacteristic('Total Consumption')).toBeDefined();
     expect(updatedAccessory.services[1].getCharacteristic('Total Consumption').UUID).toBe(totalConsumptionUUID);
     expect(updatedAccessory.services[1].getCharacteristic('Total Consumption').displayName).toBe('Total Consumption');
@@ -126,6 +124,31 @@ describe('Trailer Power', () => {
     expect(updatedAccessory.services[1].getCharacteristic('Total Consumption').props.minValue).toBe(0);
     expect(updatedAccessory.services[1].getCharacteristic('Total Consumption').props.maxValue).toBe(1000000);
     expect(updatedAccessory.services[1].getCharacteristic('Total Consumption').props.minStep).toBe(0.01);
+  });
+
+  test('Adds status sensor to existing Trailer Power accessory, setting AccessoryInformation', () => {
+    emitDiscovered(trailerStatusTopic, trailerStatusConfig);
+
+    expect(api.registerPlatformAccessories).not.toHaveBeenCalled();
+    expect(api.updatePlatformAccessories).toHaveBeenCalled();
+
+    const updateCalls = (api.updatePlatformAccessories as jest.Mock).mock.calls[0] as [any[]];
+    const updatedAccessory = updateCalls[0][0];
+
+    expect(updatedAccessory.displayName).toBe('Trailer Power');
+
+    // No new service should be added - status sensor populates AccessoryInformation only
+    expect(updatedAccessory.services).toHaveLength(2);
+
+    // AccessoryInformation should be populated from the dev object
+    const accessoryInfo = updatedAccessory.getService(api.hap.Service.AccessoryInformation);
+    expect(accessoryInfo).toBeDefined();
+    expect(accessoryInfo!.getCharacteristic('Manufacturer').value).toBe('Tasmota');
+    expect(accessoryInfo!.getCharacteristic('Model').value).toBe('Tuya MCU');
+    expect(accessoryInfo!.getCharacteristic('Firmware Revision').value).toBe('9.5.0tasmota');
+    expect(accessoryInfo!.getCharacteristic('Serial Number').value).toMatch(/^139827-/);
+
+    expect(platform.services['139827_status']).toBeDefined();
   });
 
 });
@@ -181,6 +204,30 @@ const trailerEnergyTotalConfig = {
   dev_cla: 'power',
   frc_upd: true,
   val_tpl: "{{value_json['ENERGY']['Total']}}",
+  tasmotaType: 'sensor',
+  pl_on: 'ON',
+  pl_off: 'OFF',
+};
+
+const trailerStatusTopic = 'homeassistant/sensor/139827_status/config';
+const trailerStatusConfig = {
+  name: 'Trailer Power status',
+  stat_t: 'tele/tasmota_139827/HASS_STATE',
+  avty_t: 'tele/tasmota_139827/LWT',
+  pl_avail: 'Online',
+  pl_not_avail: 'Offline',
+  json_attr_t: 'tele/tasmota_139827/HASS_STATE',
+  unit_of_meas: '%',
+  val_tpl: "{{value_json['RSSI']}}",
+  ic: 'mdi:information-outline',
+  uniq_id: '139827_status',
+  dev: {
+    ids: ['139827'],
+    name: 'Trailer Power',
+    mdl: 'Tuya MCU',
+    sw: '9.5.0(tasmota)',
+    mf: 'Tasmota',
+  },
   tasmotaType: 'sensor',
   pl_on: 'ON',
   pl_off: 'OFF',
