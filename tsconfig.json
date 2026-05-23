@@ -6,8 +6,8 @@
       "ES2022"
     ],
     "rootDir": "src",
-    "module": "commonjs",
-    "moduleResolution": "node",
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
     "strict": true,
     "declaration": true,
     "outDir": "dist",

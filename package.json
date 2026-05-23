@@ -16,6 +16,7 @@
     "node": ">=18"
   },
   "main": "dist/index.js",
+  "type": "module",
   "scripts": {
     "build": "rimraf ./dist && tsc",
     "document": "./gh-md-toc --hide-footer DEVICES.md",
