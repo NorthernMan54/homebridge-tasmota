@@ -29,9 +29,6 @@
             "history": false,
             "debug": true,
             "cleanup": 0,
-            "filterAllow": [
-                "139827"
-            ],
             "filterDeny": [
                 "5673B2",
                 "240AC4EC20DC",
