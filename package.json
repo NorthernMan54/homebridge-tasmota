@@ -24,7 +24,7 @@
     "lint:fix": "eslint --fix src/**.ts",
     "oldWatch": "npm run build && npm link && nodemon",
     "prepublishOnly": "npm run lint && npm run build",
-    "test": "rimraf ./dist && node --experimental-vm-modules node_modules/.bin/jest --detectOpenHandles",
+    "test": "rimraf ./dist && node --experimental-vm-modules node_modules/.bin/jest --detectOpenHandles --verbose=true",
     "test-coverage": "jest --coverage",
     "watch": "nodemon"
   },
@@ -34,7 +34,7 @@
     ],
     "ext": "ts",
     "ignore": [],
-    "exec": "npm run build && DEBUG=-HAP-NodeJS:*,Tasmota* homebridge -U ./test/hbConfig -T -D -I -P .",
+    "exec": "npm run build && NODE_PATH=`pwd`:.. DEBUG=-HAP-NodeJS:*,Tasmota* node ~/node_modules/homebridge-config-ui-x/dist/bin/hb-service.js run --stdout -U ./test/hbConfig -T -D -I -P ./",
     "signal": "SIGTERM",
     "env": {
       "NODE_OPTIONS": "--trace-warnings"
@@ -66,7 +66,7 @@
     "eslint-plugin-import-newlines": "^1.4.0",
     "eslint-plugin-jest": "^29.2.0",
     "eslint-plugin-sort-exports": "^0.9.1",
-    "homebridge": "^2.0.0-beta.0",
+    "homebridge": "^2.0.2",
     "jest": "^29.7.0",
     "nodemon": "^3.1.11",
     "rimraf": "^6.1.2",

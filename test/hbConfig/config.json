@@ -1,185 +1,191 @@
 {
-  "bridge": {
-    "name": "Homebridge Tasmota Test",
-    "username": "AA:BB:CC:DD:EE:02",
-    "port": 51826,
-    "pin": "031-45-154"
-  },
-  "description": "HomeBridge HTTP Status Control",
-  "plugins": [
-    "homebridge-tasmota",
-    "homebridge-config-ui-x"
-  ],
-  "platforms": [
-    {
-      "name": "Config",
-      "port": 8581,
-      "auth": "none",
-      "theme": "auto",
-      "tempUnits": "c",
-      "lang": "auto",
-      "sudo": false,
-      "platform": "config"
+    "bridge": {
+        "name": "Homebridge Tasmota Test",
+        "username": "AA:BB:CC:DD:EE:04",
+        "port": 51826,
+        "pin": "031-45-154",
+        "advertiser": "ciao"
     },
-    {
-      "platform": "Tasmota",
-      "name": "Tasmota",
-      "mqttHost": "mqtt.local",
-      "history": false,
-      "debug": true,
-      "cleanup": 0,
-      "filterAllow": [
-        "139827"
-      ],
-      "filterDeny": [
-        "5673B2",
-        "240AC4EC20DC",
-        "IBEACON",
-        "erase|discovery|restart"
-      ],
-      "effects": true,
-      "injections": [
+    "description": "HomeBridge HTTP Status Control",
+    "plugins": [
+        "homebridge-tasmota",
+        "homebridge-config-ui-x"
+    ],
+    "platforms": [
         {
-          "topic": "FB6A07_RL_1",
-          "injection": [
-            {
-              "key": "tasmotaType",
-              "value": "garageDoor"
-            }
-          ]
+            "name": "Config",
+            "platform": "config",
+            "port": 8581,
+            "auth": "none",
+            "theme": "deep-purple",
+            "tempUnits": "c",
+            "lang": "auto",
+            "debug": false
         },
         {
-          "topic": "0073C8_LI_1",
-          "injection": [
-            {
-              "key": "tasmotaType",
-              "value": "fan"
+            "platform": "Tasmota",
+            "name": "Tasmota",
+            "mqttHost": "mqtt.local",
+            "history": false,
+            "debug": true,
+            "cleanup": 0,
+            "filterAllow": [
+                "139827"
+            ],
+            "filterDeny": [
+                "5673B2",
+                "240AC4EC20DC",
+                "IBEACON",
+                "erase|discovery|restart"
+            ],
+            "effects": true,
+            "injections": [
+                {
+                    "topic": "FB6A07_RL_1",
+                    "injection": [
+                        {
+                            "key": "tasmotaType",
+                            "value": "garageDoor"
+                        }
+                    ]
+                },
+                {
+                    "topic": "0073C8_LI_1",
+                    "injection": [
+                        {
+                            "key": "tasmotaType",
+                            "value": "fan"
+                        }
+                    ]
+                },
+                {
+                    "topic": "2BA0FF_SW_1",
+                    "injection": [
+                        {
+                            "key": "device_class",
+                            "value": "motion"
+                        },
+                        {
+                            "key": "name",
+                            "value": "Shed Motion"
+                        }
+                    ]
+                },
+                {
+                    "topic": "302F1B_LI_3",
+                    "injection": [
+                        {
+                            "key": "tasmotaType",
+                            "value": "other"
+                        }
+                    ]
+                },
+                {
+                    "topic": "302F1B_LI_4",
+                    "injection": [
+                        {
+                            "key": "tasmotaType",
+                            "value": "other"
+                        }
+                    ]
+                },
+                {
+                    "topic": "860695_RL_1",
+                    "injection": [
+                        {
+                            "key": "tasmotaType",
+                            "value": "other"
+                        }
+                    ]
+                },
+                {
+                    "topic": "302F1B_LI_2",
+                    "injection": [
+                        {
+                            "key": "tasmotaType",
+                            "value": "fanFixed"
+                        }
+                    ]
+                },
+                {
+                    "topic": "303057_LI_3",
+                    "injection": [
+                        {
+                            "key": "tasmotaType",
+                            "value": "other"
+                        }
+                    ]
+                },
+                {
+                    "topic": "303057_LI_4",
+                    "injection": [
+                        {
+                            "key": "tasmotaType",
+                            "value": "other"
+                        }
+                    ]
+                },
+                {
+                    "topic": "303057_LI_2",
+                    "injection": [
+                        {
+                            "key": "tasmotaType",
+                            "value": "fanFixed"
+                        }
+                    ]
+                },
+                {
+                    "topic": "2D9EB5_LI_2",
+                    "injection": [
+                        {
+                            "key": "tasmotaType",
+                            "value": "fanFixed"
+                        }
+                    ]
+                },
+                {
+                    "topic": "2D9EB5_LI_3",
+                    "injection": [
+                        {
+                            "key": "tasmotaType",
+                            "value": "other"
+                        }
+                    ]
+                },
+                {
+                    "topic": "2D9EB5_LI_4",
+                    "injection": [
+                        {
+                            "key": "tasmotaType",
+                            "value": "other"
+                        }
+                    ]
+                },
+                {
+                    "topic": "302D6B_LI_2",
+                    "injection": [
+                        {
+                            "key": "tasmotaType",
+                            "value": "fanFixed"
+                        }
+                    ]
+                },
+                {
+                    "topic": "302D6B_LI_1",
+                    "injection": [
+                        {
+                            "key": "tasmotaType",
+                            "value": "other"
+                        }
+                    ]
+                }
+            ],
+            "_bridge": {
+                "username": "0E:90:D5:2E:54:2F",
+                "port": 47574,
+                "name": "Tasmota Child Bridge"
             }
-          ]
-        },
-        {
-          "topic": "2BA0FF_SW_1",
-          "injection": [
-            {
-              "key": "device_class",
-              "value": "motion"
-            },
-            {
-              "key": "name",
-              "value": "Shed Motion"
-            }
-          ]
-        },
-        {
-          "topic": "302F1B_LI_3",
-          "injection": [
-            {
-              "key": "tasmotaType",
-              "value": "other"
-            }
-          ]
-        },
-        {
-          "topic": "302F1B_LI_4",
-          "injection": [
-            {
-              "key": "tasmotaType",
-              "value": "other"
-            }
-          ]
-        },
-        {
-          "topic": "860695_RL_1",
-          "injection": [
-            {
-              "key": "tasmotaType",
-              "value": "other"
-            }
-          ]
-        },
-        {
-          "topic": "302F1B_LI_2",
-          "injection": [
-            {
-              "key": "tasmotaType",
-              "value": "fanFixed"
-            }
-          ]
-        },
-        {
-          "topic": "303057_LI_3",
-          "injection": [
-            {
-              "key": "tasmotaType",
-              "value": "other"
-            }
-          ]
-        },
-        {
-          "topic": "303057_LI_4",
-          "injection": [
-            {
-              "key": "tasmotaType",
-              "value": "other"
-            }
-          ]
-        },
-        {
-          "topic": "303057_LI_2",
-          "injection": [
-            {
-              "key": "tasmotaType",
-              "value": "fanFixed"
-            }
-          ]
-        },
-        {
-          "topic": "2D9EB5_LI_2",
-          "injection": [
-            {
-              "key": "tasmotaType",
-              "value": "fanFixed"
-            }
-          ]
-        },
-        {
-          "topic": "2D9EB5_LI_3",
-          "injection": [
-            {
-              "key": "tasmotaType",
-              "value": "other"
-            }
-          ]
-        },
-        {
-          "topic": "2D9EB5_LI_4",
-          "injection": [
-            {
-              "key": "tasmotaType",
-              "value": "other"
-            }
-          ]
-        },
-        {
-          "topic": "302D6B_LI_2",
-          "injection": [
-            {
-              "key": "tasmotaType",
-              "value": "fanFixed"
-            }
-          ]
-        },
-        {
-          "topic": "302D6B_LI_1",
-          "injection": [
-            {
-              "key": "tasmotaType",
-              "value": "other"
-            }
-          ]
         }
-      ]
-    }
-  ],
-  "accessories": []
+    ],
+    "accessories": []
 }

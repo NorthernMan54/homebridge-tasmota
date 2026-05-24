@@ -126,6 +126,8 @@ describe('Trailer Power', () => {
     expect(updatedAccessory.services[1].getCharacteristic('Total Consumption').props.minStep).toBe(0.01);
   });
 
+
+
   test('Adds status sensor to existing Trailer Power accessory, setting AccessoryInformation', () => {
     emitDiscovered(trailerStatusTopic, trailerStatusConfig);
 
@@ -151,6 +153,76 @@ describe('Trailer Power', () => {
     expect(platform.services['139827_status']).toBeDefined();
   });
 
+  test('Adds ENERGY Current sensor to existing Trailer Power accessory, which should be ignored (no dev_cla)', () => {
+    emitDiscovered(trailerEnergyCurrentTopic, trailerEnergyCurrentConfig);
+
+    expect(api.registerPlatformAccessories).not.toHaveBeenCalled();
+    expect(api.updatePlatformAccessories).toHaveBeenCalled();
+
+    const updateCalls = (api.updatePlatformAccessories as jest.Mock).mock.calls[0] as [any[]];
+    const updatedAccessory = updateCalls[0][0];
+
+    expect(updatedAccessory.displayName).toBe('Trailer Power');
+    expect(updatedAccessory.context.device['139827_RL_1']).toBeDefined();
+    expect(updatedAccessory.context.identifier).toBe('139827');
+
+    // No new service added - missing dev_cla results in a warning and no service creation
+    expect(updatedAccessory.services).toHaveLength(2);
+
+    expect(mockLog.warn).toHaveBeenCalledWith('Warning: missing dev_cla', 'Trailer Power ENERGY Current');
+    expect(platform.services['139827_ENERGY_Current']).toBeDefined();
+  });
+
+  test('Adds ENERGY ReactivePower sensor to existing Trailer Power accessory, which should warn unhandled power type', () => {
+    emitDiscovered(trailerEnergyReactivePowerTopic, trailerEnergyReactivePowerConfig);
+
+    expect(api.registerPlatformAccessories).not.toHaveBeenCalled();
+    expect(api.updatePlatformAccessories).toHaveBeenCalled();
+
+    const updateCalls = (api.updatePlatformAccessories as jest.Mock).mock.calls[0] as [any[]];
+    const updatedAccessory = updateCalls[0][0];
+
+    expect(updatedAccessory.displayName).toBe('Trailer Power');
+    expect(updatedAccessory.context.device['139827_RL_1']).toBeDefined();
+    expect(updatedAccessory.context.identifier).toBe('139827');
+
+    // No new service added - unhandled power sensor type
+    expect(updatedAccessory.services).toHaveLength(2);
+
+    expect(mockLog.warn).toHaveBeenCalledWith('Warning: Unhandled Tasmota power sensor type', '_energy_reactivepower');
+    expect(platform.services['139827_ENERGY_ReactivePower']).toBeDefined();
+  });
+
+  test('Adds ENERGY Power sensor to existing Trailer Power accessory, adding CurrentConsumption characteristic', () => {
+    emitDiscovered(trailerEnergyPowerTopic, trailerEnergyPowerConfig);
+
+    expect(api.registerPlatformAccessories).not.toHaveBeenCalled();
+    expect(api.updatePlatformAccessories).toHaveBeenCalled();
+
+    const updateCalls = (api.updatePlatformAccessories as jest.Mock).mock.calls[0] as [any[]];
+    const updatedAccessory = updateCalls[0][0];
+
+    expect(updatedAccessory.displayName).toBe('Trailer Power');
+    expect(updatedAccessory.context.device['139827_RL_1']).toBeDefined();
+    expect(updatedAccessory.context.identifier).toBe('139827');
+
+    // Still 2 services - CurrentConsumption is added as a characteristic to the existing Outlet service
+    expect(updatedAccessory.services).toHaveLength(2);
+    expect(updatedAccessory.services[1]).toBeInstanceOf(api.hap.Service.Outlet);
+
+    // CurrentConsumption (Consumption) characteristic should be on the Outlet service
+    const currentConsumptionUUID: UUID = 'E863F10D-079E-48FF-8F27-9C2605A29F52';
+    expect(updatedAccessory.services[1].getCharacteristic('Consumption')).toBeDefined();
+    expect(updatedAccessory.services[1].getCharacteristic('Consumption').UUID).toBe(currentConsumptionUUID);
+    expect(updatedAccessory.services[1].getCharacteristic('Consumption').props.unit).toBe('W');
+    expect(updatedAccessory.services[1].getCharacteristic('Consumption').props.format).toBe('float');
+    expect(updatedAccessory.services[1].getCharacteristic('Consumption').props.minValue).toBe(0);
+    expect(updatedAccessory.services[1].getCharacteristic('Consumption').props.maxValue).toBe(12000);
+    expect(updatedAccessory.services[1].getCharacteristic('Consumption').props.minStep).toBe(0.1);
+
+    expect(platform.services['139827_ENERGY_Power']).toBeDefined();
+  });
+
 });
 
 // =============================================================================
@@ -170,6 +242,24 @@ const trailerEnergyTotalStartTimeConfig = {
   ic: 'mdi:progress-clock',
   frc_upd: true,
   val_tpl: '{{value_json[\'ENERGY\'][\'TotalStartTime\']}}',
+  tasmotaType: 'sensor',
+  pl_on: 'ON',
+  pl_off: 'OFF',
+};
+
+const trailerEnergyPowerTopic = 'homeassistant/sensor/139827_ENERGY_Power/config';
+const trailerEnergyPowerConfig = {
+  name: 'Trailer Power ENERGY Power',
+  stat_t: 'tele/tasmota_139827/SENSOR',
+  avty_t: 'tele/tasmota_139827/LWT',
+  pl_avail: 'Online',
+  pl_not_avail: 'Offline',
+  uniq_id: '139827_ENERGY_Power',
+  dev: { ids: ['139827'] },
+  unit_of_meas: 'W',
+  dev_cla: 'power',
+  frc_upd: true,
+  val_tpl: "{{value_json['ENERGY']['Power']}}",
   tasmotaType: 'sensor',
   pl_on: 'ON',
   pl_off: 'OFF',
@@ -204,6 +294,42 @@ const trailerEnergyTotalConfig = {
   dev_cla: 'power',
   frc_upd: true,
   val_tpl: '{{value_json[\'ENERGY\'][\'Total\']}}',
+  tasmotaType: 'sensor',
+  pl_on: 'ON',
+  pl_off: 'OFF',
+};
+
+const trailerEnergyCurrentTopic = 'homeassistant/sensor/139827_ENERGY_Current/config';
+const trailerEnergyCurrentConfig = {
+  name: 'Trailer Power ENERGY Current',
+  stat_t: 'tele/tasmota_139827/SENSOR',
+  avty_t: 'tele/tasmota_139827/LWT',
+  pl_avail: 'Online',
+  pl_not_avail: 'Offline',
+  uniq_id: '139827_ENERGY_Current',
+  dev: { ids: ['139827'] },
+  unit_of_meas: 'A',
+  ic: 'mdi:alpha-a-circle-outline',
+  frc_upd: true,
+  val_tpl: "{{value_json['ENERGY']['Current']}}",
+  tasmotaType: 'sensor',
+  pl_on: 'ON',
+  pl_off: 'OFF',
+};
+
+const trailerEnergyReactivePowerTopic = 'homeassistant/sensor/139827_ENERGY_ReactivePower/config';
+const trailerEnergyReactivePowerConfig = {
+  name: 'Trailer Power ENERGY ReactivePower',
+  stat_t: 'tele/tasmota_139827/SENSOR',
+  avty_t: 'tele/tasmota_139827/LWT',
+  pl_avail: 'Online',
+  pl_not_avail: 'Offline',
+  uniq_id: '139827_ENERGY_ReactivePower',
+  dev: { ids: ['139827'] },
+  unit_of_meas: 'VAr',
+  dev_cla: 'power',
+  frc_upd: true,
+  val_tpl: "{{value_json['ENERGY']['ReactivePower']}}",
   tasmotaType: 'sensor',
   pl_on: 'ON',
   pl_off: 'OFF',
