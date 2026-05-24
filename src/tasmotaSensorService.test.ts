@@ -42,7 +42,7 @@ function makeEnergyDevice(overrides = {}) {
     unit_of_meas: ' ',
     ic: 'mdi:progress-clock',
     frc_upd: true,
-    val_tpl: "{{value_json['ENERGY']['TotalStartTime']}}",
+    val_tpl: '{{value_json[\'ENERGY\'][\'TotalStartTime\']}}',
     tasmotaType: 'sensor',
     pl_on: 'ON',
     pl_off: 'OFF',
@@ -77,12 +77,16 @@ function makeEnergyPlatform() {
     const props: CharacteristicProps = { format: 'float' as Formats, perms: ['ev' as Perms, 'pr' as Perms] };
     return class extends Characteristic {
       static UUID = uuid;
-      constructor() { super('Custom', uuid, props); }
+      constructor() {
+        super('Custom', uuid, props);
+      }
     };
   };
   const makeCustomSvc = (uuid: string) => class extends Service {
     static UUID = uuid;
-    constructor(displayName?: string, subtype?: string) { super(displayName ?? '', uuid, subtype); }
+    constructor(displayName?: string, subtype?: string) {
+      super(displayName ?? '', uuid, subtype);
+    }
   };
 
   return {

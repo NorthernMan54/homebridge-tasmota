@@ -20,7 +20,8 @@
   "scripts": {
     "build": "rimraf ./dist && tsc",
     "document": "./gh-md-toc --hide-footer DEVICES.md",
-    "lint": "eslint --fix src/**.ts",
+    "lint": "eslint src/**.ts",
+    "lint:fix": "eslint --fix src/**.ts",
     "oldWatch": "npm run build && npm link && nodemon",
     "prepublishOnly": "npm run lint && npm run build",
     "test": "rimraf ./dist && node --experimental-vm-modules node_modules/.bin/jest --detectOpenHandles",
