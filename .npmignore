@@ -133,6 +133,12 @@ dist
 .yarn/build-state.yml
 .pnp.*
 
+# project files
+.github/
+branding/
+jest.config.ts
+tsconfig.eslint.json
+
 # Documentation files
 
 DEVICES.md.orig.*

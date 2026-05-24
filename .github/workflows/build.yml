@@ -1,6 +1,10 @@
-name: Build and Lint
+name: Build, Lint and Test
 
 on: [push, pull_request]
+
+concurrency:
+  group: build_lint_and_test
+  cancel-in-progress: true
 
 jobs:
   build:
