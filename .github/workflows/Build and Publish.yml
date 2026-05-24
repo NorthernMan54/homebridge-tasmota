@@ -101,7 +101,7 @@ jobs:
     needs: [get_tags, create_documentation]
     name: Publish Test Version - ${{ needs.get_tags.outputs.BRANCH_NAME }}
     if: ${{ needs.get_tags.outputs.BRANCH_NAME != 'main' }}
-    uses: homebridge/.github/.github/workflows/npm-publish-oidc.yml@latest
+    uses: homebridge/.github/.github/workflows/npm-publish-esm-oidc.yml@latest
     with:
       tag: ${{ needs.get_tags.outputs.TARGET_IMAGE_TAG }}
       dynamically_adjust_version: true
