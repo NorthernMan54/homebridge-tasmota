@@ -1,4 +1,5 @@
 name: "Build, Publish and Release"
+
  
  #
  # Automatically publish beta releases on pushes, require a manual workflow action for production releases
@@ -13,6 +14,10 @@ on:
   push:
     branches: [beta-*.*.*, beta]
   workflow_dispatch:
+
+concurrency:
+  group: build_and_publish
+  cancel-in-progress: true
 
 jobs:
   get_tags:
@@ -70,7 +75,7 @@ jobs:
       run: |
         git config --local user.email "github-actions[bot]@users.noreply.github.com"
         git config --local user.name "github-actions[bot]"
-        git add * || true
+        git add *
         git commit -a -m "Update TOC" || true
 
     - name: Push changes
@@ -85,26 +90,23 @@ jobs:
     needs: [get_tags, create_documentation]
     name: Publish Release Version
     if: ${{ needs.get_tags.outputs.BRANCH_NAME == 'main' }}
-    uses: homebridge/.github/.github/workflows/npm-publish-esm.yml@latest
+    uses: homebridge/.github/.github/workflows/npm-publish-oidc.yml@latest
     with:
       install_cmd: npm ci
-    secrets:
-      npm_auth_token: ${{ secrets.npm_token }}
 
-  publish_test_release: 
+  publish_test_release:
     permissions:
       id-token: write
     needs: [get_tags, create_documentation]
     name: Publish Test Version - ${{ needs.get_tags.outputs.BRANCH_NAME }}
     if: ${{ needs.get_tags.outputs.BRANCH_NAME != 'main' }}
-    uses: homebridge/.github/.github/workflows/npm-publish-esm.yml@latest
+    uses: homebridge/.github/.github/workflows/npm-publish-oidc.yml@latest
     with:
       tag: ${{ needs.get_tags.outputs.TARGET_IMAGE_TAG }}
       dynamically_adjust_version: true
       npm_version_command: 'pre'
       pre_id: ${{ needs.get_tags.outputs.TARGET_IMAGE_TAG }}
-    secrets:
-      npm_auth_token: ${{ secrets.npm_token }}
+      install_cmd: npm ci
 
   publish_github_release:
     needs: [publish_prod_release]
@@ -112,7 +114,7 @@ jobs:
     steps:
     - uses: actions/checkout@v6
     - name: Create Release
-      uses: softprops/action-gh-release@v2
+      uses: softprops/action-gh-release@v3
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
