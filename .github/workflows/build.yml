@@ -1,6 +1,6 @@
 name: Build, Lint and Test
 
-on: [push, pull_request]
+on: [push]
 
 concurrency:
   group: build_lint_and_test
