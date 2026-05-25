@@ -1,4 +1,4 @@
-import { jest } from '@jest/globals';
+import { vi } from 'vitest';
 
 export const UNIQ_ID = 'sensor_test';
 
@@ -19,7 +19,7 @@ export function makeDevice(overrides = {}) {
 export function makePlatform(device = makeDevice()) {
   const uuid = `mock-uuid-${UNIQ_ID}`;
   return {
-    api: { hap: { uuid: { generate: jest.fn().mockReturnValue(uuid) } } },
+    api: { hap: { uuid: { generate: vi.fn().mockReturnValue(uuid) } } },
     Characteristic: {
       Name: 'Name',
       ConfiguredName: 'ConfiguredName',
@@ -32,34 +32,34 @@ export function makePlatform(device = makeDevice()) {
       CurrentConsumption: 'CurrentConsumption',
       TotalConsumption: 'TotalConsumption',
     },
-    mqttHost: { on: jest.fn(), statusSubscribe: jest.fn(), availabilitySubscribe: jest.fn(), sendMessage: jest.fn() },
+    mqttHost: { on: vi.fn(), statusSubscribe: vi.fn(), availabilitySubscribe: vi.fn(), sendMessage: vi.fn() },
     config: { history: false },
-    log: { info: jest.fn(), warn: jest.fn(), error: jest.fn(), debug: jest.fn() },
-    FakeGatoHistoryService: jest.fn(),
+    log: { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() },
+    FakeGatoHistoryService: vi.fn(),
     teleperiod: 300,
-    autoCleanup: jest.fn(),
+    autoCleanup: vi.fn(),
   };
 }
 
 export function makeAccessory(device = makeDevice()) {
   const mockCharacteristic = {
-    on: jest.fn().mockReturnThis(),
-    listenerCount: jest.fn().mockReturnValue(0),
+    on: vi.fn().mockReturnThis(),
+    listenerCount: vi.fn().mockReturnValue(0),
     value: null,
-    updateValue: jest.fn(),
+    updateValue: vi.fn(),
     displayName: 'ConfiguredName',
   };
   const mockService = {
     displayName: device.name,
-    getCharacteristic: jest.fn().mockReturnValue(mockCharacteristic),
-    addCharacteristic: jest.fn().mockReturnValue(mockCharacteristic),
-    setCharacteristic: jest.fn().mockReturnThis(),
+    getCharacteristic: vi.fn().mockReturnValue(mockCharacteristic),
+    addCharacteristic: vi.fn().mockReturnValue(mockCharacteristic),
+    setCharacteristic: vi.fn().mockReturnThis(),
   };
   return {
     context: { device: { [UNIQ_ID]: device } },
     displayName: device.name,
-    getService: jest.fn().mockReturnValue(undefined),
-    addService: jest.fn().mockReturnValue(mockService),
+    getService: vi.fn().mockReturnValue(undefined),
+    addService: vi.fn().mockReturnValue(mockService),
     _mockService: mockService,
     _mockCharacteristic: mockCharacteristic,
   };
@@ -88,7 +88,7 @@ export function makeSwitchDevice(overrides = {}) {
 export function makeSwitchPlatform(device = makeSwitchDevice()) {
   const uuid = `mock-uuid-${SWITCH_UNIQ_ID}`;
   return {
-    api: { hap: { uuid: { generate: jest.fn().mockReturnValue(uuid) } } },
+    api: { hap: { uuid: { generate: vi.fn().mockReturnValue(uuid) } } },
     Characteristic: {
       Name: 'Name',
       ConfiguredName: 'ConfiguredName',
@@ -101,34 +101,34 @@ export function makeSwitchPlatform(device = makeSwitchDevice()) {
       CurrentConsumption: 'CurrentConsumption',
       TotalConsumption: 'TotalConsumption',
     },
-    mqttHost: { on: jest.fn(), statusSubscribe: jest.fn(), availabilitySubscribe: jest.fn(), sendMessage: jest.fn() },
+    mqttHost: { on: vi.fn(), statusSubscribe: vi.fn(), availabilitySubscribe: vi.fn(), sendMessage: vi.fn() },
     config: { history: false },
-    log: { info: jest.fn(), warn: jest.fn(), error: jest.fn(), debug: jest.fn() },
-    FakeGatoHistoryService: jest.fn(),
+    log: { info: vi.fn(), warn: vi.fn(), error: vi.fn(), debug: vi.fn() },
+    FakeGatoHistoryService: vi.fn(),
     teleperiod: 300,
-    autoCleanup: jest.fn(),
+    autoCleanup: vi.fn(),
   };
 }
 
 export function makeSwitchAccessory(device = makeSwitchDevice()) {
   const mockCharacteristic = {
-    on: jest.fn().mockReturnThis(),
-    listenerCount: jest.fn().mockReturnValue(0),
+    on: vi.fn().mockReturnThis(),
+    listenerCount: vi.fn().mockReturnValue(0),
     value: null,
-    updateValue: jest.fn(),
+    updateValue: vi.fn(),
     displayName: 'ConfiguredName',
   };
   const mockService = {
     displayName: device.name,
-    getCharacteristic: jest.fn().mockReturnValue(mockCharacteristic),
-    addCharacteristic: jest.fn().mockReturnValue(mockCharacteristic),
-    setCharacteristic: jest.fn().mockReturnThis(),
+    getCharacteristic: vi.fn().mockReturnValue(mockCharacteristic),
+    addCharacteristic: vi.fn().mockReturnValue(mockCharacteristic),
+    setCharacteristic: vi.fn().mockReturnThis(),
   };
   return {
     context: { device: { [SWITCH_UNIQ_ID]: device } },
     displayName: device.name,
-    getService: jest.fn().mockReturnValue(undefined),
-    addService: jest.fn().mockReturnValue(mockService),
+    getService: vi.fn().mockReturnValue(undefined),
+    addService: vi.fn().mockReturnValue(mockService),
     _mockService: mockService,
     _mockCharacteristic: mockCharacteristic,
   };

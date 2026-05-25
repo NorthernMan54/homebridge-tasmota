@@ -1,4 +1,4 @@
-import { jest } from '@jest/globals';
+import { vi } from 'vitest';
 import { TasmotaService } from './TasmotaService.js';
 import {
   makeAccessory, makeDevice, makePlatform,
@@ -40,7 +40,7 @@ describe.skip('TasmotaService', () => {
       const accessory = makeAccessory(device) as any;
 
       // Simulate existing service
-      accessory.getService = jest.fn().mockReturnValue(accessory._mockService);
+      accessory.getService = vi.fn().mockReturnValue(accessory._mockService);
 
       const instance = new TasmotaService(platform, accessory, UNIQ_ID);
 

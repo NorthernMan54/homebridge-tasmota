@@ -1,5 +1,5 @@
 import { Characteristic, CharacteristicProps, Formats, Perms, Service } from '@homebridge/hap-nodejs';
-import { jest } from '@jest/globals';
+import { vi } from 'vitest';
 import { tasmotaSensorService } from './tasmotaSensorService.js';
 
 const ENERGY_UNIQ_ID = '139827_ENERGY_TotalStartTime';
@@ -52,12 +52,12 @@ function makeEnergyDevice(overrides = {}) {
 
 function mockCharacteristic() {
   return {
-    on: jest.fn().mockReturnThis(),
-    listenerCount: jest.fn().mockReturnValue(0),
+    on: vi.fn().mockReturnThis(),
+    listenerCount: vi.fn().mockReturnValue(0),
     value: null,
-    updateValue: jest.fn(),
+    updateValue: vi.fn(),
     displayName: 'ConfiguredName',
-    setProps: jest.fn().mockReturnThis(),
+    setProps: vi.fn().mockReturnThis(),
   };
 }
 
@@ -65,9 +65,9 @@ function mockService(name: string) {
   const ch = mockCharacteristic();
   return {
     displayName: name,
-    getCharacteristic: jest.fn().mockReturnValue(ch),
-    addCharacteristic: jest.fn().mockReturnValue(ch),
-    setCharacteristic: jest.fn().mockReturnThis(),
+    getCharacteristic: vi.fn().mockReturnValue(ch),
+    addCharacteristic: vi.fn().mockReturnValue(ch),
+    setCharacteristic: vi.fn().mockReturnThis(),
     _mockCharacteristic: ch,
   };
 }
@@ -92,7 +92,7 @@ function makeEnergyPlatform() {
   return {
     api: {
       hap: {
-        uuid: { generate: jest.fn().mockReturnValue(`mock-uuid-${ENERGY_UNIQ_ID}`) },
+        uuid: { generate: vi.fn().mockReturnValue(`mock-uuid-${ENERGY_UNIQ_ID}`) },
       },
     },
     Service,
@@ -109,12 +109,12 @@ function makeEnergyPlatform() {
       AirPressure: makeCustomChar('E863F10F-079E-48FF-8F27-9C2605A29F52'),
       ElectricCurrent: makeCustomChar('E863F126-079E-48FF-8F27-9C2605A29F52'),
     },
-    deviceClassToHKService: jest.fn().mockReturnValue(undefined),
+    deviceClassToHKService: vi.fn().mockReturnValue(undefined),
     mqttHost: {
-      on: jest.fn(),
-      statusSubscribe: jest.fn(),
-      availabilitySubscribe: jest.fn(),
-      sendMessage: jest.fn(),
+      on: vi.fn(),
+      statusSubscribe: vi.fn(),
+      availabilitySubscribe: vi.fn(),
+      sendMessage: vi.fn(),
     },
     config: {
       platform: 'Tasmota',
@@ -128,16 +128,16 @@ function makeEnergyPlatform() {
       teleperiod: 300,
     },
     log: {
-      info: jest.fn(),
-      success: jest.fn(),
-      warn: jest.fn(),
-      error: jest.fn(),
-      debug: jest.fn(),
+      info: vi.fn(),
+      success: vi.fn(),
+      warn: vi.fn(),
+      error: vi.fn(),
+      debug: vi.fn(),
       prefix: 'Tasmota',
     },
-    FakeGatoHistoryService: jest.fn(),
+    FakeGatoHistoryService: vi.fn(),
     teleperiod: 300,
-    autoCleanup: jest.fn(),
+    autoCleanup: vi.fn(),
   };
 }
 
@@ -159,7 +159,7 @@ function makeEnergyAccessory(device = makeEnergyDevice()) {
     UUID: '26ab1bba-c216-426f-8bb0-692843834be2',
     category: 1,
     services,
-    getService: jest.fn((serviceType) => {
+    getService: vi.fn((serviceType) => {
       if (serviceType === Service.AccessoryInformation) {
         return accessoryInfoService;
       }
@@ -172,7 +172,7 @@ function makeEnergyAccessory(device = makeEnergyDevice()) {
       }
       return undefined;
     }),
-    addService: jest.fn((serviceType: ServiceConstructor | undefined, name: string, subtype: string) => {
+    addService: vi.fn((serviceType: ServiceConstructor | undefined, name: string, subtype: string) => {
       const svc = serviceType ? new serviceType(name ?? '', subtype ?? '') : energySensorService;
       services.push(svc);
       return svc;

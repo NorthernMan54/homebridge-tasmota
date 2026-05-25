@@ -1,24 +1,31 @@
-import { beforeAll, beforeEach, describe, expect, jest, test } from '@jest/globals';
+import { beforeAll, beforeEach, describe, expect, vi, test } from 'vitest';
 import { EventEmitter } from 'events';
-import { mockMqttEmitter } from './__mocks__/Mqtt.js';
 
 // --- Mocks ---
 
-jest.mock('fakegato-history', () => () => class FakeGato { });
+vi.mock('./lib/Mqtt.js', async () => {
+  const mod = await import('./__mocks__/Mqtt.js');
+  return mod;
+});
+
+vi.mock('fakegato-history', () => ({ default: () => class FakeGato { } }));
+
+// Must be after the mock declarations so the real mockMqttEmitter instance is used
+const { mockMqttEmitter } = await import('./__mocks__/Mqtt.js');
 
 // --- Helpers ---
 
 function makeMockAPI() {
   const api = new HomebridgeAPI();
-  jest.spyOn(api, 'registerPlatformAccessories');
-  jest.spyOn(api, 'unregisterPlatformAccessories');
-  jest.spyOn(api, 'updatePlatformAccessories');
+  vi.spyOn(api, 'registerPlatformAccessories');
+  vi.spyOn(api, 'unregisterPlatformAccessories');
+  vi.spyOn(api, 'updatePlatformAccessories');
   return api;
 }
 
 const mockLog: any = {
   info: (...args: any[]) => console.log('[INFO]', ...args),
-  warn: jest.fn((...args: any[]) => console.warn('[WARN]', ...args)),
+  warn: vi.fn((...args: any[]) => console.warn('[WARN]', ...args)),
   error: (...args: any[]) => console.error('[ERROR]', ...args),
   debug: (...args: any[]) => console.log('[DEBUG]', ...args),
 };
@@ -45,7 +52,7 @@ describe('Trailer Power', () => {
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('Registers Trailer Power Outlet', () => {
@@ -53,7 +60,7 @@ describe('Trailer Power', () => {
 
     expect(api.registerPlatformAccessories).toHaveBeenCalledTimes(1);
 
-    const mockCalls = (api.registerPlatformAccessories as jest.Mock).mock.calls[0] as [string, string, any[]];
+    const mockCalls = (api.registerPlatformAccessories as ReturnType<typeof vi.spyOn>).mock.calls[0] as [string, string, any[]];
     const registeredAccessory = mockCalls[2][0];
 
     expect(registeredAccessory.displayName).toBe('Trailer Power');
@@ -77,7 +84,7 @@ describe('Trailer Power', () => {
     expect(api.registerPlatformAccessories).not.toHaveBeenCalled();
     expect(api.updatePlatformAccessories).toHaveBeenCalled();
 
-    const updateCalls = (api.updatePlatformAccessories as jest.Mock).mock.calls[0] as [any[]];
+    const updateCalls = (api.updatePlatformAccessories as ReturnType<typeof vi.spyOn>).mock.calls[0] as [any[]];
     const updatedAccessory = updateCalls[0][0];
     expect(mockLog.warn).toHaveBeenCalledWith('Warning: missing dev_cla', 'Trailer Power ENERGY TotalStartTime');
 
@@ -100,7 +107,7 @@ describe('Trailer Power', () => {
     expect(api.registerPlatformAccessories).not.toHaveBeenCalled();
     expect(api.updatePlatformAccessories).toHaveBeenCalled();
 
-    const updateCalls = (api.updatePlatformAccessories as jest.Mock).mock.calls[0] as [any[]];
+    const updateCalls = (api.updatePlatformAccessories as ReturnType<typeof vi.spyOn>).mock.calls[0] as [any[]];
     const updatedAccessory = updateCalls[0][0];
 
     expect(updatedAccessory.displayName).toBe('Trailer Power');
@@ -134,7 +141,7 @@ describe('Trailer Power', () => {
     expect(api.registerPlatformAccessories).not.toHaveBeenCalled();
     expect(api.updatePlatformAccessories).toHaveBeenCalled();
 
-    const updateCalls = (api.updatePlatformAccessories as jest.Mock).mock.calls[0] as [any[]];
+    const updateCalls = (api.updatePlatformAccessories as ReturnType<typeof vi.spyOn>).mock.calls[0] as [any[]];
     const updatedAccessory = updateCalls[0][0];
 
     expect(updatedAccessory.displayName).toBe('Trailer Power');
@@ -159,7 +166,7 @@ describe('Trailer Power', () => {
     expect(api.registerPlatformAccessories).not.toHaveBeenCalled();
     expect(api.updatePlatformAccessories).toHaveBeenCalled();
 
-    const updateCalls = (api.updatePlatformAccessories as jest.Mock).mock.calls[0] as [any[]];
+    const updateCalls = (api.updatePlatformAccessories as ReturnType<typeof vi.spyOn>).mock.calls[0] as [any[]];
     const updatedAccessory = updateCalls[0][0];
 
     expect(updatedAccessory.displayName).toBe('Trailer Power');
@@ -179,7 +186,7 @@ describe('Trailer Power', () => {
     expect(api.registerPlatformAccessories).not.toHaveBeenCalled();
     expect(api.updatePlatformAccessories).toHaveBeenCalled();
 
-    const updateCalls = (api.updatePlatformAccessories as jest.Mock).mock.calls[0] as [any[]];
+    const updateCalls = (api.updatePlatformAccessories as ReturnType<typeof vi.spyOn>).mock.calls[0] as [any[]];
     const updatedAccessory = updateCalls[0][0];
 
     expect(updatedAccessory.displayName).toBe('Trailer Power');
@@ -199,7 +206,7 @@ describe('Trailer Power', () => {
     expect(api.registerPlatformAccessories).not.toHaveBeenCalled();
     expect(api.updatePlatformAccessories).toHaveBeenCalled();
 
-    const updateCalls = (api.updatePlatformAccessories as jest.Mock).mock.calls[0] as [any[]];
+    const updateCalls = (api.updatePlatformAccessories as ReturnType<typeof vi.spyOn>).mock.calls[0] as [any[]];
     const updatedAccessory = updateCalls[0][0];
 
     expect(updatedAccessory.displayName).toBe('Trailer Power');
@@ -241,7 +248,7 @@ describe('Garage Door', () => {
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('Registers Garage Door opener accessory', () => {
@@ -249,7 +256,7 @@ describe('Garage Door', () => {
 
     expect(api.registerPlatformAccessories).toHaveBeenCalledTimes(1);
 
-    const mockCalls = (api.registerPlatformAccessories as jest.Mock).mock.calls[0] as [string, string, any[]];
+    const mockCalls = (api.registerPlatformAccessories as ReturnType<typeof vi.spyOn>).mock.calls[0] as [string, string, any[]];
     const registeredAccessory = mockCalls[2][0];
 
     expect(registeredAccessory.displayName).toBe('Garage Door');
@@ -274,7 +281,7 @@ describe('Garage Door', () => {
     expect(api.registerPlatformAccessories).not.toHaveBeenCalled();
     expect(api.updatePlatformAccessories).toHaveBeenCalled();
 
-    const updateCalls = (api.updatePlatformAccessories as jest.Mock).mock.calls[0] as [any[]];
+    const updateCalls = (api.updatePlatformAccessories as ReturnType<typeof vi.spyOn>).mock.calls[0] as [any[]];
     const updatedAccessory = updateCalls[0][0];
 
     expect(updatedAccessory.displayName).toBe('Garage Door');
@@ -312,7 +319,7 @@ describe('Light', () => {
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('Registers Bunkie Upper light accessory with On and Brightness characteristics', () => {
@@ -320,7 +327,7 @@ describe('Light', () => {
 
     expect(api.registerPlatformAccessories).toHaveBeenCalledTimes(1);
 
-    const mockCalls = (api.registerPlatformAccessories as jest.Mock).mock.calls[0] as [string, string, any[]];
+    const mockCalls = (api.registerPlatformAccessories as ReturnType<typeof vi.spyOn>).mock.calls[0] as [string, string, any[]];
     const registeredAccessory = mockCalls[2][0];
 
     expect(registeredAccessory.displayName).toBe('Bunkie Upper');
@@ -347,7 +354,7 @@ describe('Light', () => {
     expect(api.registerPlatformAccessories).not.toHaveBeenCalled();
     expect(api.updatePlatformAccessories).toHaveBeenCalled();
 
-    const updateCalls = (api.updatePlatformAccessories as jest.Mock).mock.calls[0] as [any[]];
+    const updateCalls = (api.updatePlatformAccessories as ReturnType<typeof vi.spyOn>).mock.calls[0] as [any[]];
     const updatedAccessory = updateCalls[0][0];
 
     expect(updatedAccessory.displayName).toBe('Bunkie Upper');
@@ -385,7 +392,7 @@ describe('Doorbell with Temp Sensor', () => {
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('Registers Doorbell Button switch accessory', () => {
@@ -393,7 +400,7 @@ describe('Doorbell with Temp Sensor', () => {
 
     expect(api.registerPlatformAccessories).toHaveBeenCalledTimes(1);
 
-    const mockCalls = (api.registerPlatformAccessories as jest.Mock).mock.calls[0] as [string, string, any[]];
+    const mockCalls = (api.registerPlatformAccessories as ReturnType<typeof vi.spyOn>).mock.calls[0] as [string, string, any[]];
     const registeredAccessory = mockCalls[2][0];
 
     expect(registeredAccessory.displayName).toBe('Doorbell Button');
@@ -415,7 +422,7 @@ describe('Doorbell with Temp Sensor', () => {
     expect(api.registerPlatformAccessories).not.toHaveBeenCalled();
     expect(api.updatePlatformAccessories).toHaveBeenCalled();
 
-    const updateCalls = (api.updatePlatformAccessories as jest.Mock).mock.calls[0] as [any[]];
+    const updateCalls = (api.updatePlatformAccessories as ReturnType<typeof vi.spyOn>).mock.calls[0] as [any[]];
     const updatedAccessory = updateCalls[0][0];
 
     expect(updatedAccessory.displayName).toBe('Doorbell Button');
@@ -441,7 +448,7 @@ describe('Doorbell with Temp Sensor', () => {
     expect(api.registerPlatformAccessories).not.toHaveBeenCalled();
     expect(api.updatePlatformAccessories).toHaveBeenCalled();
 
-    const updateCalls = (api.updatePlatformAccessories as jest.Mock).mock.calls[0] as [any[]];
+    const updateCalls = (api.updatePlatformAccessories as ReturnType<typeof vi.spyOn>).mock.calls[0] as [any[]];
     const updatedAccessory = updateCalls[0][0];
 
     expect(updatedAccessory.displayName).toBe('Doorbell Button');
@@ -467,7 +474,7 @@ describe('Doorbell with Temp Sensor', () => {
     expect(api.registerPlatformAccessories).not.toHaveBeenCalled();
     expect(api.updatePlatformAccessories).toHaveBeenCalled();
 
-    const updateCalls = (api.updatePlatformAccessories as jest.Mock).mock.calls[0] as [any[]];
+    const updateCalls = (api.updatePlatformAccessories as ReturnType<typeof vi.spyOn>).mock.calls[0] as [any[]];
     const updatedAccessory = updateCalls[0][0];
 
     expect(updatedAccessory.displayName).toBe('Doorbell Button');
@@ -491,7 +498,7 @@ describe('Doorbell with Temp Sensor', () => {
     expect(api.registerPlatformAccessories).not.toHaveBeenCalled();
     expect(api.updatePlatformAccessories).toHaveBeenCalled();
 
-    const updateCalls = (api.updatePlatformAccessories as jest.Mock).mock.calls[0] as [any[]];
+    const updateCalls = (api.updatePlatformAccessories as ReturnType<typeof vi.spyOn>).mock.calls[0] as [any[]];
     const updatedAccessory = updateCalls[0][0];
 
     expect(updatedAccessory.displayName).toBe('Doorbell Button');
@@ -513,7 +520,7 @@ describe('Doorbell with Temp Sensor', () => {
     expect(api.registerPlatformAccessories).not.toHaveBeenCalled();
     expect(api.updatePlatformAccessories).toHaveBeenCalled();
 
-    const updateCalls = (api.updatePlatformAccessories as jest.Mock).mock.calls[0] as [any[]];
+    const updateCalls = (api.updatePlatformAccessories as ReturnType<typeof vi.spyOn>).mock.calls[0] as [any[]];
     const updatedAccessory = updateCalls[0][0];
 
     expect(updatedAccessory.displayName).toBe('Doorbell Button');
@@ -553,7 +560,7 @@ describe('Fan', () => {
   });
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   test('Registers West Bedroom Fan accessory with On and RotationSpeed characteristics', () => {
@@ -561,7 +568,7 @@ describe('Fan', () => {
 
     expect(api.registerPlatformAccessories).toHaveBeenCalledTimes(1);
 
-    const mockCalls = (api.registerPlatformAccessories as jest.Mock).mock.calls[0] as [string, string, any[]];
+    const mockCalls = (api.registerPlatformAccessories as ReturnType<typeof vi.spyOn>).mock.calls[0] as [string, string, any[]];
     const registeredAccessory = mockCalls[2][0];
 
     expect(registeredAccessory.displayName).toBe('West Bedroom Fan');
@@ -587,7 +594,7 @@ describe('Fan', () => {
     expect(api.registerPlatformAccessories).not.toHaveBeenCalled();
     expect(api.updatePlatformAccessories).toHaveBeenCalled();
 
-    const updateCalls = (api.updatePlatformAccessories as jest.Mock).mock.calls[0] as [any[]];
+    const updateCalls = (api.updatePlatformAccessories as ReturnType<typeof vi.spyOn>).mock.calls[0] as [any[]];
     const updatedAccessory = updateCalls[0][0];
 
     expect(updatedAccessory.displayName).toBe('West Bedroom Fan');
@@ -610,7 +617,7 @@ describe('Fan', () => {
     expect(api.registerPlatformAccessories).not.toHaveBeenCalled();
     expect(api.updatePlatformAccessories).toHaveBeenCalled();
 
-    const updateCalls = (api.updatePlatformAccessories as jest.Mock).mock.calls[0] as [any[]];
+    const updateCalls = (api.updatePlatformAccessories as ReturnType<typeof vi.spyOn>).mock.calls[0] as [any[]];
     const updatedAccessory = updateCalls[0][0];
 
     expect(updatedAccessory.context.identifier).toBe('302F1B');
@@ -628,7 +635,7 @@ describe('Fan', () => {
     expect(api.registerPlatformAccessories).not.toHaveBeenCalled();
     expect(api.updatePlatformAccessories).toHaveBeenCalled();
 
-    const updateCalls = (api.updatePlatformAccessories as jest.Mock).mock.calls[0] as [any[]];
+    const updateCalls = (api.updatePlatformAccessories as ReturnType<typeof vi.spyOn>).mock.calls[0] as [any[]];
     const updatedAccessory = updateCalls[0][0];
 
     expect(updatedAccessory.context.identifier).toBe('302F1B');
@@ -646,7 +653,7 @@ describe('Fan', () => {
     expect(api.registerPlatformAccessories).not.toHaveBeenCalled();
     expect(api.updatePlatformAccessories).toHaveBeenCalled();
 
-    const updateCalls = (api.updatePlatformAccessories as jest.Mock).mock.calls[0] as [any[]];
+    const updateCalls = (api.updatePlatformAccessories as ReturnType<typeof vi.spyOn>).mock.calls[0] as [any[]];
     const updatedAccessory = updateCalls[0][0];
 
     expect(updatedAccessory.displayName).toBe('West Bedroom Fan');
