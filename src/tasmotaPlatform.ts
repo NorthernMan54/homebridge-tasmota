@@ -3,6 +3,7 @@ import fakegato from 'fakegato-history';
 import {
   API,
   Characteristic,
+  CharacteristicSetCallback,
   DynamicPlatformPlugin,
   Logger,
   PlatformAccessory,
@@ -426,12 +427,12 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
             this.log.warn('Warning: Missing accessory friendly name', topic, config.name);
           }
 
-          //          if (this.services[uniq_id] && this.services[uniq_id].service &&
-          // this.services[uniq_id].service.getCharacteristic(this.Characteristic.ConfiguredName).listenerCount('set') < 1) {
-          //            (this.services[uniq_id].service.getCharacteristic(this.Characteristic.ConfiguredName)
-          //              || this.services[uniq_id].service.addCharacteristic(this.Characteristic.ConfiguredName))
-          //              .on('set', setConfiguredName.bind(this.services[uniq_id]));
-          //          }
+          if (this.services[uniq_id] && this.services[uniq_id].service &&
+            this.services[uniq_id].service.getCharacteristic(this.Characteristic.ConfiguredName).listenerCount('set') < 1) {
+            (this.services[uniq_id].service.getCharacteristic(this.Characteristic.ConfiguredName)
+              || this.services[uniq_id].service.addCharacteristic(this.Characteristic.ConfiguredName))
+              .on('set', setConfiguredName.bind(this.services[uniq_id]));
+          }
         } else {
           this.log.warn('Warning: Malformed HASS Discovery message', topic, config.name);
         }
@@ -585,4 +586,16 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
       this.accessoryCleanup(accessory);
     });
   }
+}
+
+
+function setConfiguredName(this: tasmotaSwitchService | tasmotaGarageService | tasmotaLightService | tasmotaFanService | tasmotaSensorService | tasmotaBinarySensorService, value: any, callback: CharacteristicSetCallback) {
+  debug('this', this.service?.displayName);
+  this.platform.log.debug('setConfiguredName', value, this.service?.displayName);
+  if (this.service) {
+    this.service.displayName = value;
+    this.service.setCharacteristic(this.platform.Characteristic.Name, this.service.displayName);
+    this.platform.api.updatePlatformAccessories([this.accessory]);
+  }
+  callback();
 }

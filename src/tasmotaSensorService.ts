@@ -137,7 +137,7 @@ export class tasmotaSensorService extends TasmotaService {
             if (!this.service.getCharacteristic(this.platform.Characteristic.OutletInUse)) {
               this.service?.addCharacteristic(this.platform.Characteristic.OutletInUse);
             }
-            //  this.service?.setCharacteristic(this.platform.Characteristic.ConfiguredName, accessory.context.device[this.uniq_id].name);
+            this.service?.setCharacteristic(this.platform.Characteristic.ConfiguredName, accessory.context.device[this.uniq_id].name);
             // this.characteristic = this.service?.getCharacteristic(this.platform.CustomTypes.ResetTotal);
             break;
           case '_energy_voltage': // Voltage
@@ -152,7 +152,7 @@ export class tasmotaSensorService extends TasmotaService {
 
             this.characteristic
               = this.service?.getCharacteristic(this.deviceClassToHKCharacteristic(this.uniq_id.replace(accessory.context.identifier, '').toLowerCase()));
-            // this.service?.setCharacteristic(this.platform.Characteristic.ConfiguredName, accessory.context.device[this.uniq_id].name);
+            this.service?.setCharacteristic(this.platform.Characteristic.ConfiguredName, accessory.context.device[this.uniq_id].name);
             break;
           default:
             this.platform.log.warn('Warning: Unhandled Tasmota power sensor type', this.uniq_id.replace(accessory.context.identifier, '').toLowerCase());
