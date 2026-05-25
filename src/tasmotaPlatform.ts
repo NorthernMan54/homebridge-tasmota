@@ -37,16 +37,6 @@ interface DiscoveryTopicMap {
   uuid: string
 }
 
-interface Injection {
-  key: string
-  value: any
-}
-
-interface Injections {
-  topic: string
-  injection: Injection[]
-}
-
 type TasmotaService =
   tasmotaGarageService |
   tasmotaSwitchService |
@@ -115,20 +105,6 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
       }
       // this.log("DEBUG-2", namespaces);
       createDebug.enable(namespaces);
-    }
-
-    if (this.config.override) {
-      const injections: Injections[] = [];
-      Object.keys(this.config.override).forEach((topic) => {
-        const inject: Injection[] = [];
-        Object.entries(this.config.override[topic]).forEach(
-          ([key, value]) => {
-            const injection: Injection = { key, value };
-            inject.push(injection);
-          },
-        );
-        injections.push({ topic, injection: inject });
-      });
     }
 
     // When this event is fired it means Homebridge has restored all cached accessories from disk.

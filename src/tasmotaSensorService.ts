@@ -164,26 +164,22 @@ export class tasmotaSensorService extends TasmotaService {
     this.accessory.context.timeout = this.platform.autoCleanup(this.accessory);
 
     try {
-      let value: number = Number(this.parseValue(this.accessory.context.device[this.uniq_id].val_tpl, message.toString()));
-
-      if (value === null) {
-        debug('statusUpdate skipping, not for', this.service?.displayName);
-        return;
-      }
+      const value: number = Number(this.parseValue(this.accessory.context.device[this.uniq_id].val_tpl, message.toString()));
 
       // Sensor value tweaks or adjustments needed for homekit
 
+      let adjustedValue: number = value;
       switch (this.device_class) {
         case 'temperature':
           if (this.accessory.context.device[this.uniq_id].unit_of_meas.toUpperCase() === '°F') {
-            value = Math.round((Number(value) - 32) * 5 / 9 * 10) / 10;
+            adjustedValue = Math.round((value - 32) * 5 / 9 * 10) / 10;
           } else {
-            value = Math.round(Number(value) * 10) / 10;
+            adjustedValue = Math.round(value * 10) / 10;
           }
           break;
         case 'illuminance':
           // normalize LX in the range homebridge expects
-          value = (value < 0.0001 ? 0.0001 : (value > 100000 ? 100000 : value));
+          adjustedValue = (value < 0.0001 ? 0.0001 : (value > 100000 ? 100000 : value));
           break;
         case 'co2':
           if (value > 1200) {
@@ -196,19 +192,17 @@ export class tasmotaSensorService extends TasmotaService {
           break;
       }
 
-      if (value !== null || typeof value !== 'undefined') {
-        if (this.characteristic?.value !== value && this.delta(this.characteristic?.value, value)) {
-          this.platform.log.info('Updating \'%s:%s\' to %s', this.service?.displayName, this.characteristic?.displayName ?? '', value);
-        } else {
-          this.platform.log.debug('Updating \'%s:%s\' to %s', this.service?.displayName, this.characteristic?.displayName ?? '', value);
-        }
-
-        if (this.outletInUse && this.service?.getCharacteristic(this.platform.Characteristic.OutletInUse)) {
-          this.service?.setCharacteristic(this.platform.Characteristic.OutletInUse, value > 0);
-        }
-
-        this.characteristic?.updateValue(value);
+      if (this.characteristic?.value !== adjustedValue && this.delta(this.characteristic?.value, adjustedValue)) {
+        this.platform.log.info('Updating \'%s:%s\' to %s', this.service?.displayName, this.characteristic?.displayName ?? '', adjustedValue);
+      } else {
+        this.platform.log.debug('Updating \'%s:%s\' to %s', this.service?.displayName, this.characteristic?.displayName ?? '', adjustedValue);
       }
+
+      if (this.outletInUse && this.service?.getCharacteristic(this.platform.Characteristic.OutletInUse)) {
+        this.service?.setCharacteristic(this.platform.Characteristic.OutletInUse, adjustedValue > 0);
+      }
+
+      this.characteristic?.updateValue(adjustedValue);
 
       // debug('fakegato', this.platform.config.history, this.fakegato, this.device_class);
       if (this.platform.config.history && this.fakegato) {
@@ -217,7 +211,7 @@ export class tasmotaSensorService extends TasmotaService {
           switch (that.device_class) {
             case 'temperature':
               debug('Updating fakegato \'%s:%s\'', that.service?.displayName, that.characteristic?.displayName, {
-                temp: value,
+                temp: adjustedValue,
                 pressure: that.accessory.getService(this.platform.CustomServices.AirPressureSensor)
                   ?.getCharacteristic(this.platform.CustomCharacteristics.AirPressure)
                   .value ?? 0,
@@ -227,7 +221,7 @@ export class tasmotaSensorService extends TasmotaService {
               });
 
               that.accessory.context.fakegatoService.appendData({
-                temp: value,
+                temp: adjustedValue,
                 pressure: that.accessory.getService(this.platform.CustomServices.AirPressureSensor)
                   ?.getCharacteristic(this.platform.CustomCharacteristics.AirPressure)
                   .value ?? 0,
@@ -238,10 +232,10 @@ export class tasmotaSensorService extends TasmotaService {
               break;
             case 'power':
               debug('Updating fakegato \'%s:%s\'', that.characteristic?.displayName, that.service?.displayName, {
-                power: +value,
+                power: +adjustedValue,
               });
               that.accessory.context.fakegatoService.appendData({
-                power: +value,
+                power: +adjustedValue,
               });
               break;
             case undefined:
