@@ -26,7 +26,9 @@ export function renameKeys<T extends Record<string, any>>(
   let result: any;
 
   if (Array.isArray(obj)) {
-    result = obj.map((item) => renameKeys(item, mapShortToLong));
+    result = obj.map((item) =>
+      item && typeof item === 'object' ? renameKeys(item, mapShortToLong) : item,
+    );
   } else {
 
     result = {} as Record<string, any>;
@@ -38,13 +40,12 @@ export function renameKeys<T extends Record<string, any>>(
         // Get the value
         const value = obj[key];
 
-        // Recursively handle nested objects or arrays
+        // Recursively handle nested plain objects or arrays, and assign the renamed result
         if (value && typeof value === 'object') {
-          renameKeys(value, mapShortToLong);
+          result[destKey] = renameKeys(value, mapShortToLong);
+        } else {
+          result[destKey] = value;
         }
-
-        // Assign the value to the new key
-        result[destKey] = value;
       }
     }
   }

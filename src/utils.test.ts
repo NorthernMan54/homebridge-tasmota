@@ -95,6 +95,30 @@ describe('normalizeMessage', () => {
 
   // Add more tests for other scenarios...
 
+  test('should rename nested device keys (device -> dev, identifiers -> ids)', () => {
+    const message = {
+      unique_id: 'ABC123_switch',
+      name: 'My Switch',
+      state_topic: 'tele/tasmota/STATE',
+      device: {
+        identifiers: ['ABC123'],
+        model: 'Tasmota Switch',
+        manufacturer: 'Tasmota',
+        sw_version: '9.5.0',
+      },
+    };
+
+    const normalizedMessage = normalizeMessage(message);
+
+    expect(normalizedMessage.uniq_id).toBe('ABC123_switch');
+    expect(normalizedMessage.stat_t).toBe('tele/tasmota/STATE');
+    expect(normalizedMessage.dev).toBeDefined();
+    expect(normalizedMessage.dev.ids).toEqual(['ABC123']);
+    expect(normalizedMessage.dev.mdl).toBe('Tasmota Switch');
+    expect(normalizedMessage.dev.mf).toBe('Tasmota');
+    expect(normalizedMessage.dev.sw).toBe('9.5.0');
+  });
+
 });
 describe('renameKeys', () => {
   test('should rename keys in a single object', () => {
@@ -173,6 +197,38 @@ describe('renameKeys', () => {
     const renamedArr = renameKeys(arr, mapShortToLong);
 
     expect(renamedArr).toEqual(expectedArr);
+  });
+
+  test('should recursively rename keys in nested objects', () => {
+    const obj = {
+      unique_id: '123',
+      device: {
+        identifiers: ['ABC123'],
+        model: 'SwitchModel',
+        manufacturer: 'Tasmota',
+      },
+    };
+
+    const mapShortToLong = {
+      unique_id: 'uniq_id',
+      device: 'dev',
+      identifiers: 'ids',
+      model: 'mdl',
+      manufacturer: 'mf',
+    };
+
+    const expectedObj = {
+      uniq_id: '123',
+      dev: {
+        ids: ['ABC123'],
+        mdl: 'SwitchModel',
+        mf: 'Tasmota',
+      },
+    };
+
+    const renamedObj = renameKeys(obj, mapShortToLong);
+
+    expect(renamedObj).toEqual(expectedObj);
   });
 
   // Add more tests for other scenarios...

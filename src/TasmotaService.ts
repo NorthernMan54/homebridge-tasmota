@@ -121,7 +121,7 @@ export class TasmotaService {
     // Get current status for accessory/service on startup
     // Wild cards in topic break this
 
-    if (this.accessory.context.device[this.uniq_id].stat_t && !this.accessory.context.device[this.uniq_id].stat_t.match('/\+|#/g')) {
+    if (this.accessory.context.device[this.uniq_id].stat_t && !this.accessory.context.device[this.uniq_id].stat_t.match(/[+#]/)) {
       const statTopic: string = this.accessory.context.device[this.uniq_id].stat_t;
       const teleperiod = `${statTopic.substring(0, statTopic.lastIndexOf('/') + 1).replace('tele', 'cmnd')}teleperiod`;
       this.platform.mqttHost.sendMessage(teleperiod, this.platform.teleperiod.toString());
