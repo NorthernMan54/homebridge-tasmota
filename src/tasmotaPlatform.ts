@@ -588,7 +588,7 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
 
   // Leveraged by Binary Sensor and Sensor services to map Tasmota device classes to HomeKit services and characteristics
 
-  deviceClassToHKService(device_class: string): typeof Service {
+  deviceClassToHKService(device_class: string): typeof Service|undefined {
     switch (device_class) {
       // Sensor Service device class mappings
       case 'temperature':
@@ -617,8 +617,8 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
       case 'moisture':
         return (this.Service.LeakSensor);
       default:
-        this.log.error('Error: Unsupported device class "%s", using generic Sensor service', device_class);
-        return (this.Service.ContactSensor);
+        this.log.error(`deviceClassToHKService - Unsupported device class "${device_class}"`);
+        return (undefined);
     }
   }
 }

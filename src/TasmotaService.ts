@@ -70,6 +70,9 @@ export class TasmotaService {
 
     this.service = this.accessory.getService(this.uuid);
 
+    console.log('---------------------------------------------------------------');
+    console.log('Service Type', serviceType);
+    console.log('---------------------------------------------------------------');
     if (this.service === undefined && serviceType) {
       this.service = this.accessory.addService(serviceType, accessory.context.device[this.uniq_id].name, this.uuid);
     }
