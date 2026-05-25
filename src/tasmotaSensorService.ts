@@ -20,15 +20,15 @@ export class tasmotaSensorService extends TasmotaService {
     protected readonly outletInUse: boolean = false,
   ) {
     // TODO: Determine service type based on device class or other context
+    if (!accessory.context.device[uniq_id].dev_cla
+      && platform.findDeviceClass(accessory.context.device[uniq_id].unit_of_meas, accessory.context.device[uniq_id].ic)) {
+      accessory.context.device[uniq_id].dev_cla
+        = platform.findDeviceClass(accessory.context.device[uniq_id].unit_of_meas, accessory.context.device[uniq_id].ic);
+    }
+
     super(platform, accessory, uniq_id, platform.deviceClassToHKService(accessory.context.device[uniq_id].dev_cla));
 
     let hostname;
-
-    if (!accessory.context.device[this.uniq_id].dev_cla
-      && this.findDeviceClass(this.accessory.context.device[this.uniq_id].unit_of_meas, this.accessory.context.device[this.uniq_id].ic)) {
-      accessory.context.device[this.uniq_id].dev_cla
-        = this.findDeviceClass(this.accessory.context.device[this.uniq_id].unit_of_meas, this.accessory.context.device[this.uniq_id].ic);
-    }
 
     this.platform.log.debug('Creating %s sensor %s', this.device_class, accessory.context.device[this.uniq_id].name);
 
@@ -244,30 +244,6 @@ export class tasmotaSensorService extends TasmotaService {
     } catch (err: unknown) {
       this.platform.log.error('ERROR: Message Parse Error', topic, message.toString());
       this.platform.log.debug(String((err && (err as Error).message ? (err as Error).message : err)));
-    }
-  }
-
-  findDeviceClass(unit_of_meas: string, icon: string): string | undefined {
-    // Used by ESPHome devices to create appropriate device
-    // ICON check is for the default Tasmota device using RSSI as a %
-    switch (unit_of_meas) {
-      case '%':
-        switch (icon) {
-          case 'mdi:gauge':
-            return 'humidity';
-            break;
-          default:
-            return undefined;
-        }
-      case '°F':
-      case '°C':
-        return 'temperature';
-        break;
-      case 'hPa':
-        return 'pressure';
-        break;
-      default:
-        return undefined;
     }
   }
 }

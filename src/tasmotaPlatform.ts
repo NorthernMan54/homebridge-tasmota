@@ -621,4 +621,29 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
         return (undefined);
     }
   }
+
+
+  findDeviceClass(unit_of_meas: string, icon: string): string | undefined {
+    // Used by ESPHome devices to create appropriate device
+    // ICON check is for the default Tasmota device using RSSI as a %
+    switch (unit_of_meas) {
+      case '%':
+        switch (icon) {
+          case 'mdi:gauge':
+            return 'humidity';
+            break;
+          default:
+            return undefined;
+        }
+      case '°F':
+      case '°C':
+        return 'temperature';
+        break;
+      case 'hPa':
+        return 'pressure';
+        break;
+      default:
+        return undefined;
+    }
+  }
 }
