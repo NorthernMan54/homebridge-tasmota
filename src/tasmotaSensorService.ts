@@ -97,7 +97,10 @@ export class tasmotaSensorService extends TasmotaService {
             if (!this.service.getCharacteristic(this.platform.Characteristic.OutletInUse)) {
               this.service?.addCharacteristic(this.platform.Characteristic.OutletInUse);
             }
-            this.service?.setCharacteristic(this.platform.Characteristic.ConfiguredName, deviceConfig.name);
+            if (!this.service?.getCharacteristic(this.platform.Characteristic.ConfiguredName)) {
+              this.service?.setCharacteristic(this.platform.Characteristic.ConfiguredName, accessory.context.device[this.uniq_id].name);
+              // this.characteristic = this.service?.getCharacteristic(this.platform.CustomTypes.ResetTotal);
+            }
             break;
           case '_energy_voltage': // Voltage
           case '_energy_current': // Amps
@@ -108,8 +111,11 @@ export class tasmotaSensorService extends TasmotaService {
             this.service = this.accessory.getService(this.platform.Service.Outlet)
               || this.accessory.addService(this.platform.Service.Outlet, deviceConfig.name, this.uuid);
 
-            this.characteristic = this.service?.getCharacteristic(this.deviceClassToHKCharacteristic(suffix));
-            this.service?.setCharacteristic(this.platform.Characteristic.ConfiguredName, deviceConfig.name);
+            this.characteristic
+              = this.service?.getCharacteristic(this.deviceClassToHKCharacteristic(this.uniq_id.replace(accessory.context.identifier, '').toLowerCase()));
+            if (!this.service?.getCharacteristic(this.platform.Characteristic.ConfiguredName)) {
+              this.service?.setCharacteristic(this.platform.Characteristic.ConfiguredName, accessory.context.device[this.uniq_id].name);
+            }
             break;
           default:
             this.platform.log.warn('Warning: Unhandled Tasmota power sensor type', suffix);
@@ -125,11 +131,15 @@ export class tasmotaSensorService extends TasmotaService {
           this.platform.log.debug('Setting accessory information', deviceConfig.name);
           if (deviceConfig.dev.mf && deviceConfig.dev.mdl && deviceConfig.dev.sw) {
             this.accessory.getService(this.platform.Service.AccessoryInformation)!
-              .setCharacteristic(this.platform.Characteristic.Name, deviceConfig.dev.name)
-              .setCharacteristic(this.platform.Characteristic.Manufacturer, (deviceConfig.dev.mf ?? 'undefined').replace(/[^-\w ]/g, ''))
-              .setCharacteristic(this.platform.Characteristic.Model, (deviceConfig.dev.mdl ?? 'undefined').replace(/[^-\w ]/g, ''))
-              .setCharacteristic(this.platform.Characteristic.FirmwareRevision, (deviceConfig.dev.sw ?? 'undefined').replace(/[^-\w. ]/g, ''))
-              .setCharacteristic(this.platform.Characteristic.SerialNumber, `${deviceConfig.dev.ids[0]}-${hostname}`); // A unique fakegato ID
+              .setCharacteristic(this.platform.Characteristic.Name, accessory.context.device[this.uniq_id].dev.name)
+              .setCharacteristic(this.platform.Characteristic.Manufacturer, (accessory.context.device[this.uniq_id].dev.mf
+                ?? 'undefined').replace(/[^-\w ]/g, ''))
+              .setCharacteristic(this.platform.Characteristic.Model, (accessory.context.device[this.uniq_id].dev.mdl
+                ?? 'undefined').replace(/[^-\w ]/g, ''))
+              .setCharacteristic(this.platform.Characteristic.FirmwareRevision, (accessory.context.device[this.uniq_id].dev.sw
+                ?? 'undefined').replace(/[^-\w. ]/g, ''))
+              .setCharacteristic(this.platform.Characteristic.SerialNumber, `${accessory.context.device[this.uniq_id].dev.ids[0]
+                }-${hostname}`); // A unique fakegato ID
           }
         } else {
           this.platform.log.warn('Warning: missing dev_cla', deviceConfig.name);
