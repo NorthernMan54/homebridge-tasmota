@@ -54,6 +54,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",
+    "@swc/core": "^1.15.40",
     "@types/debug": "^4.1.12",
     "@types/node": "^24.10.1",
     "@types/nunjucks": "^3.2.6",
@@ -69,6 +70,7 @@
     "rimraf": "^6.1.2",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.3",
+    "unplugin-swc": "^1.5.9",
     "vitest": "^4.1.7"
   },
   "homepage": "https://github.com/NorthernMan54/homebridge-tasmota#readme"

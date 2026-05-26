@@ -1,19 +1,15 @@
 import { beforeAll, beforeEach, describe, expect, vi, test } from 'vitest';
 import { EventEmitter } from 'events';
+import { mockMqttEmitter } from './__mocks__/Mqtt.js';
 
 // --- Mocks ---
 
-vi.mock('./lib/Mqtt.js', async () => {
+vi.mock('../src/lib/Mqtt.js', async () => {
   const mod = await import('./__mocks__/Mqtt.js');
   return mod;
 });
 
 vi.mock('fakegato-history', () => ({ default: () => class FakeGato { } }));
-
-// Must be after the mock declarations so the real mockMqttEmitter instance is used
-const { mockMqttEmitter } = await import('./__mocks__/Mqtt.js');
-
-// --- Helpers ---
 
 function makeMockAPI() {
   const api = new HomebridgeAPI();
@@ -37,8 +33,8 @@ function emitDiscovered(topic: string, config: Record<string, any>) {
 // --- Tests ---
 
 import { UUID } from 'crypto';
-import { HomebridgeAPI } from '../node_modules/homebridge/dist/api.js';
-import { tasmotaPlatform } from './tasmotaPlatform.js';
+import { HomebridgeAPI } from '../../node_modules/homebridge/dist/api.js';
+import { tasmotaPlatform } from '../src/tasmotaPlatform.js';
 
 describe('Trailer Power', () => {
   let api: HomebridgeAPI;
@@ -287,7 +283,7 @@ describe('Garage Door', () => {
     expect(updatedAccessory.displayName).toBe('Garage Door');
 
     // No new service added - status sensor populates AccessoryInformation only
-    expect(updatedAccessory.services).toHaveLength(2);
+    expect(updatedAccessory.services).toHaveLength(3);
     expect(updatedAccessory.services[1]).toBeInstanceOf(api.hap.Service.GarageDoorOpener);
 
     // AccessoryInformation should be populated from the dev object

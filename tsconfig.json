@@ -1,31 +1,21 @@
 {
   "compilerOptions": {
-    "target": "ES2022",
-    "lib": [
-      "DOM",
-      "ES2022"
-    ],
-    "rootDir": "src",
+    "target": "esnext",
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
     "module": "nodenext",
     "moduleResolution": "nodenext",
-    "strict": true,
+    "strict": false,
     "declaration": true,
-    "outDir": "dist",
+    "outDir": "./dist",
+    "removeComments": true,
     "sourceMap": true,
-    "allowSyntheticDefaultImports": true,
-    "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true,
-    "skipLibCheck": true,
-    "types": [
-      "jest"
-    ]
+    "esModuleInterop": true
   },
-  "include": [
-    "eslint.config.js",
-    "src"
-  ],
   "exclude": [
-    "src/**/*.test.ts",
-    "src/__mocks__"
+    "node_modules",
+    "./dist",
+    "ui",
+    "public"
   ]
 }
