@@ -6,8 +6,8 @@ export default defineConfig({
     globals: true,
     // environment: 'node',
     // reporters: ['verbose'],
-     fileParallelism: false,
-    include: ['test/**/*.test.ts'],
+    fileParallelism: false,
+    include: ['src/**/*.test.ts'],
   },
   plugins: [
     swc.vite({

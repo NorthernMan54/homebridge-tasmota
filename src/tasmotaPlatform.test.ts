@@ -1,5 +1,5 @@
-import { beforeAll, beforeEach, describe, expect, vi, test } from 'vitest';
 import { EventEmitter } from 'events';
+import { beforeAll, beforeEach, describe, expect, test, vi } from 'vitest';
 import { mockMqttEmitter } from './__mocks__/Mqtt.js';
 
 // --- Mocks ---
@@ -33,8 +33,8 @@ function emitDiscovered(topic: string, config: Record<string, any>) {
 // --- Tests ---
 
 import { UUID } from 'crypto';
-import { HomebridgeAPI } from '../../node_modules/homebridge/dist/api.js';
-import { tasmotaPlatform } from '../src/tasmotaPlatform.js';
+import { HomebridgeAPI } from '../node_modules/homebridge/dist/api.js';
+import { tasmotaPlatform } from './tasmotaPlatform.js';
 
 describe('Trailer Power', () => {
   let api: HomebridgeAPI;
