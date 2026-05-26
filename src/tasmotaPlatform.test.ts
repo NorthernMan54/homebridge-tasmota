@@ -283,7 +283,7 @@ describe('Garage Door', () => {
     expect(updatedAccessory.displayName).toBe('Garage Door');
 
     // No new service added - status sensor populates AccessoryInformation only
-    expect(updatedAccessory.services).toHaveLength(3);
+    expect(updatedAccessory.services).toHaveLength(2);
     expect(updatedAccessory.services[1]).toBeInstanceOf(api.hap.Service.GarageDoorOpener);
 
     // AccessoryInformation should be populated from the dev object
