@@ -1,6 +1,10 @@
 import { EventEmitter } from 'events';
 import { beforeAll, beforeEach, describe, expect, test, vi } from 'vitest';
 import { mockMqttEmitter } from './__mocks__/Mqtt.js';
+import { makeMockAPI, mockLog } from './__mocks__/mocks.js';
+import { UUID } from 'crypto';
+import { HomebridgeAPI } from '../node_modules/homebridge/dist/api.js';
+import { tasmotaPlatform } from './tasmotaPlatform.js';
 
 // --- Mocks ---
 
@@ -11,30 +15,11 @@ vi.mock('../src/lib/Mqtt.js', async () => {
 
 vi.mock('fakegato-history', () => ({ default: () => class FakeGato { } }));
 
-function makeMockAPI() {
-  const api = new HomebridgeAPI();
-  vi.spyOn(api, 'registerPlatformAccessories');
-  vi.spyOn(api, 'unregisterPlatformAccessories');
-  vi.spyOn(api, 'updatePlatformAccessories');
-  return api;
-}
-
-const mockLog: any = {
-  info: (...args: any[]) => console.log('[INFO]', ...args),
-  warn: vi.fn((...args: any[]) => console.warn('[WARN]', ...args)),
-  error: (...args: any[]) => console.error('[ERROR]', ...args),
-  debug: (...args: any[]) => console.log('[DEBUG]', ...args),
-};
-
 function emitDiscovered(topic: string, config: Record<string, any>) {
   (mockMqttEmitter as EventEmitter).emit('Discovered', topic, config);
 }
 
 // --- Tests ---
-
-import { UUID } from 'crypto';
-import { HomebridgeAPI } from '../node_modules/homebridge/dist/api.js';
-import { tasmotaPlatform } from './tasmotaPlatform.js';
 
 describe('Trailer Power', () => {
   let api: HomebridgeAPI;

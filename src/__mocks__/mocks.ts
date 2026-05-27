@@ -1,6 +1,22 @@
 import { vi } from 'vitest';
+import { HomebridgeAPI } from '../../node_modules/homebridge/dist/api.js';
 
 export const UNIQ_ID = 'sensor_test';
+
+export function makeMockAPI() {
+  const api = new HomebridgeAPI();
+  vi.spyOn(api, 'registerPlatformAccessories');
+  vi.spyOn(api, 'unregisterPlatformAccessories');
+  vi.spyOn(api, 'updatePlatformAccessories');
+  return api;
+}
+
+export const mockLog: any = {
+  info: (...args: any[]) => console.log('[INFO]', ...args),
+  warn: vi.fn((...args: any[]) => console.warn('[WARN]', ...args)),
+  error: (...args: any[]) => console.error('[ERROR]', ...args),
+  debug: (...args: any[]) => console.log('[DEBUG]', ...args),
+};
 
 export function makeDevice(overrides = {}) {
   return {
