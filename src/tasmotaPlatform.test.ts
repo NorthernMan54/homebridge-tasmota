@@ -1,7 +1,7 @@
 import { UUID } from 'crypto';
 import { EventEmitter } from 'events';
 import { beforeAll, beforeEach, describe, expect, test, vi } from 'vitest';
-import { HomebridgeAPI } from '../node_modules/homebridge/dist/api.js';
+import { HomebridgeAPI } from 'homebridge';
 import { mockMqttEmitter } from './__mocks__/Mqtt.js';
 import { makeMockAPI, mockLog } from './__mocks__/mocks.js';
 import { tasmotaPlatform } from './tasmotaPlatform.js';
