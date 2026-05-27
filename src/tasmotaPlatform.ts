@@ -487,8 +487,7 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
 
 
 function setConfiguredName(this: tasmotaSwitchService | tasmotaGarageService | tasmotaLightService | tasmotaFanService | tasmotaSensorService | tasmotaBinarySensorService, value: any, callback: CharacteristicSetCallback) {
-  debug('setConfiguredName', this.service?.displayName);
-  this.platform.log.debug('setConfiguredName', value, this.service?.displayName);
+  this.platform.log.debug(`setConfiguredName for Service %sto %s`, this.service?.displayName, value);
   if (this.service) {
     this.service.displayName = value;
     this.service.setCharacteristic(this.platform.Characteristic.Name, this.service.displayName);
