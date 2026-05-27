@@ -273,9 +273,12 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
               this.discoveryTopicMap[topic] = { topic, type: topicType, uniq_id, uuid };
             } else if (message.name) {
               this.log.info('Creating service:', message.name, message.tasmotaType);
-              this.services[uniq_id] = this.createService(message.tasmotaType, existingAccessory, uniq_id);
-              const topicType = message.tasmotaType === 'sensor' && !message.dev_cla ? 'Accessory' : 'Service';
-              this.discoveryTopicMap[topic] = { topic, type: topicType, uniq_id, uuid };
+              const service = this.createService(message.tasmotaType, existingAccessory, uniq_id);
+              if (service) {
+                this.services[uniq_id] = service;
+                const topicType = message.tasmotaType === 'sensor' && !message.dev_cla ? 'Accessory' : 'Service';
+                this.discoveryTopicMap[topic] = { topic, type: topicType, uniq_id, uuid };
+              }
             } else {
               this.log.warn('Warning: missing friendly name for topic ', topic);
             }
@@ -294,15 +297,18 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
             accessory.context.device[uniq_id] = message;
             accessory.context.identifier = identifier;
 
-            this.services[uniq_id] = this.createService(message.tasmotaType, accessory, uniq_id);
-            const topicType = message.tasmotaType === 'sensor' && !message.dev_cla ? 'Accessory' : 'Service';
-            this.discoveryTopicMap[topic] = { topic, type: topicType, uniq_id, uuid };
+            const service = this.createService(message.tasmotaType, accessory, uniq_id);
+            if (service) {
+              this.services[uniq_id] = service;
+              const topicType = message.tasmotaType === 'sensor' && !message.dev_cla ? 'Accessory' : 'Service';
+              this.discoveryTopicMap[topic] = { topic, type: topicType, uniq_id, uuid };
+            }
 
             debug('discovery devices - this.api.registerPlatformAccessories - %d', accessory.services.length);
-            if (accessory.services.length > 1) {
+            if (service && accessory.services.length > 1) {
               this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
               this.accessories.push(accessory);
-            } else {
+            } else if (service) {
               this.log.warn('Warning: incomplete HASS Discovery message and device definition', topic, config.name);
             }
           } else {
@@ -324,7 +330,7 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
     });
   }
 
-  private createService(tasmotaType: string | undefined, accessory: PlatformAccessory, uniq_id: string): TasmotaService {
+  private createService(tasmotaType: string | undefined, accessory: PlatformAccessory, uniq_id: string): TasmotaService | undefined {
     switch (tasmotaType) {
       case 'switch':
         return new tasmotaSwitchService(this, accessory, uniq_id);
@@ -341,7 +347,7 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
         return new tasmotaBinarySensorService(this, accessory, uniq_id);
       default:
         this.log.warn('Warning: Unhandled Tasmota device type', tasmotaType);
-        return new tasmotaSensorService(this, accessory, uniq_id);
+        return undefined;
     }
   }
 
