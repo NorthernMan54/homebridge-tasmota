@@ -1,3 +1,4 @@
+import { describe, expect, test } from 'vitest';
 import { findVal, normalizeMessage, renameKeys, replaceStringsInObject } from './utils.js';
 
 describe('normalizeMessage', () => {

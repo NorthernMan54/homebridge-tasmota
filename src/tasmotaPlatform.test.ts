@@ -1,9 +1,9 @@
+import { UUID } from 'crypto';
 import { EventEmitter } from 'events';
 import { beforeAll, beforeEach, describe, expect, test, vi } from 'vitest';
+import { HomebridgeAPI } from '../node_modules/homebridge/dist/api.js';
 import { mockMqttEmitter } from './__mocks__/Mqtt.js';
 import { makeMockAPI, mockLog } from './__mocks__/mocks.js';
-import { UUID } from 'crypto';
-import { HomebridgeAPI } from '../node_modules/homebridge/dist/api.js';
 import { tasmotaPlatform } from './tasmotaPlatform.js';
 
 // --- Mocks ---
@@ -687,7 +687,7 @@ const trailerEnergyPowerConfig = {
   unit_of_meas: 'W',
   dev_cla: 'power',
   frc_upd: true,
-  val_tpl: "{{value_json['ENERGY']['Power']}}",
+  val_tpl: '{{value_json[\'ENERGY\'][\'Power\']}}',
   tasmotaType: 'sensor',
   pl_on: 'ON',
   pl_off: 'OFF',
@@ -739,7 +739,7 @@ const trailerEnergyCurrentConfig = {
   unit_of_meas: 'A',
   ic: 'mdi:alpha-a-circle-outline',
   frc_upd: true,
-  val_tpl: "{{value_json['ENERGY']['Current']}}",
+  val_tpl: '{{value_json[\'ENERGY\'][\'Current\']}}',
   tasmotaType: 'sensor',
   pl_on: 'ON',
   pl_off: 'OFF',
@@ -757,7 +757,7 @@ const trailerEnergyReactivePowerConfig = {
   unit_of_meas: 'VAr',
   dev_cla: 'power',
   frc_upd: true,
-  val_tpl: "{{value_json['ENERGY']['ReactivePower']}}",
+  val_tpl: '{{value_json[\'ENERGY\'][\'ReactivePower\']}}',
   tasmotaType: 'sensor',
   pl_on: 'ON',
   pl_off: 'OFF',
@@ -812,7 +812,7 @@ const garageDoorStatusConfig = {
   pl_not_avail: 'Offline',
   json_attr_t: 'tele/tasmota_FB6A07/HASS_STATE',
   unit_of_meas: '%',
-  val_tpl: "{{value_json['RSSI']}}",
+  val_tpl: '{{value_json[\'RSSI\']}}',
   ic: 'mdi:information-outline',
   uniq_id: 'FB6A07_status',
   dev: {
@@ -857,7 +857,7 @@ const bunkieUpperStatusConfig = {
   pl_not_avail: 'Offline',
   json_attr_t: 'tele/tasmota_CBA0E5/HASS_STATE',
   unit_of_meas: '%',
-  val_tpl: "{{value_json['RSSI']}}",
+  val_tpl: '{{value_json[\'RSSI\']}}',
   ic: 'mdi:information-outline',
   uniq_id: 'CBA0E5_status',
   dev: {
@@ -897,7 +897,7 @@ const doorbellStatusConfig = {
   pl_not_avail: 'Offline',
   json_attr_t: 'tele/tasmota_AC5811/HASS_STATE',
   unit_of_meas: '%',
-  val_tpl: "{{value_json['RSSI']}}",
+  val_tpl: '{{value_json[\'RSSI\']}}',
   ic: 'mdi:information-outline',
   uniq_id: 'AC5811_status',
   dev: {
@@ -924,7 +924,7 @@ const doorbellTempConfig = {
   unit_of_meas: '°C',
   dev_cla: 'temperature',
   frc_upd: true,
-  val_tpl: "{{value_json['BME280']['Temperature']}}",
+  val_tpl: '{{value_json[\'BME280\'][\'Temperature\']}}',
   tasmotaType: 'sensor',
   pl_on: 'ON',
   pl_off: 'OFF',
@@ -942,7 +942,7 @@ const doorbellHumidityConfig = {
   unit_of_meas: '%',
   dev_cla: 'humidity',
   frc_upd: true,
-  val_tpl: "{{value_json['BME280']['Humidity']}}",
+  val_tpl: '{{value_json[\'BME280\'][\'Humidity\']}}',
   tasmotaType: 'sensor',
   pl_on: 'ON',
   pl_off: 'OFF',
@@ -960,7 +960,7 @@ const doorbellDewPointConfig = {
   unit_of_meas: '°C',
   ic: 'mdi:weather-rainy',
   frc_upd: true,
-  val_tpl: "{{value_json['BME280']['DewPoint']}}",
+  val_tpl: '{{value_json[\'BME280\'][\'DewPoint\']}}',
   tasmotaType: 'sensor',
   pl_on: 'ON',
   pl_off: 'OFF',
@@ -978,7 +978,7 @@ const doorbellPressureConfig = {
   unit_of_meas: 'hPa',
   dev_cla: 'pressure',
   frc_upd: true,
-  val_tpl: "{{value_json['BME280']['Pressure']}}",
+  val_tpl: '{{value_json[\'BME280\'][\'Pressure\']}}',
   tasmotaType: 'sensor',
   pl_on: 'ON',
   pl_off: 'OFF',
@@ -1047,7 +1047,7 @@ const westBedroomStatusConfig = {
   pl_not_avail: 'Offline',
   json_attr_t: 'tele/tasmota_302F1B/HASS_STATE',
   unit_of_meas: '%',
-  val_tpl: "{{value_json['RSSI']}}",
+  val_tpl: '{{value_json[\'RSSI\']}}',
   ic: 'mdi:information-outline',
   uniq_id: '302F1B_status',
   dev: {
