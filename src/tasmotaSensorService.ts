@@ -272,6 +272,9 @@ export class tasmotaSensorService extends TasmotaService {
           default:
             return undefined;
         }
+      case 'V':
+      case 'A':
+        return 'power';
       case '°F':
       case '°C':
         return 'temperature';
