@@ -15,6 +15,7 @@ class MockMqtt extends EventEmitter {
     return { event: topic };
   }
 
+  sendMessage(_topic: string, _message: string) { }
   publish(_topic: string, _message: string) { }
   subscribe(_topic: string) { }
 }

@@ -3,6 +3,7 @@ import fakegato from 'fakegato-history';
 import {
   API,
   Characteristic,
+  CharacteristicSetCallback,
   DynamicPlatformPlugin,
   Logger,
   PlatformAccessory,
@@ -35,8 +36,6 @@ interface DiscoveryTopicMap {
   uniq_id: string
   uuid: string
 }
-
-
 
 type TasmotaService =
   tasmotaGarageService |
@@ -106,32 +105,6 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
       }
       // this.log("DEBUG-2", namespaces);
       createDebug.enable(namespaces);
-    }
-
-    if (this.config.override) {
-      interface Injection {
-        key: string
-
-        value: any
-      }
-      interface Injections {
-        topic: string
-        injection: Injection[]
-      }
-      const injections: Injections[] = [];
-      Object.keys(this.config.override).forEach((topic) => {
-        const inject: Injection[] = [];
-        Object.entries(this.config.override[topic]).forEach(
-          ([key, value]) => {
-            // debug("topic: %s, key: %s, value: %s", topic, key, value);
-            const injection: Injection = { key, value };
-            inject.push(injection);
-          },
-        );
-        injections.push({ topic, injection: inject });
-      });
-      // debug('This is your override reformated to injections.');
-      // debug('"injections": %s\n', JSON.stringify(injections, null, 2));
     }
 
     // When this event is fired it means Homebridge has restored all cached accessories from disk.
@@ -268,13 +241,6 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
     });
 
     this.mqttHost.on('Discovered', (topic, config) => {
-      // generate a unique id for the accessory this should be generated from
-      // something globally unique, but constant, for example, the device serial
-      // number or MAC address
-
-      // debug('topic', topic);
-      // debug('filter', this.config.filter);
-      // debug('filterList', this.config.filterList);
       if (this.isTopicAllowed(topic, this.config.filter, this.config.filterAllow, this.config.filterDeny)) {
         let message = normalizeMessage(config);
         debug('normalizeMessage ->', message);
@@ -290,19 +256,11 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
           // the cached devices we stored in the `configureAccessory` method above
           const existingAccessory = this.accessories.find(accessory => accessory.UUID === uuid);
 
-
           if (existingAccessory) {
             // the accessory already exists
 
             this.log.info('Found existing accessory: %s - %s', message.name, uniq_id);
-            // if you need to update the accessory.context then you should run `api.updatePlatformAccessories`. eg.:
-            // existingAccessory.context.device = device;
-            // this.api.updatePlatformAccessories([existingAccessory]);
 
-            // create the accessory handler for the restored accessory
-            // this is imported from `platformAccessory.ts`
-
-            // existingAccessory.context.mqttHost = mqttHost;
             existingAccessory.context.device[uniq_id] = message;
             existingAccessory.context.identifier = identifier;
 
@@ -311,54 +269,15 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
             if (this.services[uniq_id]) {
               this.log.warn('Restoring existing service from cache:', message.name);
               this.services[uniq_id].refresh();
-              switch (message.tasmotaType) {
-                case 'sensor':
-                  if (!message.dev_cla) { // This is the device status topic
-                    this.discoveryTopicMap[topic] = { topic, type: 'Accessory', uniq_id, uuid };
-                  } else {
-                    this.discoveryTopicMap[topic] = { topic, type: 'Service', uniq_id, uuid };
-                  }
-                  // debug('discoveryTopicMap', this.discoveryTopicMap[topic]);
-                  break;
-                default:
-                  this.discoveryTopicMap[topic] = { topic, type: 'Service', uniq_id, uuid };
-              }
+              const topicType = message.tasmotaType === 'sensor' && !message.dev_cla ? 'Accessory' : 'Service';
+              this.discoveryTopicMap[topic] = { topic, type: topicType, uniq_id, uuid };
             } else if (message.name) {
-              // this.log.info('existingAccessory:', existingAccessory.displayName, existingAccessory)
-              // this.log.info('this.services:', this.services)
               this.log.info('Creating service:', message.name, message.tasmotaType);
-              switch (message.tasmotaType) {
-                case 'sensor':
-                  this.services[uniq_id] = new tasmotaSensorService(this, existingAccessory, uniq_id);
-                  if (!message.dev_cla) { // This is the device status topic
-                    this.discoveryTopicMap[topic] = { topic, type: 'Accessory', uniq_id, uuid };
-                  } else {
-                    this.discoveryTopicMap[topic] = { topic, type: 'Service', uniq_id, uuid };
-                  }
-                  break;
-                case 'light':
-                  this.services[uniq_id] = new tasmotaLightService(this, existingAccessory, uniq_id);
-                  this.discoveryTopicMap[topic] = { topic, type: 'Service', uniq_id, uuid };
-                  break;
-                case 'fan':
-                case 'fanFixed':
-                  this.services[uniq_id] = new tasmotaFanService(this, existingAccessory, uniq_id);
-                  this.discoveryTopicMap[topic] = { topic, type: 'Service', uniq_id, uuid };
-                  break;
-                case 'switch':
-                  this.services[uniq_id] = new tasmotaSwitchService(this, existingAccessory, uniq_id);
-                  this.discoveryTopicMap[topic] = { topic, type: 'Service', uniq_id, uuid };
-                  break;
-                case 'garageDoor':
-                  this.services[uniq_id] = new tasmotaGarageService(this, existingAccessory, uniq_id);
-                  this.discoveryTopicMap[topic] = { topic, type: 'Service', uniq_id, uuid };
-                  break;
-                case 'binary_sensor':
-                  this.services[uniq_id] = new tasmotaBinarySensorService(this, existingAccessory, uniq_id);
-                  this.discoveryTopicMap[topic] = { topic, type: 'Service', uniq_id, uuid };
-                  break;
-                default:
-                  this.log.warn('Warning: Unhandled Tasmota device type', message.tasmotaType);
+              const service = this.createService(message.tasmotaType, existingAccessory, uniq_id);
+              if (service) {
+                this.services[uniq_id] = service;
+                const topicType = message.tasmotaType === 'sensor' && !message.dev_cla ? 'Accessory' : 'Service';
+                this.discoveryTopicMap[topic] = { topic, type: topicType, uniq_id, uuid };
               }
             } else {
               this.log.warn('Warning: missing friendly name for topic ', topic);
@@ -374,64 +293,34 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
             const accessory = new this.api.platformAccessory(message.name, uuid);
 
             // store a copy of the device object in the `accessory.context`
-            // the `context` property can be used to store any data about the accessory you may need
             accessory.context.device = {};
             accessory.context.device[uniq_id] = message;
-            // accessory.context.mqttHost = mqttHost;
             accessory.context.identifier = identifier;
 
-            // create the accessory handler for the newly create accessory
-            // this is imported from `platformAccessory.ts`
-            switch (message.tasmotaType) {
-              case 'switch':
-                this.services[uniq_id] = new tasmotaSwitchService(this, accessory, uniq_id);
-                this.discoveryTopicMap[topic] = { topic, type: 'Service', uniq_id, uuid };
-                break;
-              case 'garageDoor':
-                this.services[uniq_id] = new tasmotaGarageService(this, accessory, uniq_id);
-                this.discoveryTopicMap[topic] = { topic, type: 'Service', uniq_id, uuid };
-                break;
-              case 'light':
-                this.services[uniq_id] = new tasmotaLightService(this, accessory, uniq_id);
-                this.discoveryTopicMap[topic] = { topic, type: 'Service', uniq_id, uuid };
-                break;
-              case 'fan':
-              case 'fanFixed':
-                this.services[uniq_id] = new tasmotaFanService(this, accessory, uniq_id);
-                this.discoveryTopicMap[topic] = { topic, type: 'Service', uniq_id, uuid };
-                break;
-              case 'sensor':
-                this.services[uniq_id] = new tasmotaSensorService(this, accessory, uniq_id);
-                if (!message.dev_cla) { // This is the device status topic
-                  this.discoveryTopicMap[topic] = { topic, type: 'Accessory', uniq_id, uuid };
-                } else {
-                  this.discoveryTopicMap[topic] = { topic, type: 'Service', uniq_id, uuid };
-                }
-                break;
-              case 'binary_sensor':
-                this.services[uniq_id] = new tasmotaBinarySensorService(this, accessory, uniq_id);
-                this.discoveryTopicMap[topic] = { topic, type: 'Service', uniq_id, uuid };
-                break;
-              default:
-                this.log.warn('Warning: Unhandled Tasmota device type', message.tasmotaType);
+            const service = this.createService(message.tasmotaType, accessory, uniq_id);
+            if (service) {
+              this.services[uniq_id] = service;
+              const topicType = message.tasmotaType === 'sensor' && !message.dev_cla ? 'Accessory' : 'Service';
+              this.discoveryTopicMap[topic] = { topic, type: topicType, uniq_id, uuid };
             }
+
             debug('discovery devices - this.api.registerPlatformAccessories - %d', accessory.services.length);
-            if (accessory.services.length > 1) {
+            if (service && accessory.services.length > 1) {
               this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
               this.accessories.push(accessory);
-            } else {
+            } else if (service) {
               this.log.warn('Warning: incomplete HASS Discovery message and device definition', topic, config.name);
             }
           } else {
             this.log.warn('Warning: Missing accessory friendly name', topic, config.name);
           }
 
-          //          if (this.services[uniq_id] && this.services[uniq_id].service &&
-          // this.services[uniq_id].service.getCharacteristic(this.Characteristic.ConfiguredName).listenerCount('set') < 1) {
-          //            (this.services[uniq_id].service.getCharacteristic(this.Characteristic.ConfiguredName)
-          //              || this.services[uniq_id].service.addCharacteristic(this.Characteristic.ConfiguredName))
-          //              .on('set', setConfiguredName.bind(this.services[uniq_id]));
-          //          }
+          if (this.services[uniq_id] && this.services[uniq_id].service &&
+            this.services[uniq_id].service.getCharacteristic(this.Characteristic.ConfiguredName).listenerCount('set') < 1) {
+            (this.services[uniq_id].service.getCharacteristic(this.Characteristic.ConfiguredName)
+              || this.services[uniq_id].service.addCharacteristic(this.Characteristic.ConfiguredName))
+              .on('set', setConfiguredName.bind(this.services[uniq_id]));
+          }
         } else {
           this.log.warn('Warning: Malformed HASS Discovery message', topic, config.name);
         }
@@ -441,24 +330,39 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
     });
   }
 
+  private createService(tasmotaType: string | undefined, accessory: PlatformAccessory, uniq_id: string): TasmotaService | undefined {
+    switch (tasmotaType) {
+      case 'switch':
+        return new tasmotaSwitchService(this, accessory, uniq_id);
+      case 'garageDoor':
+        return new tasmotaGarageService(this, accessory, uniq_id);
+      case 'light':
+        return new tasmotaLightService(this, accessory, uniq_id);
+      case 'fan':
+      case 'fanFixed':
+        return new tasmotaFanService(this, accessory, uniq_id);
+      case 'sensor':
+        return new tasmotaSensorService(this, accessory, uniq_id);
+      case 'binary_sensor':
+        return new tasmotaBinarySensorService(this, accessory, uniq_id);
+      default:
+        this.log.warn('Warning: Unhandled Tasmota device type', tasmotaType);
+        return undefined;
+    }
+  }
+
 
   discoveryOveride(uniq_id: string, message: any) {
     if (this.config.override) { // pre version 0.1.0 override configuration
-      // debug('override', this.config.override);
-
-      const overrides: any = [];
+      const overrides: Record<string, any> = {};
       for (const [key, value] of Object.entries(this.config.override)) {
-        // debug(`${key}: ${value}`);
         overrides[key] = value;
       }
       if (overrides[uniq_id]) {
-        // debug('Merging', this.config.override[uniq_id]);
         const merged = { ...message, ...this.config.override[uniq_id] };
-        // debug('Merged', merged);
         return normalizeMessage(merged);
       }
     } else if (this.config.injections) {
-      // debug('injections', this.config.injections);
 
       this.config.injections.forEach((overide: any) => {
         if (overide.topic === uniq_id) {
@@ -585,4 +489,15 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
       this.accessoryCleanup(accessory);
     });
   }
+}
+
+
+function setConfiguredName(this: tasmotaSwitchService | tasmotaGarageService | tasmotaLightService | tasmotaFanService | tasmotaSensorService | tasmotaBinarySensorService, value: any, callback: CharacteristicSetCallback) {
+  this.platform.log.debug(`setConfiguredName for Service %sto %s`, this.service?.displayName, value);
+  if (this.service) {
+    this.service.displayName = value;
+    this.service.setCharacteristic(this.platform.Characteristic.Name, this.service.displayName);
+    this.platform.api.updatePlatformAccessories([this.accessory]);
+  }
+  callback();
 }

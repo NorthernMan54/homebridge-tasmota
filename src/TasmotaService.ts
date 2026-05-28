@@ -12,6 +12,10 @@ import { tasmotaPlatform } from './tasmotaPlatform.js';
 
 const debug = createDebug('Tasmota:Service');
 
+// Initialize nunjucks global config once at module level
+nunjucks.installJinjaCompat();
+nunjucks.configure({ autoescape: true });
+
 /**
  * Platform Accessory
  * An instance of this class is created for each accessory your platform registers
@@ -48,7 +52,6 @@ export class TasmotaService {
     // Home Assistant device template filters
 
     this.nunjucksEnvironment.addFilter('is_defined', (val, cb) => {
-      // console.log('is_defined', val, cb);
       if (val || val === 0) {
         cb(null, val);
       } else {
@@ -56,16 +59,7 @@ export class TasmotaService {
       }
     }, true);
 
-    function float(val: string) {
-      return (Number.parseFloat(val));
-    }
-
-    this.nunjucksEnvironment.addGlobal('float', float);
-
-    nunjucks.installJinjaCompat();
-    nunjucks.configure({
-      autoescape: true,
-    });
+    this.nunjucksEnvironment.addGlobal('float', (val: string) => Number.parseFloat(val));
   }
 
   enableFakegato() {
@@ -120,7 +114,6 @@ export class TasmotaService {
       case '_energy_total': // Total Kilowatts
       case '-dt24-watt-hour':
         return (this.platform.CustomCharacteristics.TotalConsumption);
-        break;
     }
   }
 
@@ -128,9 +121,9 @@ export class TasmotaService {
     // Get current status for accessory/service on startup
     // Wild cards in topic break this
 
-    if (this.accessory.context.device[this.uniq_id].stat_t && !this.accessory.context.device[this.uniq_id].stat_t.match('/\+|#/g')) {
-      const teleperiod = `${this.accessory.context.device[this.uniq_id].stat_t.substr(0,
-        this.accessory.context.device[this.uniq_id].stat_t.lastIndexOf('/') + 1).replace('tele', 'cmnd')}teleperiod`;
+    if (this.accessory.context.device[this.uniq_id].stat_t && !this.accessory.context.device[this.uniq_id].stat_t.match(/[+#]/)) {
+      const statTopic: string = this.accessory.context.device[this.uniq_id].stat_t;
+      const teleperiod = `${statTopic.substring(0, statTopic.lastIndexOf('/') + 1).replace('tele', 'cmnd')}teleperiod`;
       this.platform.mqttHost.sendMessage(teleperiod, this.platform.teleperiod.toString());
     }
   }
