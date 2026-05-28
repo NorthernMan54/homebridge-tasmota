@@ -11,9 +11,10 @@ jobs:
     runs-on: ubuntu-latest
 
     strategy:
+        fail-fast: false
       matrix:
         # the Node.js versions to build on
-        node-version: [20, 22, 24]
+        node-version: [lts/*, lts/-1, lts/-2]
 
     steps:
       - uses: actions/checkout@v6
