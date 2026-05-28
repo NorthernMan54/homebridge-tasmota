@@ -8,9 +8,11 @@ concurrency:
 
 jobs:
   build:
+    name: Build, Lint and Test on Node.js ${{ matrix.node-version }}
     runs-on: ubuntu-latest
 
     strategy:
+      fail-fast: false
       matrix:
         # the Node.js versions to build on
         node-version: [lts/*, lts/-1, lts/-2]
@@ -23,10 +25,14 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
 
-      - name: Install dependencies
+      - name: Extract node version
+        id: node_version
+        run: echo "NODE_VERSION=$(node -v)" >> $GITHUB_OUTPUT
+
+      - name: Install dependencies ${{ steps.node_version.outputs.node-version }}
         run: npm install
 
-      - name: Lint the project
+      - name: Lint the project ${{ steps.node_version.outputs.node-version }}
         run: npm run lint
 
       - name: Build the project
@@ -34,5 +40,5 @@ jobs:
         env:
           CI: true
 
-      - name: Test the project
+      - name: Test the project ${{ steps.node_version.outputs.node-version }}
         run: npm run test
