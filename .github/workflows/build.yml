@@ -21,24 +21,21 @@ jobs:
       - uses: actions/checkout@v6
 
       - name: Use Node.js ${{ matrix.node-version }} 
+        id: setup-node
         uses: actions/setup-node@v6
         with:
           node-version: ${{ matrix.node-version }}
 
-      - name: Extract node version
-        id: node_version
-        run: echo "NODE_VERSION=$(node -v)" >> $GITHUB_OUTPUT
-
-      - name: Install dependencies ${{ steps.node_version.outputs.node-version }}
+      - name: Install dependencies ${{ steps.setup-node.outputs.node-version }}
         run: npm install
 
-      - name: Lint the project ${{ steps.node_version.outputs.node-version }}
+      - name: Lint the project ${{ steps.setup-node.outputs.node-version }} 
         run: npm run lint
 
-      - name: Build the project
+      - name: Build the project ${{ steps.setup-node.outputs.node-version }}
         run: npm run build
         env:
           CI: true
 
-      - name: Test the project ${{ steps.node_version.outputs.node-version }}
+      - name: Test the project ${{ steps.setup-node.outputs.node-version }}
         run: npm run test
