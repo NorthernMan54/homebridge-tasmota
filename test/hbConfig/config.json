@@ -30,7 +30,8 @@
             "debug": true,
             "cleanup": 0,
             "filterAllow": [
-                "139827"
+                "139827",
+                "130C86"
             ],
             "filterDeny": [
                 "5673B2",
@@ -179,12 +180,7 @@
                         }
                     ]
                 }
-            ],
-            "_bridge": {
-                "username": "0E:90:D5:2E:54:2F",
-                "port": 47574,
-                "name": "Tasmota Child Bridge"
-            }
+            ]
         }
     ],
     "accessories": []

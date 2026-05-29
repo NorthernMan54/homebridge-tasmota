@@ -123,8 +123,8 @@ export class TasmotaService {
 
     if (this.accessory.context.device[this.uniq_id].stat_t && !this.accessory.context.device[this.uniq_id].stat_t.match(/[+#]/)) {
       const statTopic: string = this.accessory.context.device[this.uniq_id].stat_t;
-      const teleperiod = `${statTopic.substring(0, statTopic.lastIndexOf('/') + 1).replace('tele', 'cmnd')}teleperiod`;
-      this.platform.mqttHost.sendMessage(teleperiod, this.platform.teleperiod.toString());
+      // teleperiod is sent once per device from tasmotaPlatform after the _status message is processed
+      debug('refresh: statTopic %s', statTopic);
     }
   }
 
@@ -180,8 +180,12 @@ export class TasmotaService {
    */
 
   availabilityUpdate(topic: string, message: Buffer) {
-    // debug("availabilityUpdate", this, topic, message.toString());
-    this.platform.log.info('Marking accessory \'%s\' to %s', this.service?.displayName, message.toString());
+    // Only log once per physical device — every service subscribes to the same avty_t topic
+    // so we suppress duplicates by only logging from the first registered service for this accessory.
+    const deviceKeys = Object.keys(this.accessory.context.device ?? {});
+    if (deviceKeys[0] === this.uniq_id) {
+      this.platform.log.info('Marking accessory \'%s\' to %s', this.accessory.displayName, message.toString());
+    }
 
     if (message.toString() === this.accessory.context.device[this.uniq_id].pl_not_avail) {
       const availability: Nullable<CharacteristicValue> | Error = new Error(`${this.accessory.displayName} ${message.toString()}`);

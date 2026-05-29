@@ -1,21 +1,7 @@
 
-export interface Message {
-  tasmotaType?: string;
-  cmd_t?: string;
-  stat_t?: string;
-  uniq_id?: string;
-  dev_cla?: string;
-  pl_on?: string;
-  pl_off?: string;
-  payload_high_speed?: string;
-  payload_medium_speed?: string;
-  payload_low_speed?: string;
-  val_tpl?: string;
-  bri_val_tpl?: string;
-  speeds?: string[];
+import { TasmotaDeviceInfo, TasmotaDiscoveryMessage } from './lib/TasmotaTypes.js';
 
-  [key: string]: any; // Allow additional properties
-}
+export type { TasmotaDeviceInfo, TasmotaDiscoveryMessage };
 
 
 export function renameKeys<T extends Record<string, any>>(
@@ -102,7 +88,7 @@ export function replaceStringsInObject(
 
 /* The various Tasmota firmware's have a slightly different flavors of the message. */
 
-export function normalizeMessage(message: Message): Message {
+export function normalizeMessage(message: TasmotaDiscoveryMessage): TasmotaDiscoveryMessage {
   // Handle specific tasmotaType cases
   if (message.tasmotaType === 'fanFixed') {
     message = {
@@ -146,11 +132,11 @@ export function normalizeMessage(message: Message): Message {
   };
 
   // Rename keys in the message
-  message = renameKeys(message, translation);
+  message = renameKeys(message, translation) as TasmotaDiscoveryMessage;
 
   // Replace placeholders in the message
   if (message['~']) {
-    message = replaceStringsInObject(message, '~', message['~']);
+    message = replaceStringsInObject(message as Record<string, any>, '~', message['~'] as string) as TasmotaDiscoveryMessage;
   }
 
   // Validate MQTT topic uniqueness

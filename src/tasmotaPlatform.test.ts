@@ -1,6 +1,6 @@
 import { UUID } from 'crypto';
 import { EventEmitter } from 'events';
-import { beforeAll, beforeEach, describe, expect, test, vi } from 'vitest';
+import { afterAll, beforeAll, beforeEach, describe, expect, test, vi } from 'vitest';
 import { HomebridgeAPI } from 'homebridge';
 import { mockMqttEmitter } from './__mocks__/Mqtt.js';
 import { makeMockAPI, mockLog } from './__mocks__/mocks.js';
@@ -15,8 +15,14 @@ vi.mock('../src/lib/Mqtt.js', async () => {
 
 vi.mock('fakegato-history', () => ({ default: () => class FakeGato { } }));
 
+// Use fake timers throughout so the discovery debounce can be flushed synchronously
+// by calling vi.runAllTimers() (done automatically inside emitDiscovered).
+vi.useFakeTimers();
+
 function emitDiscovered(topic: string, config: Record<string, any>) {
   (mockMqttEmitter as EventEmitter).emit('Discovered', topic, config);
+  // Flush the per-device debounce timer so processing is synchronous in tests
+  vi.runAllTimers();
 }
 
 // --- Tests ---

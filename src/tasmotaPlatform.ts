@@ -14,6 +14,7 @@ import { EveHomeKitTypes } from 'homebridge-lib/EveHomeKitTypes';
 // Local methods
 
 import { Mqtt } from './lib/Mqtt.js';
+import { TasmotaDiscoveryMessage } from './lib/TasmotaTypes.js';
 import { PLATFORM_NAME, PLUGIN_NAME } from './settings.js';
 import { tasmotaBinarySensorService } from './tasmotaBinarySensorService.js';
 import { tasmotaFanService } from './tasmotaFanService.js';
@@ -46,6 +47,8 @@ type TasmotaService =
   tasmotaFanService;
 
 
+
+
 /**
  * TasmotaPlatform
  */
@@ -64,6 +67,14 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
   public readonly services: Record<string, TasmotaService> = {};
 
   private discoveryTopicMap: DiscoveryTopicMap[] = [];
+
+  // Debounced discovery buffering: collect all messages for a device before processing
+  private pendingDiscovery: Map<string, Array<{ topic: string; config: TasmotaDiscoveryMessage }>> = new Map();
+  private pendingTimers: Map<string, ReturnType<typeof setTimeout>> = new Map();
+  public discoveryDebounce: number;
+
+  // Track devices for which the teleperiod command has already been sent (once per device)
+  private teleperiodSent: Set<string> = new Set();
 
   public mqttHost: Mqtt;
   // Auto removal of non responding devices
@@ -93,6 +104,7 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
     this.cleanup = (this.config.cleanup !== undefined ? this.config.cleanup : 24); // #46
     this.debug = this.config.debug || false;
     this.teleperiod = this.config.teleperiod || 300;
+    this.discoveryDebounce = this.config.discoveryDebounce ?? 250;
 
     if (this.debug) {
       let namespaces = createDebug.disable();
@@ -242,92 +254,169 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
 
     this.mqttHost.on('Discovered', (topic, config) => {
       if (this.isTopicAllowed(topic, this.config.filter, this.config.filterAllow, this.config.filterDeny)) {
-        let message = normalizeMessage(config);
-        debug('normalizeMessage ->', message);
-        if (message.dev?.ids?.[0]) {
-          const identifier = message.dev.ids[0]; // Unique per accessory
-          const uniq_id: string = message.uniq_id as string; // Unique per service
-
-          message = this.discoveryOveride(uniq_id, message);
-          debug('Discovered ->', topic, config.name, message);
-          const uuid = this.api.hap.uuid.generate(identifier);
-
-          // see if an accessory with the same uuid has already been registered and restored from
-          // the cached devices we stored in the `configureAccessory` method above
-          const existingAccessory = this.accessories.find(accessory => accessory.UUID === uuid);
-
-          if (existingAccessory) {
-            // the accessory already exists
-
-            this.log.info('Found existing accessory: %s - %s', message.name, uniq_id);
-
-            existingAccessory.context.device[uniq_id] = message;
-            existingAccessory.context.identifier = identifier;
-
-            this.discoveryTopicMap[topic] = { topic, type: 'Service', uniq_id, uuid };
-
-            if (this.services[uniq_id]) {
-              this.log.warn('Restoring existing service from cache:', message.name);
-              this.services[uniq_id].refresh();
-              const topicType = message.tasmotaType === 'sensor' && !message.dev_cla ? 'Accessory' : 'Service';
-              this.discoveryTopicMap[topic] = { topic, type: topicType, uniq_id, uuid };
-            } else if (message.name) {
-              this.log.info('Creating service:', message.name, message.tasmotaType);
-              const service = this.createService(message.tasmotaType, existingAccessory, uniq_id);
-              if (service) {
-                this.services[uniq_id] = service;
-                const topicType = message.tasmotaType === 'sensor' && !message.dev_cla ? 'Accessory' : 'Service';
-                this.discoveryTopicMap[topic] = { topic, type: topicType, uniq_id, uuid };
-              }
-            } else {
-              this.log.warn('Warning: missing friendly name for topic ', topic);
-            }
-
-            debug('discoveryDevices - this.api.updatePlatformAccessories - %d', existingAccessory.services.length);
-            this.api.updatePlatformAccessories([existingAccessory]);
-          } else if (message.name) {
-            // the accessory does not yet exist, so we need to create it
-            this.log.info('Adding new accessory:', message.name);
-
-            // create a new accessory
-            const accessory = new this.api.platformAccessory(message.name, uuid);
-
-            // store a copy of the device object in the `accessory.context`
-            accessory.context.device = {};
-            accessory.context.device[uniq_id] = message;
-            accessory.context.identifier = identifier;
-
-            const service = this.createService(message.tasmotaType, accessory, uniq_id);
-            if (service) {
-              this.services[uniq_id] = service;
-              const topicType = message.tasmotaType === 'sensor' && !message.dev_cla ? 'Accessory' : 'Service';
-              this.discoveryTopicMap[topic] = { topic, type: topicType, uniq_id, uuid };
-            }
-
-            debug('discovery devices - this.api.registerPlatformAccessories - %d', accessory.services.length);
-            if (service && accessory.services.length > 1) {
-              this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
-              this.accessories.push(accessory);
-            } else if (service) {
-              this.log.warn('Warning: incomplete HASS Discovery message and device definition', topic, config.name);
-            }
-          } else {
-            this.log.warn('Warning: Missing accessory friendly name', topic, config.name);
-          }
-
-          if (this.services[uniq_id] && this.services[uniq_id].service &&
-            this.services[uniq_id].service.getCharacteristic(this.Characteristic.ConfiguredName).listenerCount('set') < 1) {
-            (this.services[uniq_id].service.getCharacteristic(this.Characteristic.ConfiguredName)
-              || this.services[uniq_id].service.addCharacteristic(this.Characteristic.ConfiguredName))
-              .on('set', setConfiguredName.bind(this.services[uniq_id]));
-          }
-        } else {
+        // Quick pre-check: only buffer if the message has a device identifier
+        const rawMessage = normalizeMessage(config);
+        const identifier = rawMessage.dev?.ids?.[0];
+        if (!identifier) {
           this.log.warn('Warning: Malformed HASS Discovery message', topic, config.name);
+          return;
         }
+
+        // Buffer message for this device
+        if (!this.pendingDiscovery.has(identifier)) {
+          this.pendingDiscovery.set(identifier, []);
+        }
+        this.pendingDiscovery.get(identifier)!.push({ topic, config });
+        debug('Buffering discovery for %s (%d messages pending)', identifier, this.pendingDiscovery.get(identifier)!.length);
+
+        // Reset the debounce timer for this device
+        const existing = this.pendingTimers.get(identifier);
+        if (existing) {
+          clearTimeout(existing);
+        }
+        this.pendingTimers.set(
+          identifier,
+          setTimeout(() => this.flushPendingDiscovery(identifier), this.discoveryDebounce),
+        );
       } else {
         debug('filtered', topic);
       }
     });
+  }
+
+  /**
+   * Called when the debounce timer fires for a device. Sorts all buffered
+   * discovery messages for that device by topic and processes them in order.
+   */
+  private flushPendingDiscovery(identifier: string): void {
+    const pending = this.pendingDiscovery.get(identifier);
+    if (!pending) return;
+
+    this.pendingTimers.delete(identifier);
+    this.pendingDiscovery.delete(identifier);
+
+    // Sort by topic for deterministic, reproducible processing order:
+    // 1. Primary service types first (switch, light, garageDoor, fan, binary_sensor)
+    // 2. General sensors (non-status) next  — homeassistant/sensor/<id>/config
+    // 3. Status sensors last               — homeassistant/sensor/<id>_status/config
+    // The type is taken from the second segment of the topic path:
+    //   homeassistant/<type>/<uniq_id>/config
+    const topicPriority = (entry: { topic: string; config: TasmotaDiscoveryMessage }): number => {
+      const topicType = entry.topic.split('/')[1];
+      if (topicType !== 'sensor') return 0;                     // switch, light, fan, binary_sensor, garageDoor
+      if ((entry.config.uniq_id ?? '').endsWith('_status')) return 2; // sensor/_status — always last
+      return 1;                                                  // all other sensors
+    };
+    pending.sort((a, b) => {
+      const diff = topicPriority(a) - topicPriority(b);
+      return diff !== 0 ? diff : a.topic.localeCompare(b.topic);
+    });
+    debug('flushPendingDiscovery: %s — processing %d messages', identifier, pending.length);
+
+    for (const { topic, config } of pending) {
+      this.processDiscoveredMessage(topic, config);
+    }
+  }
+
+  /**
+   * Processes a single normalised discovery message. Called for each message
+   * in topic-sorted order after the per-device debounce window closes.
+   */
+  private processDiscoveredMessage(topic: string, config: TasmotaDiscoveryMessage): void {
+    let message = normalizeMessage(config);
+    // debug('normalizeMessage ->', message);
+    if (message.dev?.ids?.[0]) {
+      const identifier = message.dev.ids[0]; // Unique per accessory
+      const uniq_id: string = message.uniq_id as string; // Unique per service
+
+      message = this.discoveryOveride(uniq_id, message);
+      debug('Discovered ->', topic, config.name, message);
+      const uuid = this.api.hap.uuid.generate(identifier);
+
+      // see if an accessory with the same uuid has already been registered and restored from
+      // the cached devices we stored in the `configureAccessory` method above
+      const existingAccessory = this.accessories.find(accessory => accessory.UUID === uuid);
+
+      if (existingAccessory) {
+        // the accessory already exists
+
+        this.log.info('Found existing accessory: %s - %s', message.name, uniq_id);
+
+        existingAccessory.context.device[uniq_id] = message;
+        existingAccessory.context.identifier = identifier;
+
+        this.discoveryTopicMap[topic] = { topic, type: 'Service', uniq_id, uuid };
+
+        if (this.services[uniq_id]) {
+          this.log.warn('Restoring existing service from cache:', message.name);
+          this.services[uniq_id].refresh();
+          const topicType = message.tasmotaType === 'sensor' && !message.dev_cla ? 'Accessory' : 'Service';
+          this.discoveryTopicMap[topic] = { topic, type: topicType, uniq_id, uuid };
+        } else if (message.name) {
+          this.log.info('Creating service:', message.name, message.tasmotaType);
+          const service = this.createService(message.tasmotaType, existingAccessory, uniq_id);
+          if (service) {
+            this.services[uniq_id] = service;
+            const topicType = message.tasmotaType === 'sensor' && !message.dev_cla ? 'Accessory' : 'Service';
+            this.discoveryTopicMap[topic] = { topic, type: topicType, uniq_id, uuid };
+          }
+        } else {
+          this.log.warn('Warning: missing friendly name for topic ', topic);
+        }
+
+        debug('discoveryDevices - this.api.updatePlatformAccessories - %d', existingAccessory.services.length);
+        this.api.updatePlatformAccessories([existingAccessory]);
+      } else if (message.name) {
+        // the accessory does not yet exist, so we need to create it
+        this.log.info('Adding new accessory:', message.name);
+
+        // create a new accessory
+        const accessory = new this.api.platformAccessory(message.name, uuid);
+
+        // store a copy of the device object in the `accessory.context`
+        accessory.context.device = {};
+        accessory.context.device[uniq_id] = message;
+        accessory.context.identifier = identifier;
+
+        const service = this.createService(message.tasmotaType, accessory, uniq_id);
+        if (service) {
+          this.services[uniq_id] = service;
+          const topicType = message.tasmotaType === 'sensor' && !message.dev_cla ? 'Accessory' : 'Service';
+          this.discoveryTopicMap[topic] = { topic, type: topicType, uniq_id, uuid };
+        }
+
+        debug('discovery devices - this.api.registerPlatformAccessories - %d', accessory.services.length);
+        if (service && accessory.services.length > 1) {
+          this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
+          this.accessories.push(accessory);
+        } else if (service) {
+          this.log.warn('Warning: incomplete HASS Discovery message and device definition', topic, config.name);
+        }
+      } else {
+        this.log.warn('Warning: Missing accessory friendly name', topic, config.name);
+      }
+
+      if (this.services[uniq_id] && this.services[uniq_id].service &&
+        this.services[uniq_id].service.getCharacteristic(this.Characteristic.ConfiguredName).listenerCount('set') < 1) {
+        (this.services[uniq_id].service.getCharacteristic(this.Characteristic.ConfiguredName)
+          || this.services[uniq_id].service.addCharacteristic(this.Characteristic.ConfiguredName))
+          .on('set', setConfiguredName.bind(this.services[uniq_id]));
+      }
+
+      // Send teleperiod once per physical device, after the _status message (which is always
+      // processed last). Derive the cmnd topic from the stat_t in the status message.
+      if (uniq_id.endsWith('_status') && !this.teleperiodSent.has(identifier)) {
+        const statTopic: string | undefined = message.stat_t;
+        if (statTopic && !statTopic.match(/[+#]/)) {
+          const teleperiodTopic = `${statTopic.substring(0, statTopic.lastIndexOf('/') + 1).replace('tele', 'cmnd')}teleperiod`;
+          debug('Sending teleperiod for %s → %s = %d', identifier, teleperiodTopic, this.teleperiod);
+          this.mqttHost.sendMessage(teleperiodTopic, this.teleperiod.toString());
+          this.teleperiodSent.add(identifier);
+        }
+      }
+    } else {
+      this.log.warn('Warning: Malformed HASS Discovery message', topic, config.name);
+    }
   }
 
   private createService(tasmotaType: string | undefined, accessory: PlatformAccessory, uniq_id: string): TasmotaService | undefined {
