@@ -339,7 +339,7 @@ DimmerRange 100,255
 * Tasmota configuration
 
 ```
-Template {"NAME":"Trailer Switch","GPIO":[0,0,0,0,226,225,0,0,227,0,0,228,0,0],"FLAG":0,"BASE":18}
+Template {"NAME":"Trailer Switch","GPIO":[0,0,0,0,257,256,0,0,259,0,258,0,0,0],"FLAG":0,"BASE":18}
 Backlog Module 0; WebButton1 Trailer Ceiling; WebButton2 Trailer Flood; WebButton3 Trailer Porch; WebButton4 Trailer Step
 ```
 
