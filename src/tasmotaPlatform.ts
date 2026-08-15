@@ -290,7 +290,9 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
    */
   private flushPendingDiscovery(identifier: string): void {
     const pending = this.pendingDiscovery.get(identifier);
-    if (!pending) return;
+    if (!pending) {
+      return;
+    }
 
     this.pendingTimers.delete(identifier);
     this.pendingDiscovery.delete(identifier);
@@ -303,9 +305,13 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
     //   homeassistant/<type>/<uniq_id>/config
     const topicPriority = (entry: { topic: string; config: TasmotaDiscoveryMessage }): number => {
       const topicType = entry.topic.split('/')[1];
-      if (topicType !== 'sensor') return 0;                     // switch, light, fan, binary_sensor, garageDoor
-      if ((entry.config.uniq_id ?? '').endsWith('_status')) return 2; // sensor/_status — always last
-      return 1;                                                  // all other sensors
+      if (topicType !== 'sensor') {
+        return 0;
+      } // switch, light, fan, binary_sensor, garageDoor
+      if ((entry.config.uniq_id ?? '').endsWith('_status')) {
+        return 2;
+      } // sensor/_status — always last
+      return 1; // all other sensors
     };
     pending.sort((a, b) => {
       const diff = topicPriority(a) - topicPriority(b);
@@ -582,7 +588,7 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
 
 
 function setConfiguredName(this: tasmotaSwitchService | tasmotaGarageService | tasmotaLightService | tasmotaFanService | tasmotaSensorService | tasmotaBinarySensorService, value: any, callback: CharacteristicSetCallback) {
-  this.platform.log.debug(`setConfiguredName for Service %sto %s`, this.service?.displayName, value);
+  this.platform.log.debug('setConfiguredName for Service %sto %s', this.service?.displayName, value);
   if (this.service) {
     this.service.displayName = value;
     this.service.setCharacteristic(this.platform.Characteristic.Name, this.service.displayName);

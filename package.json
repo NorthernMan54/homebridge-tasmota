@@ -34,7 +34,7 @@
     ],
     "ext": "ts",
     "ignore": [],
-    "exec": "npm run build && NODE_PATH=`pwd`:.. DEBUG=-HAP-NodeJS:*,Tasmota* node ~/node_modules/homebridge-config-ui-x/dist/bin/hb-service.js run --stdout -U ./test/hbConfig -T -D -I -P ./",
+    "exec": "npm run build && NODE_PATH=`pwd`:.. DEBUG=-HAP-NodeJS:*,-Tasmota* node ~/npm/lib/node_modules/homebridge-config-ui-x/dist/bin/hb-service.js run --stdout -U ./test/hbConfig -T -D -I -P ./",
     "signal": "SIGTERM",
     "env": {
       "NODE_OPTIONS": "--trace-warnings"
@@ -73,5 +73,10 @@
     "unplugin-swc": "^1.5.9",
     "vitest": "^4.1.7"
   },
-  "homepage": "https://github.com/NorthernMan54/homebridge-tasmota#readme"
+  "homepage": "https://github.com/NorthernMan54/homebridge-tasmota#readme",
+  "allowScripts": {
+    "fsevents@2.3.3": true,
+    "unrs-resolver@1.11.1": true,
+    "@swc/core@1.15.40": true
+  }
 }
