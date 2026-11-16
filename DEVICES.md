@@ -833,3 +833,25 @@ All messages go to the topic `router/Internet_Status`:
 | 0 | Internet Ok | Check succeeded | `{"text":"Internet Ok","status":0}` |
 | 1–3 | Internet may be down | Check failed; `status` is the failure count, `interval` is minutes between checks | `{"text":"Internet may be down","status":2.000,"interval":1}` |
 | 4 | Rebooting Modem | 3 failures in a row; Power1 is power cycled | `{"text":"Rebooting Modem","status":4}` |
+
+## Restart timing
+
+It takes **3 failed checks** to trigger a modem restart, so a restart happens after 2–3 check intervals.
+
+| Interval | Time until the restart | Then the interval becomes |
+|---|---|---|
+| 1 min | 2–3 min | 4 min |
+| 4 min | 8–12 min | 16 min |
+| 16 min | 32–48 min | 64 min |
+| 64 min | about 2–3 hours | 240 min (capped) |
+| 240 min | 8–12 hours | 240 min (stays) |
+
+### Restarts during an outage that doesn't fix itself
+
+1. **~3 minutes:** 1st restart
+2. **~15 minutes:** 2nd
+3. **~1 hour:** 3rd
+4. **~4 hours:** 4th
+5. **Then about every 12 hours**
+
+As soon as any check succeeds, everything resets: checks go back to every minute, and the next outage starts again at the top of this list.
