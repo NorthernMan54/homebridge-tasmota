@@ -803,3 +803,33 @@ Rule2
   ON WebSend#Data=Done DO backlog Publish router/Internet_Status {"text":"Internet Ok","status":2}; backlog Var3 1; Var4 0 ENDON
 Backlog rule2 1
 ```
+
+## Version 4 - Do three checks before rebooting
+
+Rule 1 - Reboot router if internet connection fails 3 checks in a row, initial checks are 1 minute appart. If internet does not recover, quadruple the test interval to a max of 4 hours.
+
+```
+Rule1
+  ON system#boot DO backlog Var1 1; Var2 0 ENDON
+  ON Var1#State>240 DO Var1 240 ENDON
+  ON Time#Minute|%var1% DO backlog websend [google.com] / ENDON
+  ON WebSend#Data$!Done DO backlog Add2 1 ENDON
+  ON Var2#state>=3 DO backlog Publish router/Internet_Status {"text":"Rebooting Modem","status":4}; delay 5; Mult1 4; Var2 0; Power1 0; Delay 10; Power1 1 ENDON
+  ON WebSend#Data=Done DO backlog Publish router/Internet_Status {"text":"Internet Ok","status":0}; backlog Var1 1; Var2 0 ENDON
+Backlog rule1 1
+```
+Rule 2 - Publish status to router/Internet_Status
+
+```
+Rule2
+  ON Var2#State>0 DO Publish router/Internet_Status {"text":"Internet may be down","status":%value%,"interval":%var1%} ENDON
+Backlog rule2 1
+```
+
+All messages go to the topic `router/Internet_Status`:
+
+| status | text | When | Example |
+|---|---|---|---|
+| 0 | Internet Ok | Check succeeded | `{"text":"Internet Ok","status":0}` |
+| 1–3 | Internet may be down | Check failed; `status` is the failure count, `interval` is minutes between checks | `{"text":"Internet may be down","status":2.000,"interval":1}` |
+| 4 | Rebooting Modem | 3 failures in a row; Power1 is power cycled | `{"text":"Rebooting Modem","status":4}` |
