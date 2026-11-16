@@ -67,6 +67,8 @@ jobs:
         chmod a+x gh-md-toc
 
     - name: Create Table of Contents
+      env:
+        GH_TOC_TOKEN: ${{ secrets.GITHUB_TOKEN }} # authenticated API calls avoid the anonymous rate limit
       run: |
         npm run-script document
         rm gh-md-toc
