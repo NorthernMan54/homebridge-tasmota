@@ -47,6 +47,10 @@ export class tasmotaClimateService extends TasmotaService {
     const service = this.accessory.getService(this.uuid)
       || this.accessory.addService(this.platform.Service.Thermostat, this.config.name, this.uuid);
     this.service = service;
+    // The thermostat is the accessory's main tile; with several zones, only the first is primary
+    if (!this.accessory.services.some(s => s.isPrimaryService && s !== service)) {
+      this.service.setPrimaryService(true);
+    }
     this.service.setCharacteristic(this.platform.Characteristic.ConfiguredName, this.config.name);
     if (!this.service.displayName) {
       this.service.setCharacteristic(this.platform.Characteristic.Name, this.config.name);
