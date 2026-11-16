@@ -91,7 +91,21 @@ describe('CONNEX zone 1 climate', () => {
     expect(service.getCharacteristic(api.hap.Characteristic.TargetHeatingCoolingState).props.validValues)
       .toEqual([api.hap.Characteristic.TargetHeatingCoolingState.HEAT]);
     expect(service.getCharacteristic(api.hap.Characteristic.CurrentHeatingCoolingState).props.validValues)
-      .toEqual([api.hap.Characteristic.CurrentHeatingCoolingState.HEAT]);
+      .toEqual([api.hap.Characteristic.CurrentHeatingCoolingState.OFF, api.hap.Characteristic.CurrentHeatingCoolingState.HEAT]);
+  });
+
+  test('shows heating only while the room is below the setpoint', () => {
+    const BME_T = 'home/OMG_ESP32_CONNEX/CLIMAtoMQTT/bme';
+    const state = () => thermostat().getCharacteristic(api.hap.Characteristic.CurrentHeatingCoolingState).value;
+    mockMqttEmitter.emit(TEMP_STAT_T, TEMP_STAT_T, statusPayload({ 1: { setpoint: 22 } }));
+    mockMqttEmitter.emit(BME_T, BME_T, Buffer.from('{"tempc":21.2}'));
+    expect(state()).toBe(api.hap.Characteristic.CurrentHeatingCoolingState.HEAT);
+
+    mockMqttEmitter.emit(TEMP_STAT_T, TEMP_STAT_T, statusPayload({ 1: { setpoint: 20 } }));
+    expect(state()).toBe(api.hap.Characteristic.CurrentHeatingCoolingState.OFF);
+
+    mockMqttEmitter.emit(BME_T, BME_T, Buffer.from('{"tempc":19.5}'));
+    expect(state()).toBe(api.hap.Characteristic.CurrentHeatingCoolingState.HEAT);
   });
 
   test('status payload sets TargetTemperature from zone 1 setpoint', () => {

@@ -61,9 +61,11 @@ export class tasmotaClimateService extends TasmotaService {
     this.service.getCharacteristic(this.platform.Characteristic.TargetHeatingCoolingState)
       .updateValue(heat)
       .setProps({ validValues: [heat] });
+    // Heating while the measured temperature is below the setpoint, otherwise idle (OFF)
+    const off = this.platform.Characteristic.CurrentHeatingCoolingState.OFF;
     this.service.getCharacteristic(this.platform.Characteristic.CurrentHeatingCoolingState)
-      .updateValue(heat)
-      .setProps({ validValues: [heat] });
+      .setProps({ validValues: [off, heat] })
+      .updateValue(off);
     this.service.getCharacteristic(this.platform.Characteristic.TemperatureDisplayUnits)
       .updateValue(this.platform.Characteristic.TemperatureDisplayUnits.CELSIUS);
 
@@ -115,6 +117,7 @@ export class tasmotaClimateService extends TasmotaService {
       if (!this.config.curr_temp_t) {
         this.service?.getCharacteristic(this.platform.Characteristic.CurrentTemperature).updateValue(setpoint);
       }
+      this.updateHeatingState();
     } catch (err: unknown) {
       this.platform.log.error('ERROR: Message Parse Error', topic, message.toString());
       this.platform.log.debug(String((err && (err as Error).message ? (err as Error).message : err)));
@@ -138,9 +141,25 @@ export class tasmotaClimateService extends TasmotaService {
       const prevCurrent = this.service?.getCharacteristic(this.platform.Characteristic.CurrentTemperature).value;
       this.platform.log[prevCurrent !== current ? 'info' : 'debug']('Updating \'%s:CurrentTemperature\' to %s', this.service?.displayName, current);
       this.service?.getCharacteristic(this.platform.Characteristic.CurrentTemperature).updateValue(current);
+      this.updateHeatingState();
     } catch (err: unknown) {
       this.platform.log.error('ERROR: Message Parse Error', topic, message.toString());
       this.platform.log.debug(String((err && (err as Error).message ? (err as Error).message : err)));
+    }
+  }
+
+  /**
+   * CurrentHeatingCoolingState is HEAT while the current temperature is below the target, else OFF.
+   * The heaters never report their state, so this is an estimate from the room sensor.
+   */
+  private updateHeatingState() {
+    const C = this.platform.Characteristic;
+    const current = Number(this.service?.getCharacteristic(C.CurrentTemperature).value);
+    const target = Number(this.service?.getCharacteristic(C.TargetTemperature).value);
+    const state = current < target ? C.CurrentHeatingCoolingState.HEAT : C.CurrentHeatingCoolingState.OFF;
+    if (this.service?.getCharacteristic(C.CurrentHeatingCoolingState).value !== state) {
+      debug('%s heating state -> %s (current %s, target %s)', this.config.name, state ? 'HEAT' : 'OFF', current, target);
+      this.service?.getCharacteristic(C.CurrentHeatingCoolingState).updateValue(state);
     }
   }
 
