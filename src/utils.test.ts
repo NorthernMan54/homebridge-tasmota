@@ -1,5 +1,37 @@
 import { describe, expect, test } from 'vitest';
-import { findVal, normalizeMessage, renameKeys, replaceStringsInObject } from './utils.js';
+import { findVal, isOmgSystemEntity, normalizeMessage, renameKeys, replaceStringsInObject } from './utils.js';
+import type { TasmotaDiscoveryMessage } from './lib/TasmotaTypes.js';
+
+describe('isOmgSystemEntity', () => {
+  const omg = (mf: string | undefined, ids: string[] = ['240AC4EE7D34']) =>
+    ({ dev: { ids, mf } }) as unknown as TasmotaDiscoveryMessage;
+
+  test('matches OMG system entities', () => {
+    expect(isOmgSystemEntity(omg('OMG_community'), '240AC4EE7D34-disc')).toBe(true);
+    expect(isOmgSystemEntity(omg('OMG_community'), '240AC4EE7D34-BH1750-ftcd')).toBe(true);
+    expect(isOmgSystemEntity(omg('OMG_community'), '240AC4EE7D34-bme-altim')).toBe(true);
+    expect(isOmgSystemEntity(omg('OMG_community'), '240AC4EE7D34-discovery')).toBe(true);
+    expect(isOmgSystemEntity(omg('OMG_community'), '240AC4EE7D34-BH1750-lux')).toBe(false);
+    expect(isOmgSystemEntity(omg('OMG_community'), '240AC4EE7D34-tempc')).toBe(true);
+    expect(isOmgSystemEntity(omg('OMG_community'), '240AC4EE7D34-connexid')).toBe(true);
+  });
+
+  test('does not match OMG sensor entities', () => {
+    expect(isOmgSystemEntity(omg('OMG_community'), '240AC4EE7D34-bme-temp')).toBe(false);
+  });
+
+  test('does not match non-OMG devices', () => {
+    expect(isOmgSystemEntity(omg('Tasmota'), '240AC4EE7D34-tempc')).toBe(false);
+  });
+
+  test('does not match when dev.mf is missing', () => {
+    expect(isOmgSystemEntity(omg(undefined), '240AC4EE7D34-tempc')).toBe(false);
+  });
+
+  test('does not match a BLE sensor whose uniq_id prefix differs from dev.ids[0]', () => {
+    expect(isOmgSystemEntity(omg('OMG_community'), 'A4C138AABBCC-tempc')).toBe(false);
+  });
+});
 
 describe('normalizeMessage', () => {
   test('should handle fanFixed tasmotaType', () => {

@@ -804,3 +804,12 @@ Rule2
   ON WebSend#Data=Done DO backlog Publish router/Internet_Status {"text":"Internet Ok","status":2}; backlog Var3 1; Var4 0 ENDON
 Backlog rule2 1
 ```
+
+# openMQTTGateway / Dimplex Connex heater zones
+
+Requires the `esp32dev-connex` OpenMQTTGateway build. Each zone the gateway has used appears as a HomeKit Thermostat; all zones share one accessory.
+
+- Heat only: the heaters have no off command, so set 0 or 5 °C instead.
+- Target temperature 0-30 °C in 0.5 °C steps; changes are sent once, 500 ms after the last adjustment.
+- Current temperature comes from the gateway's BME280 when fitted, otherwise it shows the last setpoint.
+- Learn and Pair stay MQTT-only and are not exposed in HomeKit.

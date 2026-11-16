@@ -168,6 +168,21 @@ export function normalizeMessage(message: TasmotaDiscoveryMessage): TasmotaDisco
 }
 
 
+/*
+ * True when a discovery message describes an OpenMQTTGateway system entity
+ * (connectivity, auto discovery switch, memory, network, restart/erase buttons...).
+ * The uniq_id must be exactly `<dev.ids[0]>-<suffix>` so that sensor entities
+ * merely ending in a similar suffix are not matched.
+ */
+export function isOmgSystemEntity(message: TasmotaDiscoveryMessage, uniq_id: string): boolean {
+  const id = message.dev?.ids?.[0];
+  if (message.dev?.mf !== 'OMG_community' || !id) {
+    return false;
+  }
+  const match = /-(connectivity|disc|freemem|ip|rssi|uptime|tempc|connexid|restart|erase|discovery|BH1750-ftcd|BH1750-wm2|bme-altift|bme-altim)$/.exec(uniq_id);
+  return match !== null && uniq_id === `${id}-${match[1]}`;
+}
+
 export function findVal<T>(object: Record<string, any>, key: string): T | undefined {
   let value: T | undefined;
 

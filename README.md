@@ -88,6 +88,10 @@ SetOption19 0
 
 ### [setoption37 - Remapping the RGBWcWw channels for lights](https://tasmota.github.io/docs/Commands/#setoption37)
 
+### Hiding OpenMQTTGateway system entities
+
+The `hideOmgSystem` option (default on) skips OpenMQTTGateway system entities such as connectivity, the auto discovery switch, free memory, IP, RSSI, uptime, internal temperature, Connex controller ID, the restart/erase/discovery buttons, BH1750 ftCd and W/m², and BME altitude. Untick it in the plugin settings to show them again. Services already created for these entities are removed on the next discovery.
+
 ## Discovery Overrides
 
 Please see[DEVICES.md](DEVICES.md) for examples.

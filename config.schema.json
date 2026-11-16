@@ -96,6 +96,13 @@
           "type": "string"
         }
       },
+      "hideOmgSystem": {
+        "title": "Hide OpenMQTTGateway system entities",
+        "type": "boolean",
+        "required": false,
+        "default": true,
+        "description": "Skip OpenMQTTGateway system entities (connectivity, auto discovery switch, free memory, IP, RSSI, uptime, internal temperature, Connex controller ID, restart/erase/discovery buttons, BH1750 ftCd and W/m², BME altitude). Untick to show them."
+      },
       "effects": {
         "title": "RGB Light Effects",
         "type": "boolean",
@@ -196,6 +203,7 @@
             "type": "string"
           }
         },
+        "hideOmgSystem",
         "filter"
       ]
     },

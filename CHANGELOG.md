@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file. This project uses [Semantic Versioning](https://semver.org/).
 
+
+## Unreleased (0.2.4 beta)
+
+### New
+- HomeKit Thermostat support for Home Assistant `climate` discovery (OpenMQTTGateway Dimplex Connex heater zones): heat only, 0-30 °C in 0.5 °C steps, setpoint changes sent once 500 ms after the last adjustment, current temperature from the gateway's BME280 when present
+- `hideOmgSystem` option (default on) hides OpenMQTTGateway system entities (connectivity, auto discovery switch, free memory, IP, RSSI, uptime, internal temperature, Connex controller ID, restart/erase/discovery buttons, BH1750 ftCd and W/m², BME altitude) and removes services already cached for them. Existing OpenMQTTGateway installs will lose those entities; untick the option to restore them
+
+### Changes
+- Discovery messages are collected per device and processed in a fixed order (primary services, then sensors, then status), and teleperiod is sent once per device
+- Node.js 26 support
+- Tests moved from Jest to Vitest, with platform and utility test suites
+- `npm run lint` no longer auto-fixes; use `npm run lint:fix`
+- DEVICES.md: Trailer devices, Always on Powerbar and Connex heater zones
+- Dependency and build workflow updates
+
+
 ## 0.2.3 (2025-12-04)
 
 ## [Version 0.2.3](https://github.com/northernman54/homebridge-tasmota/compare/0.2.2...0.2.3)

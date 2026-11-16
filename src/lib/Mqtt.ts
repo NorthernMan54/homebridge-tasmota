@@ -73,7 +73,7 @@ export class Mqtt extends EventEmitter {
         const device = JSON.parse(message.toString());
         device.tasmotaType = subject[1];
 
-        const validTypes = ["switch", "sensor", "binary_sensor", "light", "fan", "garageDoor"];
+        const validTypes = ["switch", "sensor", "binary_sensor", "light", "fan", "garageDoor", "climate"];
         if (validTypes.includes(subject[1])) {
           this.emit("Discovered", topic, device);
         }

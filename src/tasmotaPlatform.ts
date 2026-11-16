@@ -17,12 +17,13 @@ import { Mqtt } from './lib/Mqtt.js';
 import { TasmotaDiscoveryMessage } from './lib/TasmotaTypes.js';
 import { PLATFORM_NAME, PLUGIN_NAME } from './settings.js';
 import { tasmotaBinarySensorService } from './tasmotaBinarySensorService.js';
+import { tasmotaClimateService } from './tasmotaClimateService.js';
 import { tasmotaFanService } from './tasmotaFanService.js';
 import { tasmotaGarageService } from './tasmotaGarageService.js';
 import { tasmotaLightService } from './tasmotaLightService.js';
 import { tasmotaSensorService } from './tasmotaSensorService.js';
 import { tasmotaSwitchService } from './tasmotaSwitchService.js';
-import { findVal, normalizeMessage } from './utils.js';
+import { findVal, isOmgSystemEntity, normalizeMessage } from './utils.js';
 const debug = createDebug('Tasmota:platform');
 
 /**
@@ -44,7 +45,8 @@ type TasmotaService =
   tasmotaLightService |
   tasmotaSensorService |
   tasmotaBinarySensorService |
-  tasmotaFanService;
+  tasmotaFanService |
+  tasmotaClimateService;
 
 
 
@@ -339,6 +341,25 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
       debug('Discovered ->', topic, config.name, message);
       const uuid = this.api.hap.uuid.generate(identifier);
 
+      if ((this.config.hideOmgSystem ?? true) && isOmgSystemEntity(message, uniq_id)) {
+        debug('Skipping OpenMQTTGateway system entity', topic, uniq_id);
+        // remove any service previously created or restored from cache for this entity
+        const cachedAccessory = this.accessories.find(accessory => accessory.UUID === uuid);
+        if (cachedAccessory) {
+          if (this.services[uniq_id]) {
+            this.serviceCleanup(uniq_id, cachedAccessory);
+          } else {
+            const serviceUuid = this.api.hap.uuid.generate(uniq_id);
+            const cachedService = cachedAccessory.services.find(service => service.UUID === serviceUuid || service.subtype === serviceUuid);
+            if (cachedService) {
+              cachedAccessory.removeService(cachedService);
+              this.api.updatePlatformAccessories([cachedAccessory]);
+            }
+          }
+        }
+        return;
+      }
+
       // see if an accessory with the same uuid has already been registered and restored from
       // the cached devices we stored in the `configureAccessory` method above
       const existingAccessory = this.accessories.find(accessory => accessory.UUID === uuid);
@@ -438,6 +459,8 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
         return new tasmotaFanService(this, accessory, uniq_id);
       case 'sensor':
         return new tasmotaSensorService(this, accessory, uniq_id);
+      case 'climate':
+        return new tasmotaClimateService(this, accessory, uniq_id);
       case 'binary_sensor':
         return new tasmotaBinarySensorService(this, accessory, uniq_id);
       default:
