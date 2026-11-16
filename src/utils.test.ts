@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { findVal, isOmgSystemEntity, normalizeMessage, renameKeys, replaceStringsInObject } from './utils.js';
+import { findVal, isOmgSystemEntity, normalizeMessage, omgAccessoryInfo, renameKeys, replaceStringsInObject } from './utils.js';
 import type { TasmotaDiscoveryMessage } from './lib/TasmotaTypes.js';
 
 describe('isOmgSystemEntity', () => {
@@ -378,4 +378,18 @@ describe('findVal', () => {
 
   // Add more tests for other scenarios...
 
+});
+
+describe('omgAccessoryInfo', () => {
+  test('builds accessory information from an OMG device block', () => {
+    expect(omgAccessoryInfo({ dev: { ids: ['240AC4EE7D34'],
+      mf: 'OMG_community',
+      mdl: '["WebUI","BME280","CONNEX"]',
+      sw: 'v1.9.1-1-gf303e94e[feature/connex-gateway]' } } as any)).toEqual({
+      manufacturer: 'OMG_community', model: 'WebUI BME280 CONNEX', firmware: 'v1.9.1-1-gf303e94efeatureconnex-gateway' });
+  });
+  test('returns undefined without mf, mdl or sw, or for non-OMG devices', () => {
+    expect(omgAccessoryInfo({ dev: { ids: ['240AC4EE7D34'] } } as any)).toBeUndefined();
+    expect(omgAccessoryInfo({ dev: { ids: ['A'], mf: 'Tasmota', mdl: 'x', sw: '1' } } as any)).toBeUndefined();
+  });
 });

@@ -23,7 +23,7 @@ import { tasmotaGarageService } from './tasmotaGarageService.js';
 import { tasmotaLightService } from './tasmotaLightService.js';
 import { tasmotaSensorService } from './tasmotaSensorService.js';
 import { tasmotaSwitchService } from './tasmotaSwitchService.js';
-import { findVal, isOmgSystemEntity, normalizeMessage } from './utils.js';
+import { findVal, isOmgSystemEntity, normalizeMessage, omgAccessoryInfo } from './utils.js';
 const debug = createDebug('Tasmota:platform');
 
 /**
@@ -340,6 +340,18 @@ export class tasmotaPlatform implements DynamicPlatformPlugin {
       message = this.discoveryOveride(uniq_id, message);
       debug('Discovered ->', topic, config.name, message);
       const uuid = this.api.hap.uuid.generate(identifier);
+
+      // OMG climate configs carry only dev.ids, and the rssi sensor that used to set the
+      // accessory information may be hidden, so take it from any OMG message that has it
+      const omgInfo = omgAccessoryInfo(message);
+      const infoAccessory = omgInfo && this.accessories.find(accessory => accessory.UUID === uuid);
+      if (omgInfo && infoAccessory) {
+        infoAccessory.getService(this.Service.AccessoryInformation)!
+          .setCharacteristic(this.Characteristic.Manufacturer, omgInfo.manufacturer)
+          .setCharacteristic(this.Characteristic.Model, omgInfo.model)
+          .setCharacteristic(this.Characteristic.FirmwareRevision, omgInfo.firmware)
+          .setCharacteristic(this.Characteristic.SerialNumber, identifier);
+      }
 
       if ((this.config.hideOmgSystem ?? true) && isOmgSystemEntity(message, uniq_id)) {
         debug('Skipping OpenMQTTGateway system entity', topic, uniq_id);

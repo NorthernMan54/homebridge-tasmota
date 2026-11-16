@@ -325,3 +325,30 @@ export function HSBtoTasmota(h: number, s: number, b: number) {
     hsb
   );
 }
+
+/**
+ * Accessory information from an OpenMQTTGateway discovery message's device block,
+ * or undefined when the message isn't from OMG or lacks the manufacturer, model or version.
+ * OMG sends its module list as the model, e.g. '["WebUI","BME280"]' -> 'WebUI BME280'.
+ */
+export function omgAccessoryInfo(message: TasmotaDiscoveryMessage):
+  { manufacturer: string; model: string; firmware: string } | undefined {
+  const dev = message.dev;
+  if (dev?.mf !== 'OMG_community' || !dev.mdl || !dev.sw) {
+    return undefined;
+  }
+  let model = dev.mdl;
+  try {
+    const modules = JSON.parse(dev.mdl);
+    if (Array.isArray(modules)) {
+      model = modules.join(' ');
+    }
+  } catch {
+    // not a JSON list, use as is
+  }
+  return {
+    manufacturer: dev.mf.replace(/[^-\w ]/g, ''),
+    model: model.replace(/[^-\w ]/g, '').trim() || 'OpenMQTTGateway',
+    firmware: dev.sw.replace(/[^-\w. ]/g, ''),
+  };
+}
