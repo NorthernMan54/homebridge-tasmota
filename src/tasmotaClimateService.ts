@@ -9,6 +9,10 @@ const debug = createDebug('Tasmota:climate');
 // produce one radio command rather than many
 const COMMAND_DEBOUNCE_MS = 500;
 
+// Tolerance (°C) below the setpoint before the thermostat shows heating, so readings
+// near the setpoint don't flip it between heating and idle
+const HEATING_BAND = 0.2;
+
 /**
  * Home Assistant climate discovery fields used by this service
  * homeassistant/climate/<uniq_id>/config
@@ -149,15 +153,22 @@ export class tasmotaClimateService extends TasmotaService {
   }
 
   /**
-   * CurrentHeatingCoolingState is HEAT while the current temperature is below the target, else OFF.
+   * CurrentHeatingCoolingState: HEAT once the current temperature drops below target - HEATING_BAND, OFF once it reaches the target.
    * The heaters never report their state, so this is an estimate from the room sensor.
    */
   private updateHeatingState() {
     const C = this.platform.Characteristic;
     const current = Number(this.service?.getCharacteristic(C.CurrentTemperature).value);
     const target = Number(this.service?.getCharacteristic(C.TargetTemperature).value);
-    const state = current < target ? C.CurrentHeatingCoolingState.HEAT : C.CurrentHeatingCoolingState.OFF;
-    if (this.service?.getCharacteristic(C.CurrentHeatingCoolingState).value !== state) {
+    const previous = this.service?.getCharacteristic(C.CurrentHeatingCoolingState).value;
+    // Hysteresis: start heating below target - band, stop at target, keep the last state in between
+    let state = previous;
+    if (current < target - HEATING_BAND) {
+      state = C.CurrentHeatingCoolingState.HEAT;
+    } else if (current >= target) {
+      state = C.CurrentHeatingCoolingState.OFF;
+    }
+    if (previous !== state) {
       debug('%s heating state -> %s (current %s, target %s)', this.config.name, state ? 'HEAT' : 'OFF', current, target);
       this.service?.getCharacteristic(C.CurrentHeatingCoolingState).updateValue(state);
     }

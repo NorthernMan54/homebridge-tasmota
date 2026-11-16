@@ -108,6 +108,24 @@ describe('CONNEX zone 1 climate', () => {
     expect(state()).toBe(api.hap.Characteristic.CurrentHeatingCoolingState.HEAT);
   });
 
+  test('keeps the last heating state within the 0.2 degree band', () => {
+    const BME_T = 'home/OMG_ESP32_CONNEX/CLIMAtoMQTT/bme';
+    const { HEAT, OFF } = api.hap.Characteristic.CurrentHeatingCoolingState;
+    const state = () => thermostat().getCharacteristic(api.hap.Characteristic.CurrentHeatingCoolingState).value;
+    const room = (t: number) => mockMqttEmitter.emit(BME_T, BME_T, Buffer.from(`{"tempc":${t}}`));
+    mockMqttEmitter.emit(TEMP_STAT_T, TEMP_STAT_T, statusPayload({ 1: { setpoint: 20 } }));
+    room(20.1);
+    expect(state()).toBe(OFF);
+    room(19.9); // inside the band: stays off
+    expect(state()).toBe(OFF);
+    room(19.7); // below the band: heating
+    expect(state()).toBe(HEAT);
+    room(19.9); // inside the band: keeps heating
+    expect(state()).toBe(HEAT);
+    room(20); // reached the setpoint: idle
+    expect(state()).toBe(OFF);
+  });
+
   test('status payload sets TargetTemperature from zone 1 setpoint', () => {
     mockMqttEmitter.emit(TEMP_STAT_T, TEMP_STAT_T, statusPayload({ 1: { setpoint: 20.5, source: 'gateway', age: 0 } }));
 
