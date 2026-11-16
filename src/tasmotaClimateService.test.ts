@@ -108,6 +108,25 @@ describe('CONNEX zone 1 climate', () => {
     expect(state()).toBe(api.hap.Characteristic.CurrentHeatingCoolingState.HEAT);
   });
 
+  test('uses the device action topic instead of estimating when act_t is present', () => {
+    const ACT_T = 'home/thermo/action';
+    const ACT_UNIQ = 'DDEEFF-thermo';
+    emitDiscovered(`homeassistant/climate/${ACT_UNIQ}/config`, { ...climateConfig,
+      name: 'Thermo',
+      uniq_id: ACT_UNIQ,
+      dev: { ids: ['DDEEFF'] },
+      act_t: ACT_T });
+    const state = () => (platform.services[ACT_UNIQ]?.service as any).getCharacteristic(api.hap.Characteristic.CurrentHeatingCoolingState).value;
+    const { HEAT, OFF } = api.hap.Characteristic.CurrentHeatingCoolingState;
+    mockMqttEmitter.emit(ACT_T, ACT_T, Buffer.from('heating'));
+    expect(state()).toBe(HEAT);
+    // a temperature reading at the setpoint would estimate OFF, but the device state wins
+    mockMqttEmitter.emit('home/OMG_ESP32_CONNEX/CLIMAtoMQTT/bme', 'home/OMG_ESP32_CONNEX/CLIMAtoMQTT/bme', Buffer.from('{"tempc":30}'));
+    expect(state()).toBe(HEAT);
+    mockMqttEmitter.emit(ACT_T, ACT_T, Buffer.from('idle'));
+    expect(state()).toBe(OFF);
+  });
+
   test('keeps the last heating state within the 0.2 degree band', () => {
     const BME_T = 'home/OMG_ESP32_CONNEX/CLIMAtoMQTT/bme';
     const { HEAT, OFF } = api.hap.Characteristic.CurrentHeatingCoolingState;

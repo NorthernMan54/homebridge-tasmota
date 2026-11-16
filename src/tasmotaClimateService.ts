@@ -28,11 +28,13 @@ interface ClimateConfig {
   min_temp?: number;
   max_temp?: number;
   temp_step?: number;
+  act_t?: string; // action_topic: what the device is doing (heating, idle, off ...)
+  act_tpl?: string;
 }
 
 /**
  * Thermostat service for a single climate zone (e.g. OMG Connex heater zone).
- * Heat only: HomeKit target and current state are always HEAT.
+ * Heat only: target state is always HEAT; current state comes from act_t, or is estimated from the temperatures.
  */
 export class tasmotaClimateService extends TasmotaService {
   private readonly config: ClimateConfig;
@@ -65,7 +67,7 @@ export class tasmotaClimateService extends TasmotaService {
     this.service.getCharacteristic(this.platform.Characteristic.TargetHeatingCoolingState)
       .updateValue(heat)
       .setProps({ validValues: [heat] });
-    // Heating while the measured temperature is below the setpoint, otherwise idle (OFF)
+    // From the device's action topic when it has one, otherwise estimated from the temperatures
     const off = this.platform.Characteristic.CurrentHeatingCoolingState.OFF;
     this.service.getCharacteristic(this.platform.Characteristic.CurrentHeatingCoolingState)
       .setProps({ validValues: [off, heat] })
@@ -88,6 +90,11 @@ export class tasmotaClimateService extends TasmotaService {
   }
 
   private subscribeStatus() {
+    if (this.config.act_t) {
+      this.platform.log.debug('Creating action listener for %s %s', this.config.act_t, this.config.name);
+      this.platform.mqttHost.on(this.config.act_t, this.actionUpdate.bind(this));
+      this.platform.mqttHost.statusSubscribe(this.config.act_t);
+    }
     if (this.config.temp_stat_t) {
       this.platform.log.debug('Creating setpoint listener for %s %s', this.config.temp_stat_t, this.config.name);
       this.platform.mqttHost.on(this.config.temp_stat_t, this.statusUpdate.bind(this));
@@ -157,6 +164,9 @@ export class tasmotaClimateService extends TasmotaService {
    * The heaters never report their state, so this is an estimate from the room sensor.
    */
   private updateHeatingState() {
+    if (this.config.act_t) {
+      return; // the device reports its own state on act_t
+    }
     const C = this.platform.Characteristic;
     const current = Number(this.service?.getCharacteristic(C.CurrentTemperature).value);
     const target = Number(this.service?.getCharacteristic(C.TargetTemperature).value);
@@ -171,6 +181,27 @@ export class tasmotaClimateService extends TasmotaService {
     if (previous !== state) {
       debug('%s heating state -> %s (current %s, target %s)', this.config.name, state ? 'HEAT' : 'OFF', current, target);
       this.service?.getCharacteristic(C.CurrentHeatingCoolingState).updateValue(state);
+    }
+  }
+
+  /**
+   * Device-reported action from act_t (HA climate action: heating, preheating, idle, off ...).
+   * Heating and preheating show as HEAT, everything else as OFF (idle).
+   */
+  actionUpdate(topic: string, message: Buffer) {
+    debug('action update for "%s" on topic "%s" ->', this.config.name, topic, message.toString());
+    try {
+      const action = (this.config.act_tpl ? this.parseValue(this.config.act_tpl, message.toString()) : message.toString())
+        .trim().toLowerCase();
+      if (action === '' || action === 'none') {
+        return;
+      }
+      const C = this.platform.Characteristic;
+      const state = ['heating', 'preheating'].includes(action) ? C.CurrentHeatingCoolingState.HEAT : C.CurrentHeatingCoolingState.OFF;
+      this.service?.getCharacteristic(C.CurrentHeatingCoolingState).updateValue(state);
+    } catch (err: unknown) {
+      this.platform.log.error('ERROR: Message Parse Error', topic, message.toString());
+      this.platform.log.debug(String((err && (err as Error).message ? (err as Error).message : err)));
     }
   }
 
