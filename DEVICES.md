@@ -9,11 +9,11 @@
    * [configuration override of discovery object to create a FAN ( post version 0.1.0 )](#configuration-override-of-discovery-object-to-create-a-fan--post-version-010-)
    * [configuration override of discovery object to create a FAN ( pre version 0.1.0 )](#configuration-override-of-discovery-object-to-create-a-fan--pre-version-010-)
    * [Slave a FEIT Wifi Dimmer Wall Switch to an iFan as a light switch](#slave-a-feit-wifi-dimmer-wall-switch-to-an-ifan-as-a-light-switch)
-* [BME280 Temperature Sensor - <a href="docs/MCUIOT.md">MCUIOT</a>](docs/MCUIOT.md)
-* [DHT11 Temperature Sensor - <a href="docs/MCUIOT.md">MCUIOT</a>](docs/MCUIOT.md)
+* [BME280 Temperature Sensor - MCUIOT](#bme280-temperature-sensor---mcuiot)
+* [DHT11 Temperature Sensor - MCUIOT](#dht11-temperature-sensor---mcuiot)
 * [Water Leak Sensor with On/Off control](#water-leak-sensor-with-onoff-control)
-   * [LEAK Tasmota configuration - <a href="docs/MCUIOT.md#dht-yl">DHT11</a>](docs/MCUIOT.md#dht-yl)
-   * [Leak Tasmota configuration - <a href="docs/MCUIOT.md#dht-yl">BME280</a>](docs/MCUIOT.md#dht-yl)
+   * [LEAK Tasmota configuration - DHT11](#leak-tasmota-configuration---dht11)
+   * [Leak Tasmota configuration - BME280](#leak-tasmota-configuration---bme280)
 * [Motion + BME280 Temperature Sensor](#motion--bme280-temperature-sensor)
 * [PIR Motion + BME280 Temperature Sensor + BH1750 Lux Illuminance Sensor](#pir-motion--bme280-temperature-sensor--bh1750-lux-illuminance-sensor)
 * [ZMAi-90 Current Sensor Switch](#zmai-90-current-sensor-switch)
@@ -42,6 +42,7 @@
    * [Version 1 ( Uses node-red to monitor google.com and turn off the plug )](#version-1--uses-node-red-to-monitor-googlecom-and-turn-off-the-plug-)
    * [Version 2](#version-2)
    * [Version 3 - Do three checks before rebooting](#version-3---do-three-checks-before-rebooting)
+* [openMQTTGateway / Dimplex Connex heater zones](#openmqttgateway--dimplex-connex-heater-zones)
 <!--te-->
 
 # My standard config after setting name and device configuration <!-- omit in toc -->
